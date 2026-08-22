@@ -11,12 +11,12 @@ const services = [
 ];
 
 const work = [
-  { id: '001', img: '/work/w1.jpg', t: 'Launch, start to finish', tag: 'Brand · Social', yr: '25' },
-  { id: '002', img: '/work/w2.jpg', t: 'A film for a founder',    tag: 'Film',           yr: '25' },
-  { id: '003', img: '/work/w3.jpg', t: 'Spend that paid back',    tag: 'Paid media',     yr: '24' },
-  { id: '004', img: '/work/w4.jpg', t: 'Ranking for the hard one',tag: 'Search',         yr: '24' },
-  { id: '005', img: '/work/w5.jpg', t: 'Shelf to screen',         tag: 'Photography',    yr: '24' },
-  { id: '006', img: '/work/w6.jpg', t: 'A year of always-on',     tag: 'Social',         yr: '23' },
+  { id: '001', img: '/work/w1.webp', t: 'Launch, start to finish', tag: 'Brand · Social', yr: '25' },
+  { id: '002', img: '/work/w2.webp', t: 'A film for a founder',    tag: 'Film',           yr: '25' },
+  { id: '003', img: '/work/w3.webp', t: 'Spend that paid back',    tag: 'Paid media',     yr: '24' },
+  { id: '004', img: '/work/w4.webp', t: 'Ranking for the hard one',tag: 'Search',         yr: '24' },
+  { id: '005', img: '/work/w5.webp', t: 'Shelf to screen',         tag: 'Photography',    yr: '24' },
+  { id: '006', img: '/work/w6.webp', t: 'A year of always-on',     tag: 'Social',         yr: '23' },
 ];
 
 const steps = [
@@ -103,9 +103,6 @@ const faqs = [
           <h2 class="rv text-[clamp(2.2rem,6vw,5rem)]">Selected work</h2>
           <p class="rv label">Six of thirty-one · 2023 to 25</p>
         </div>
-        <p class="rv mt-6 max-w-[46ch] font-mono text-[12px] leading-relaxed text-rust">
-          Frames below are stand-ins. Swap the six files in /work and the page picks them up.
-        </p>
 
         <!-- deliberately uneven: rows breathe differently -->
         <div class="mt-20 grid grid-cols-12 gap-x-6 gap-y-20">
@@ -338,7 +335,7 @@ const faqs = [
     const canvas = document.getElementById('cam');
     if (canvas) {
       const photo = new Image();
-      photo.src = '/work/w1.jpg';
+      photo.src = '/work/w1.webp';
 
       const cam = createCamera(canvas, { photo });
       let p = 0;
