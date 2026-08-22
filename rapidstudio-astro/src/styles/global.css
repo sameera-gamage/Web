@@ -1,0 +1,66 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root { --edge: clamp(20px, 5vw, 72px); }
+
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    @apply bg-bone text-ink font-sans antialiased;
+    overflow-x: hidden;
+    overflow-x: clip;
+  }
+
+  ::selection { background: #D6461F; color: #F2EDE4; }
+
+  h1, h2, h3 { @apply font-display; letter-spacing: -0.03em; line-height: 0.94; }
+
+  /* film grain, sits over everything, costs nothing */
+  body::after {
+    content: '';
+    position: fixed; inset: 0; z-index: 60; pointer-events: none;
+    opacity: .055; mix-blend-mode: multiply;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.82' numOctaves='3'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  :focus-visible { outline: 2px solid #D6461F; outline-offset: 3px; }
+}
+
+@layer components {
+  .edge { padding-inline: var(--edge); }
+
+  /* rule that reads as a printed hairline, not a CSS border */
+  .rule { @apply border-t border-ink/15; }
+
+  .label {
+    @apply font-mono text-[11px] uppercase tracking-[0.22em] text-ink/55;
+  }
+
+  .btn {
+    @apply inline-flex items-center gap-3 rounded-full px-7 py-3.5 text-[15px] font-semibold
+           transition-transform duration-300 will-change-transform;
+  }
+  .btn:hover { transform: translateY(-2px); }
+  .btn-solid { @apply bg-ink text-bone; }
+  .btn-rust  { @apply bg-rust text-bone; }
+  .btn-line  { @apply border border-ink/30 text-ink; }
+
+  /* link with a rule that wipes in, an old print trick */
+  .ulink { @apply relative inline-block; }
+  .ulink::after {
+    content: ''; position: absolute; left: 0; bottom: -2px; height: 1px; width: 100%;
+    background: currentColor; transform: scaleX(0); transform-origin: right;
+    transition: transform .45s cubic-bezier(.22,.8,.28,1);
+  }
+  .ulink:hover::after { transform: scaleX(1); transform-origin: left; }
+}
+
+/* reveal: set by GSAP, but safe if JS never runs */
+.rv { opacity: 0; transform: translateY(18px); }
+.no-js .rv, .rv.shown { opacity: 1; transform: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation-duration: .001ms !important; transition-duration: .001ms !important; }
+  .rv { opacity: 1 !important; transform: none !important; }
+}

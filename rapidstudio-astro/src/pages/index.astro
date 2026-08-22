@@ -1,0 +1,420 @@
+---
+import Base from '../layouts/Base.astro';
+
+const services = [
+  { n: '01', t: 'Search',       d: 'You show up when someone is already typing the thing you sell.', k: 'SEO, technical, local' },
+  { n: '02', t: 'Paid media',   d: 'Budget goes where it comes back. The rest gets cut, early.',      k: 'Google, Meta, TikTok' },
+  { n: '03', t: 'Social',       d: 'Posts that survive the thumb. Made weekly, not quarterly.',       k: 'Content, community' },
+  { n: '04', t: 'Brand',        d: 'A name, a face, and a voice nobody confuses with the shop next door.', k: 'Identity, systems' },
+  { n: '05', t: 'Film',         d: 'Thirty seconds that does what a page of copy could not.',         k: 'Direction, edit, grade' },
+  { n: '06', t: 'Photography',  d: 'Product frames people trust enough to put a card number in.',     k: 'Studio, location' },
+];
+
+const work = [
+  { id: '001', img: '/work/w1.jpg', t: 'Launch, start to finish', tag: 'Brand · Social', yr: '25' },
+  { id: '002', img: '/work/w2.jpg', t: 'A film for a founder',    tag: 'Film',           yr: '25' },
+  { id: '003', img: '/work/w3.jpg', t: 'Spend that paid back',    tag: 'Paid media',     yr: '24' },
+  { id: '004', img: '/work/w4.jpg', t: 'Ranking for the hard one',tag: 'Search',         yr: '24' },
+  { id: '005', img: '/work/w5.jpg', t: 'Shelf to screen',         tag: 'Photography',    yr: '24' },
+  { id: '006', img: '/work/w6.jpg', t: 'A year of always-on',     tag: 'Social',         yr: '23' },
+];
+
+const steps = [
+  { n: 'i',   t: 'We look first',      d: 'Your accounts, your site, your competitors. You get the honest read, including the parts you will not enjoy.' },
+  { n: 'ii',  t: 'You see the plan',   d: 'Written in plain language, with the numbers attached, before a single pound moves.' },
+  { n: 'iii', t: 'We run it',          d: 'Weekly notes on what worked and what did not. You can check every figure yourself.' },
+  { n: 'iv',  t: 'We cut what fails',  d: 'No twelve-month lock-in. A channel that is not earning gets stopped, not defended.' },
+];
+
+const faqs = [
+  ['How long before this actually works?', 'Paid gives you real data inside a fortnight. Search is slower, three to six months before it moves properly. We tell you which one you are buying before you buy it.'],
+  ['Do we get the same plan everyone gets?', 'No. The plan comes out of your audit. If it could be pasted onto another client we have not done our job.'],
+  ['What happens if it does not work?', 'You are month to month. We say so plainly, change it, or stop it. You are not held in place by paperwork.'],
+  ['Who does the work?', 'Us. Nothing is quietly passed to a studio you have never heard of.'],
+  ['Do we have to take all six?', 'No. Start with the one that matters this quarter. Add later, or never.'],
+];
+---
+
+<Base
+  title="RapidStudio, an independent studio for search, media, film and stills"
+  description="An independent studio running search, paid media, social, brand, film and photography for businesses that would rather hire one team than five."
+>
+
+  <!-- ══ nav ══ -->
+  <header class="fixed inset-x-0 top-0 z-50 mix-blend-difference">
+    <div class="edge flex items-center justify-between py-6">
+      <a href="#top" class="font-display text-[17px] font-extrabold tracking-tight text-bone">
+        Rapid<span class="text-rust">•</span>Studio
+      </a>
+      <nav class="hidden items-center gap-9 md:flex">
+        {['Work','Studio','Process','Contact'].map((l) => (
+          <a href={`#${l.toLowerCase()}`} class="ulink font-mono text-[11px] uppercase tracking-[0.2em] text-bone">{l}</a>
+        ))}
+      </nav>
+      <a href="#contact" class="font-mono text-[11px] uppercase tracking-[0.2em] text-bone md:hidden">Contact</a>
+    </div>
+  </header>
+
+  <main id="main">
+
+    <!-- ══ the rig ══ -->
+    <section id="top" class="relative" style="height:260vh">
+      <div class="sticky top-0 h-screen overflow-hidden bg-ink">
+        <canvas id="cam" class="absolute inset-0 h-full w-full"></canvas>
+
+        <!-- opening frame: top-aligned on phones so the rig sits clear below it -->
+        <div id="hero-a" class="pointer-events-none absolute inset-0 flex items-start pt-[19vh] md:items-center md:pt-0">
+          <div class="edge w-full max-w-edge md:pt-16">
+            <div class="max-w-[min(92vw,42rem)]">
+              <p class="label mb-6 text-bone/60">Est. 2019 · Independent</p>
+              <h1 class="whitespace-nowrap text-bone text-[clamp(2.6rem,7.6vw,6.6rem)]">
+                <span class="block overflow-hidden pb-[0.06em]"><span class="ln inline-block">Six trades.</span></span>
+                <span class="block overflow-hidden pb-[0.06em]"><span class="ln inline-block text-rust">One room.</span></span>
+              </h1>
+              <p class="mt-7 max-w-[32ch] text-[16px] leading-relaxed text-bone/70">
+                Search, paid media, social, brand, film and stills. Run by the same
+                people, in the same building, on the same plan.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- landing frame, arrives as the aperture clears -->
+        <div id="hero-b" class="pointer-events-none absolute inset-0 flex items-end opacity-0">
+          <div class="edge w-full max-w-edge pb-[12vh]">
+            <p class="label mb-5 text-bone/70">Now look properly</p>
+            <p class="max-w-[18ch] font-display text-[clamp(2rem,5.5vw,4.5rem)] font-extrabold leading-[0.95] text-bone">
+              This is what we&nbsp;made.
+            </p>
+          </div>
+        </div>
+
+        <div id="scroll-cue" class="absolute bottom-8 right-[var(--edge)] flex items-center gap-3">
+          <span class="label text-bone/50">Scroll</span>
+          <span class="block h-10 w-px bg-bone/30"></span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══ work ══ -->
+    <section id="work" class="relative bg-bone pt-[14vh]">
+      <div class="edge max-w-edge">
+        <div class="rule flex flex-wrap items-baseline justify-between gap-4 pt-6">
+          <h2 class="rv text-[clamp(2.2rem,6vw,5rem)]">Selected work</h2>
+          <p class="rv label">Six of thirty-one · 2023 to 25</p>
+        </div>
+        <p class="rv mt-6 max-w-[46ch] font-mono text-[12px] leading-relaxed text-rust">
+          Frames below are stand-ins. Swap the six files in /work and the page picks them up.
+        </p>
+
+        <!-- deliberately uneven: rows breathe differently -->
+        <div class="mt-20 grid grid-cols-12 gap-x-6 gap-y-20">
+          {work.map((w, i) => {
+            const spans = ['col-span-12 md:col-span-7','col-span-12 md:col-span-4 md:col-start-9','col-span-12 md:col-span-5 md:col-start-2','col-span-12 md:col-span-6 md:col-start-7','col-span-12 md:col-span-6','col-span-12 md:col-span-8 md:col-start-4'];
+            const ars   = ['4/5','1/1','5/4','3/4','1/1','16/10'];
+            const nudge = ['','md:-mt-28','md:mt-10','md:-mt-16','md:mt-6','md:-mt-10'];
+            return (
+              <figure class={`rv group ${spans[i]} ${nudge[i]}`}>
+                <div class="relative overflow-hidden bg-clay" style={`aspect-ratio:${ars[i]}`}>
+                  <img src={w.img} alt={`${w.t}, ${w.tag}`} loading="lazy" decoding="async"
+                       class="h-full w-full object-cover transition-transform duration-[900ms] ease-[cubic-bezier(.22,.8,.28,1)] group-hover:scale-[1.04]" />
+                </div>
+                <figcaption class="mt-4 flex items-baseline justify-between gap-4 border-t border-ink/15 pt-3">
+                  <span class="font-display text-[19px] font-bold">{w.t}</span>
+                  <span class="label shrink-0">{w.id} / {w.tag} / ’{w.yr}</span>
+                </figcaption>
+              </figure>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+
+    <!-- ══ ticker ══ -->
+    <div class="relative mt-[14vh] overflow-hidden border-y border-ink/15 bg-ochre py-5">
+      <div class="marquee flex w-max gap-10 whitespace-nowrap font-display text-[clamp(1.4rem,3.4vw,2.6rem)] font-extrabold">
+        {Array.from({ length: 6 }).map(() => (
+          <>
+            <span>Search</span><span class="text-rust">✳</span>
+            <span>Paid media</span><span class="text-rust">✳</span>
+            <span>Social</span><span class="text-rust">✳</span>
+            <span>Brand</span><span class="text-rust">✳</span>
+            <span>Film</span><span class="text-rust">✳</span>
+            <span>Photography</span><span class="text-rust">✳</span>
+          </>
+        ))}
+      </div>
+    </div>
+
+    <!-- ══ studio / services as an index, not cards ══ -->
+    <section id="studio" class="bg-bone py-[14vh]">
+      <div class="edge max-w-edge">
+        <div class="grid grid-cols-12 gap-x-6">
+          <div class="col-span-12 md:col-span-4">
+            <h2 class="rv sticky top-28 text-[clamp(2.2rem,6vw,5rem)]">
+              What we<br /><span class="text-rust">do all day</span>
+            </h2>
+          </div>
+          <div class="col-span-12 md:col-span-7 md:col-start-6">
+            <p class="rv mb-14 max-w-[40ch] text-[19px] leading-relaxed">
+              Most places sell you one of these and subcontract the rest. We kept all six
+              in the building, which is the whole reason the work matches.
+            </p>
+            <ul>
+              {services.map((s) => (
+                <li class="rv group border-t border-ink/15 py-7 transition-colors duration-500 hover:bg-clay/40">
+                  <div class="flex items-start gap-6">
+                    <span class="label pt-2">{s.n}</span>
+                    <div class="flex-1">
+                      <h3 class="font-display text-[clamp(1.5rem,3vw,2.2rem)] font-bold">{s.t}</h3>
+                      <p class="mt-2 max-w-[42ch] text-[16px] leading-relaxed text-ink/70">{s.d}</p>
+                    </div>
+                    <span class="label hidden shrink-0 pt-2 text-right sm:block">{s.k}</span>
+                  </div>
+                </li>
+              ))}
+              <li class="border-t border-ink/15"></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══ process, dark slab ══ -->
+    <section id="process" class="bg-ink py-[14vh] text-bone">
+      <div class="edge max-w-edge">
+        <div class="flex flex-wrap items-end justify-between gap-6 border-b border-bone/20 pb-8">
+          <h2 class="rv text-[clamp(2.2rem,6vw,5rem)]">How it goes</h2>
+          <p class="rv label max-w-[26ch] text-bone/60">The bit most studios keep vague on purpose.</p>
+        </div>
+        <ol class="mt-16 grid grid-cols-12 gap-x-6 gap-y-14">
+          {steps.map((s, i) => (
+            <li class={`rv col-span-12 sm:col-span-6 lg:col-span-3 ${i % 2 ? 'lg:mt-14' : ''}`}>
+              <span class="font-display text-[clamp(3rem,7vw,5.5rem)] font-extrabold leading-none text-rust">{s.n}</span>
+              <h3 class="mt-5 font-display text-[22px] font-bold">{s.t}</h3>
+              <p class="mt-3 text-[15px] leading-relaxed text-bone/65">{s.d}</p>
+            </li>
+          ))}
+        </ol>
+
+        <div class="mt-24 grid grid-cols-12 gap-6 border-t border-bone/20 pt-10">
+          {[['No lock-in','Month to month, always'],['Your accounts','In your name from day one'],['Weekly numbers','Spend in, revenue out'],['One team','Same people, start to end']].map(([a,b]) => (
+            <div class="rv col-span-6 lg:col-span-3">
+              <p class="font-display text-[19px] font-bold text-ochre">{a}</p>
+              <p class="mt-1 text-[14px] text-bone/55">{b}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <!-- ══ the pull quote ══ -->
+    <section class="bg-moss py-[16vh] text-bone">
+      <div class="edge max-w-edge">
+        <p class="rv max-w-[20ch] font-display text-[clamp(2rem,6.5vw,5.5rem)] font-extrabold leading-[0.98]">
+          Beautiful is the entry&nbsp;fee. <span class="text-ochre">Working is the job.</span>
+        </p>
+        <div class="rv mt-12 flex items-center gap-5">
+          <span class="h-px w-16 bg-bone/40"></span>
+          <p class="label text-bone/70">The house rule, written on the wall</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══ faq ══ -->
+    <section id="faq" class="bg-bone py-[14vh]">
+      <div class="edge max-w-edge">
+        <div class="grid grid-cols-12 gap-x-6">
+          <div class="col-span-12 md:col-span-4">
+            <h2 class="rv text-[clamp(2.2rem,6vw,5rem)]">Straight<br />answers</h2>
+          </div>
+          <div class="col-span-12 md:col-span-7 md:col-start-6">
+            {faqs.map(([q, a]) => (
+              <details class="rv group border-t border-ink/15 py-6">
+                <summary class="flex cursor-pointer list-none items-baseline justify-between gap-6">
+                  <span class="font-display text-[clamp(1.1rem,2.2vw,1.5rem)] font-bold">{q}</span>
+                  <span class="font-mono text-rust transition-transform duration-300 group-open:rotate-45">+</span>
+                </summary>
+                <p class="mt-4 max-w-[52ch] text-[16px] leading-relaxed text-ink/70">{a}</p>
+              </details>
+            ))}
+            <div class="border-t border-ink/15"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══ contact ══ -->
+    <section id="contact" class="bg-rust py-[14vh] text-bone">
+      <div class="edge max-w-edge">
+        <div class="grid grid-cols-12 gap-x-6 gap-y-14">
+          <div class="col-span-12 lg:col-span-6">
+            <h2 class="rv text-[clamp(2.4rem,7vw,5.5rem)]">Tell us what<br />is stuck.</h2>
+            <p class="rv mt-8 max-w-[34ch] text-[18px] leading-relaxed text-bone/80">
+              You get a real read on it, not a deck. If we are the wrong shop for the job
+              we will say so and point you somewhere better.
+            </p>
+            <a href="mailto:info@rapidsolutions.live"
+               class="rv ulink mt-10 inline-block font-display text-[clamp(1.2rem,2.6vw,1.9rem)] font-bold">
+              info@rapidsolutions.live
+            </a>
+          </div>
+
+          <div class="col-span-12 lg:col-span-5 lg:col-start-8">
+            <div id="sent" class="hidden border border-bone/40 p-7">
+              <p class="font-display text-[20px] font-bold">Your mail app is opening.</p>
+              <p class="mt-2 text-[15px] text-bone/75">If it did not, write to info@rapidsolutions.live and we will pick it up.</p>
+            </div>
+            <form id="brief" class="rv space-y-7">
+              {[['name','Name','text'],['email','Email','email'],['site','Website (if you have one)','text']].map(([n,l,t]) => (
+                <p>
+                  <label for={n} class="label mb-2 block text-bone/70">{l}</label>
+                  <input id={n} name={n} type={t} required={n!=='site'}
+                         class="w-full border-0 border-b border-bone/40 bg-transparent pb-2 text-[17px] text-bone outline-none transition-colors focus:border-bone" />
+                </p>
+              ))}
+              <p>
+                <label for="msg" class="label mb-2 block text-bone/70">What is going wrong</label>
+                <textarea id="msg" name="msg" rows="3" required
+                          class="w-full resize-y border-0 border-b border-bone/40 bg-transparent pb-2 text-[17px] text-bone outline-none transition-colors focus:border-bone"></textarea>
+              </p>
+              <button type="submit" class="btn bg-ink text-bone">
+                Send it
+                <span aria-hidden="true">→</span>
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <footer class="bg-ink py-14 text-bone">
+      <div class="edge max-w-edge">
+        <div class="flex flex-wrap items-end justify-between gap-8 border-b border-bone/15 pb-10">
+          <p class="font-display text-[clamp(2rem,7vw,5rem)] font-extrabold leading-none">
+            Rapid<span class="text-rust">•</span>Studio
+          </p>
+          <div class="flex gap-8">
+            {['Work','Studio','Process','FAQ'].map((l) => (
+              <a href={`#${l.toLowerCase()}`} class="ulink label text-bone/70">{l}</a>
+            ))}
+          </div>
+        </div>
+        <div class="mt-8 flex flex-wrap justify-between gap-4">
+          <p class="label text-bone/45">© 2026 RapidStudio</p>
+          <p class="label text-bone/45">Built in-house</p>
+        </div>
+      </div>
+    </footer>
+  </main>
+
+  <script>
+    import Lenis from 'lenis';
+    import { gsap } from 'gsap';
+    import { ScrollTrigger } from 'gsap/ScrollTrigger';
+    import { createCamera } from '../scripts/camera.js';
+
+    gsap.registerPlugin(ScrollTrigger);
+
+    const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    /* ---- Lenis, wired into ScrollTrigger's clock ---- */
+    if (!reduced) {
+      const lenis = new Lenis({ duration: 1.05, smoothWheel: true });
+      lenis.on('scroll', ScrollTrigger.update);
+      gsap.ticker.add((t) => lenis.raf(t * 1000));
+      gsap.ticker.lagSmoothing(0);
+      document.querySelectorAll('a[href^="#"]').forEach((a) => {
+        a.addEventListener('click', (e) => {
+          const el = document.querySelector(a.getAttribute('href'));
+          if (!el) return;
+          e.preventDefault();
+          lenis.scrollTo(el, { offset: -10 });
+        });
+      });
+    }
+
+    /* ---- the camera rig ---- */
+    const canvas = document.getElementById('cam');
+    if (canvas) {
+      const photo = new Image();
+      photo.src = '/work/w1.jpg';
+
+      const cam = createCamera(canvas, { photo });
+      let p = 0;
+      let raf = null;
+
+      const paint = (t) => { cam.render(p, t); raf = null; };
+      const request = () => { if (raf === null) raf = requestAnimationFrame(paint); };
+
+      photo.onload = request;
+      addEventListener('resize', () => { cam.resize(); request(); });
+
+      // one source of truth: the rig's progress drives the canvas AND the copy,
+      // so the beats can never drift apart from percentage maths
+      const heroA = document.getElementById('hero-a');
+      const heroB = document.getElementById('hero-b');
+      const cue = document.getElementById('scroll-cue');
+      const span = (a, b, x) => Math.min(1, Math.max(0, (x - a) / (b - a)));
+
+      let lastA = -1, lastB = -1, lastC = -1;
+      function paintCopy(v) {
+        const a = 1 - span(0.14, 0.42, v);          // gone before the push begins
+        const b = span(0.78, 0.94, v);              // lands as the aperture clears
+        const c = 1 - span(0.0, 0.10, v);
+        if (a !== lastA) { heroA.style.opacity = a; heroA.style.transform = `translateY(${(1 - a) * -36}px)`; lastA = a; }
+        if (b !== lastB) { heroB.style.opacity = b; heroB.style.transform = `translateY(${(1 - b) * 28}px)`; lastB = b; }
+        if (c !== lastC) { cue.style.opacity = c; lastC = c; }
+      }
+
+      ScrollTrigger.create({
+        trigger: '#top',
+        start: 'top top',
+        end: 'bottom bottom',
+        scrub: true,
+        onUpdate: (self) => { p = self.progress; paintCopy(p); request(); },
+      });
+      paintCopy(0);
+
+      // idle breathing while the rig is parked at the top
+      if (!reduced) gsap.ticker.add(() => { if (p < 0.22) request(); });
+
+      request();
+
+      // headline lines lift in on load
+      if (!reduced) gsap.from('.ln', { yPercent: 115, duration: 1.15, ease: 'expo.out', stagger: 0.09 });
+    }
+
+    /* ---- reveals ---- */
+    if (reduced) {
+      document.querySelectorAll('.rv').forEach((el) => el.classList.add('shown'));
+    } else {
+      gsap.utils.toArray('.rv').forEach((el) => {
+        gsap.to(el, {
+          opacity: 1, y: 0, duration: 0.9, ease: 'power3.out',
+          scrollTrigger: { trigger: el, start: 'top 88%', once: true },
+        });
+      });
+    }
+
+    /* ---- ticker ---- */
+    const track = document.querySelector('.marquee');
+    if (track && !reduced) {
+      gsap.to(track, { xPercent: -50, duration: 26, ease: 'none', repeat: -1 });
+    }
+
+    /* ---- brief -> mail ---- */
+    const form = document.getElementById('brief');
+    form?.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const v = (n) => (form.elements[n]?.value || '').trim();
+      const subject = encodeURIComponent(`Brief from ${v('name') || 'the website'}`);
+      const body = encodeURIComponent(
+        `Name: ${v('name')}\nEmail: ${v('email')}\nSite: ${v('site')}\n\n${v('msg')}`
+      );
+      location.href = `mailto:info@rapidsolutions.live?subject=${subject}&body=${body}`;
+      document.getElementById('sent')?.classList.remove('hidden');
+      form.classList.add('hidden');
+    });
+  </script>
+</Base>
