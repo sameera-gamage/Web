@@ -4,17 +4,17 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>RapidStudio | SEO, Paid Ads, Social, Branding, Video &amp; Photography</title>
-<meta name="description" content="RapidStudio is a full-service digital marketing agency. SEO, paid ads, social, branding, video, and photography, run by one team under one roof.">
-<meta name="theme-color" content="#14101c">
+<meta name="description" content="RapidStudio is a full-service digital marketing studio. SEO, paid ads, social, branding, video, and photography, run by one team. Scroll to open the lens.">
+<meta name="theme-color" content="#0e0a18">
 
 <!-- DEPLOY STEP: replace both URLs below with the live site URL at deploy time -->
-<meta property="og:title" content="RapidStudio | One studio. Every channel.">
+<meta property="og:title" content="RapidStudio | Bring it into focus.">
 <meta property="og:description" content="SEO, paid ads, social, branding, video, and photography, run by one team under one roof.">
 <meta property="og:image" content="https://example.com/assets/og-image.jpg">
 <meta property="og:url" content="https://example.com/">
 <meta property="og:type" content="website">
 
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%2314101c'/%3E%3Cpath d='M16 5c5.5 8.5 9 12.7 9 16.4a9 9 0 0 1-18 0C7 17.7 10.5 13.5 16 5Z' fill='%23ff4d6d'/%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230e0a18'/%3E%3Ccircle cx='16' cy='16' r='9' fill='none' stroke='%23ff3ea5' stroke-width='2.4'/%3E%3Ccircle cx='16' cy='16' r='3.4' fill='%23ffb020'/%3E%3C/svg%3E">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -24,9 +24,9 @@
 
 <noscript>
 <style>
-  .band, .scroll-cue { display: none !important; }
-  .hero-static { display: flex !important; }
-  [data-io], .service-card, .step, .promise-card { opacity: 1 !important; transform: none !important; }
+  .lens-copy,.lens-hint{display:none !important}
+  .lens-static{display:flex !important}
+  [data-io],.service-card,.step,.promise-card,.tile{opacity:1 !important;transform:none !important}
 </style>
 </noscript>
 </head>
@@ -36,10 +36,11 @@
 
 <nav class="nav">
   <a class="brand" href="#top">
-    <svg class="mark" viewBox="0 0 32 32" aria-hidden="true"><path d="M16 5c5.5 8.5 9 12.7 9 16.4a9 9 0 0 1-18 0C7 17.7 10.5 13.5 16 5Z" fill="var(--accent)"/></svg>
+    <svg class="mark" viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="10" fill="none" stroke="var(--accent)" stroke-width="2.4"/><circle cx="16" cy="16" r="3.6" fill="var(--accent-3)"/></svg>
     RapidStudio
   </a>
   <div class="nav-links">
+    <a href="#work">Work</a>
     <a href="#services">Services</a>
     <a href="#process">Process</a>
     <a href="#faq">FAQ</a>
@@ -53,69 +54,125 @@
 
 <main id="main" tabindex="-1">
 
-  <div id="top" class="hero-pin">
-    <div class="stage">
-      <div class="stage-bg" aria-hidden="true"></div>
+  <div id="top" class="lens-pin">
+    <div class="lens-stage">
+      <div class="lens-bg" aria-hidden="true"></div>
 
-      <svg class="pour-svg" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
-        <defs>
-          <filter id="goo">
-            <feGaussianBlur in="SourceGraphic" stdDeviation="2.6" result="blur"/>
-            <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 22 -9" result="goo"/>
-          </filter>
-        </defs>
-        <g filter="url(#goo)">
-          <circle id="blob1" cx="46" cy="-10" r="7.5" fill="var(--accent)"/>
-          <circle id="blob2" cx="62" cy="-10" r="6" fill="var(--accent-2)"/>
-          <circle id="blob3" cx="40" cy="-10" r="6.5" fill="var(--accent-3)"/>
-          <circle id="blob4" cx="68" cy="-10" r="5.5" fill="var(--accent)"/>
-          <ellipse id="pool" cx="55" cy="82" rx="17" ry="4.6" fill="var(--accent)" opacity="0"/>
-        </g>
-      </svg>
+      <!-- the lens -->
+      <div class="lens-wrap" aria-hidden="true">
+       <div class="lens-scale">
+        <svg viewBox="0 0 500 500" role="img" aria-label="A camera lens whose aperture opens as you scroll">
+          <defs>
+            <clipPath id="glassClip"><circle cx="250" cy="250" r="244"/></clipPath>
+            <radialGradient id="metal" cx="42%" cy="38%" r="72%">
+              <stop offset="0%" stop-color="#39304d"/>
+              <stop offset="55%" stop-color="#221a33"/>
+              <stop offset="100%" stop-color="#0c0916"/>
+            </radialGradient>
+            <radialGradient id="apGlow" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="#fff4c2" stop-opacity=".95"/>
+              <stop offset="30%" stop-color="#ff8ad1" stop-opacity=".85"/>
+              <stop offset="62%" stop-color="#c04bff" stop-opacity=".5"/>
+              <stop offset="100%" stop-color="#c04bff" stop-opacity="0"/>
+            </radialGradient>
+            <radialGradient id="glassVig" cx="50%" cy="45%" r="60%">
+              <stop offset="55%" stop-color="#000" stop-opacity="0"/>
+              <stop offset="100%" stop-color="#000" stop-opacity=".55"/>
+            </radialGradient>
+          </defs>
 
-      <div class="scrim" aria-hidden="true"></div>
+          <!-- barrel -->
+          <circle cx="250" cy="250" r="262" fill="none" stroke="#0a0712" stroke-width="16"/>
+          <circle cx="250" cy="250" r="255" fill="none" stroke="rgba(255,255,255,.06)" stroke-width="2"/>
+          <!-- dial ticks -->
+          <circle cx="250" cy="250" r="276" fill="none" stroke="rgba(183,171,201,.35)" stroke-width="8" stroke-dasharray="1.5 12" stroke-linecap="round"/>
+          <circle cx="250" cy="250" r="276" fill="none" stroke="var(--accent)" stroke-width="10" stroke-dasharray="2 63.5" stroke-linecap="round"/>
 
-      <div class="hero-copy">
-        <div id="band1" class="band" data-entrance="rise">
-          <span class="kicker">SEO &middot; PAID ADS &middot; SOCIAL &middot; BRANDING &middot; VIDEO &middot; PHOTO</span>
-          <h1 data-split="rise">One studio. Every channel.</h1>
-        </div>
+          <!-- glass: photo + glow, clipped to the lens circle -->
+          <g clip-path="url(#glassClip)">
+            <image id="glass-photo" href="assets/work-01.jpg" x="0" y="0" width="500" height="500" preserveAspectRatio="xMidYMid slice" opacity="0.15"/>
+            <rect x="0" y="0" width="500" height="500" fill="url(#glassVig)"/>
+            <circle id="iris-glow" cx="250" cy="250" r="30" fill="url(#apGlow)"/>
+          </g>
 
-        <div id="band2" class="band" data-entrance="scatter">
-          <h1 data-split="scatter">Six disciplines. Poured into one result.</h1>
-        </div>
+          <!-- iris metal with the polygon hole (path + seams filled by JS) -->
+          <path id="iris-path" fill="url(#metal)" fill-rule="evenodd" stroke="rgba(0,0,0,.5)" stroke-width="1"/>
+          <g id="iris-seams"></g>
+          <circle cx="250" cy="250" r="243" fill="none" stroke="rgba(255,255,255,.08)" stroke-width="2"/>
+        </svg>
+       </div>
+       <div class="lens-readouts" aria-hidden="true">
+         <div class="lens-readout rf">f / 16</div>
+         <div class="lens-readout riso">ISO 400</div>
+         <div class="lens-readout rshutter">1/60 s</div>
+       </div>
+      </div>
 
-        <div id="band3" class="band" data-entrance="punch">
-          <h1 data-split="punch">No more juggling five vendors for one campaign.</h1>
-        </div>
-
-        <div id="band4" class="band" data-entrance="rise">
-          <span class="kicker">RAPIDSTUDIO</span>
-          <h1 data-split="rise">Built to be seen. Built to convert.</h1>
-          <p class="sub">SEO, paid ads, social, branding, video, and photography, run by one team that actually talks to you.</p>
-          <div class="cta-row">
-            <a class="btn btn-primary" href="#contact">Get a Free Audit</a>
-            <a class="btn btn-ghost" href="#services">See what we do</a>
+      <!-- animated copy -->
+      <div class="lens-copy">
+        <div class="hero-band">
+          <span class="kicker">SEO &middot; ADS &middot; SOCIAL &middot; BRAND &middot; VIDEO &middot; PHOTO</span>
+          <h1>Bring it<br><span class="line2">into focus.</span></h1>
+          <p class="hero-sub">Six channels, one sharp picture of your brand. Scroll to open the lens.</p>
+          <div class="hero-cta">
+            <a class="btn btn-primary" href="#contact">Get a Free Audit<span class="arw" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 12 12"><path d="M2 6h7M6 3l3 3-3 3" stroke="#fff" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></span></a>
+            <a class="btn btn-ghost" href="#work">See the work</a>
           </div>
-        </div>
-
-        <div class="hero-static">
-          <span class="kicker">SEO &middot; PAID ADS &middot; SOCIAL &middot; BRANDING &middot; VIDEO &middot; PHOTO</span>
-          <h1>One studio. Every channel. One result.</h1>
-          <p>RapidStudio runs SEO, paid ads, social, branding, video, and photography under one roof, so six disciplines pour into one number you can actually watch move.</p>
-          <div class="cta-row">
-            <a class="btn btn-primary" href="#contact">Get a Free Audit</a>
-            <a class="btn btn-ghost" href="#services">See what we do</a>
-          </div>
+          <p class="hero-scribble">// shot, built, and run in one studio</p>
         </div>
       </div>
 
-      <div class="scroll-cue" aria-hidden="true">
-        Scroll
-        <svg viewBox="0 0 16 16"><path d="M2 5l6 6 6-6" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <!-- static hero for reduced motion / no JS -->
+      <div class="lens-static">
+        <span class="kicker">SEO &middot; ADS &middot; SOCIAL &middot; BRAND &middot; VIDEO &middot; PHOTO</span>
+        <h1>Bring it <span class="line2">into focus.</span></h1>
+        <p>Six channels, one sharp picture of your brand. SEO, paid ads, social, branding, video, and photography, run by one team.</p>
+        <div class="hero-cta">
+          <a class="btn btn-primary" href="#contact">Get a Free Audit</a>
+          <a class="btn btn-ghost" href="#work">See the work</a>
+        </div>
       </div>
+
+      <div class="lens-hint" aria-hidden="true">Scroll to open the aperture</div>
     </div>
   </div>
+
+  <section id="work">
+    <div class="wrap">
+      <div class="section-head" data-io>
+        <span class="kicker">Recent work</span>
+        <h2>What comes into focus.</h2>
+        <p>A look at the kind of campaigns and shoots we build. Every channel, one consistent look.</p>
+        <p class="work-note">Placeholder images. Drop your real shots into assets/ and we'll swap them in.</p>
+      </div>
+      <div class="gallery">
+        <figure class="tile t-a">
+          <img src="assets/work-01.jpg" alt="Placeholder work sample, magenta brand campaign">
+          <figcaption class="meta"><span class="cat">Branding + Social</span><span class="ttl">Launch campaign</span></figcaption>
+        </figure>
+        <figure class="tile t-b">
+          <img src="assets/work-02.jpg" alt="Placeholder work sample, violet product film">
+          <figcaption class="meta"><span class="cat">Video</span><span class="ttl">Product film</span></figcaption>
+        </figure>
+        <figure class="tile t-c">
+          <img src="assets/work-03.jpg" alt="Placeholder work sample, amber paid ads set">
+          <figcaption class="meta"><span class="cat">Paid Ads</span><span class="ttl">Performance set</span></figcaption>
+        </figure>
+        <figure class="tile t-d">
+          <img src="assets/work-04.jpg" alt="Placeholder work sample, teal SEO content">
+          <figcaption class="meta"><span class="cat">SEO</span><span class="ttl">Content engine</span></figcaption>
+        </figure>
+        <figure class="tile t-e">
+          <img src="assets/work-05.jpg" alt="Placeholder work sample, coral photography">
+          <figcaption class="meta"><span class="cat">Photography</span><span class="ttl">Product shoot</span></figcaption>
+        </figure>
+        <figure class="tile t-f">
+          <img src="assets/work-06.jpg" alt="Placeholder work sample, blue social series">
+          <figcaption class="meta"><span class="cat">Social</span><span class="ttl">Always-on series</span></figcaption>
+        </figure>
+      </div>
+    </div>
+  </section>
 
   <section id="services">
     <div class="wrap">
@@ -127,39 +184,33 @@
       <div class="services-grid">
         <article class="service-card">
           <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="10" cy="10" r="6.5" stroke="currentColor" stroke-width="1.6"/><path d="M19 19l-4.3-4.3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
-          <h3>SEO</h3>
-          <p>Show up when people are already looking for you.</p>
+          <h3>SEO</h3><p>Show up when people are already looking for you.</p>
         </article>
         <article class="service-card">
           <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 12h8M15 12h6M12 5v3M12 16v3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="12" cy="12" r="2.4" stroke="currentColor" stroke-width="1.6"/></svg>
-          <h3>Paid Ads</h3>
-          <p>Spend that pays you back, not spend for its own sake.</p>
+          <h3>Paid Ads</h3><p>Spend that pays you back, not spend for its own sake.</p>
         </article>
         <article class="service-card">
           <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="4" stroke="currentColor" stroke-width="1.6"/><circle cx="9" cy="10" r="1.4" fill="currentColor"/><path d="M7 16c1.4-2 3-3 5-3s3.6 1 5 3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
-          <h3>Social</h3>
-          <p>Content people actually stop scrolling for.</p>
+          <h3>Social</h3><p>Content people actually stop scrolling for.</p>
         </article>
         <article class="service-card">
           <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 18V9l8-5 8 5v9" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M9 18v-6h6v6" stroke="currentColor" stroke-width="1.6"/></svg>
-          <h3>Branding</h3>
-          <p>A look nobody mixes up with your competitor.</p>
+          <h3>Branding</h3><p>A look nobody mixes up with your competitor.</p>
         </article>
         <article class="service-card">
           <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3" y="6" width="13" height="12" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M16 10.5l5-3v9l-5-3" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
-          <h3>Video</h3>
-          <p>Footage that does the selling before you say a word.</p>
+          <h3>Video</h3><p>Footage that does the selling before you say a word.</p>
         </article>
         <article class="service-card">
           <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3" y="6" width="18" height="13" rx="2" stroke="currentColor" stroke-width="1.6"/><circle cx="12" cy="12.5" r="3.4" stroke="currentColor" stroke-width="1.6"/><path d="M8 6l1.4-2.2h5.2L16 6" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
-          <h3>Photography</h3>
-          <p>Product shots people trust enough to click.</p>
+          <h3>Photography</h3><p>Product shots people trust enough to click.</p>
         </article>
       </div>
     </div>
   </section>
 
-  <section id="process" class="process">
+  <section id="process">
     <div class="wrap">
       <div class="section-head" data-io>
         <span class="kicker">Process</span>
@@ -167,30 +218,12 @@
         <p>Built to answer the question most agencies never do: what are you doing with our money, and how do we know it's working.</p>
       </div>
       <div style="position:relative">
-        <div class="process-line" aria-hidden="true">
-          <svg viewBox="0 0 2 100" preserveAspectRatio="none"><path d="M1 0 L1 100" pathLength="1"/></svg>
-        </div>
+        <div class="process-line" aria-hidden="true"><svg viewBox="0 0 2 100" preserveAspectRatio="none"><path d="M1 0 L1 100" pathLength="1"/></svg></div>
         <div class="steps">
-          <div class="step">
-            <span class="step-num">01</span>
-            <h3>We audit what's actually happening.</h3>
-            <p>Before we touch anything, we look at your accounts, your site, and your competitors, and tell you the truth about where you stand.</p>
-          </div>
-          <div class="step">
-            <span class="step-num">02</span>
-            <h3>We show you the plan first.</h3>
-            <p>You see the strategy in plain language before a single dollar moves. No jargon, no surprises.</p>
-          </div>
-          <div class="step">
-            <span class="step-num">03</span>
-            <h3>We run it and report the real numbers.</h3>
-            <p>Weekly updates on what's working and what isn't, in numbers you can check yourself.</p>
-          </div>
-          <div class="step">
-            <span class="step-num">04</span>
-            <h3>You keep what works.</h3>
-            <p>No long contracts. If a channel isn't earning its keep, we cut it and move the budget somewhere that does.</p>
-          </div>
+          <div class="step"><span class="step-num">01</span><h3>We audit what's actually happening.</h3><p>Before we touch anything, we look at your accounts, your site, and your competitors, and tell you the truth about where you stand.</p></div>
+          <div class="step"><span class="step-num">02</span><h3>We show you the plan first.</h3><p>You see the strategy in plain language before a single dollar moves. No jargon, no surprises.</p></div>
+          <div class="step"><span class="step-num">03</span><h3>We run it and report the real numbers.</h3><p>Weekly updates on what's working and what isn't, in numbers you can check yourself.</p></div>
+          <div class="step"><span class="step-num">04</span><h3>You keep what works.</h3><p>No long contracts. If a channel isn't earning its keep, we cut it and move the budget somewhere that does.</p></div>
         </div>
       </div>
     </div>
@@ -204,26 +237,10 @@
         <p>We'd rather tell you exactly what you get than show you a wall of quotes you can't verify.</p>
       </div>
       <div class="promise-grid">
-        <div class="promise-card">
-          <span class="glow" aria-hidden="true"></span>
-          <h3>No lock-in contracts</h3>
-          <p>Work with us month to month. Stay because it's working, not because you're stuck.</p>
-        </div>
-        <div class="promise-card">
-          <span class="glow" aria-hidden="true"></span>
-          <h3>You own your accounts</h3>
-          <p>Every ad account, login, and asset stays in your name from day one.</p>
-        </div>
-        <div class="promise-card">
-          <span class="glow" aria-hidden="true"></span>
-          <h3>Weekly reporting, plain numbers</h3>
-          <p>You'll always know what we spent and what it brought back.</p>
-        </div>
-        <div class="promise-card">
-          <span class="glow" aria-hidden="true"></span>
-          <h3>One team, one story</h3>
-          <p>The people who write your ads are the same people who build your brand, so nothing gets lost in translation.</p>
-        </div>
+        <div class="promise-card"><span class="glow" aria-hidden="true"></span><h3>No lock-in contracts</h3><p>Work with us month to month. Stay because it's working, not because you're stuck.</p></div>
+        <div class="promise-card"><span class="glow" aria-hidden="true"></span><h3>You own your accounts</h3><p>Every ad account, login, and asset stays in your name from day one.</p></div>
+        <div class="promise-card"><span class="glow" aria-hidden="true"></span><h3>Weekly reporting, plain numbers</h3><p>You'll always know what we spent and what it brought back.</p></div>
+        <div class="promise-card"><span class="glow" aria-hidden="true"></span><h3>One team, one story</h3><p>The people who write your ads are the same people who build your brand, so nothing gets lost in translation.</p></div>
       </div>
     </div>
   </section>
@@ -246,10 +263,7 @@
         </div>
         <div class="pour-btn-wrap">
           <button type="button" class="pour-btn" aria-label="Hold to pour your plan together">
-            <svg viewBox="0 0 150 150" aria-hidden="true">
-              <circle class="track" cx="75" cy="75" r="49"/>
-              <circle class="fill" cx="75" cy="75" r="49"/>
-            </svg>
+            <svg viewBox="0 0 150 150" aria-hidden="true"><circle class="track" cx="75" cy="75" r="49"/><circle class="fill" cx="75" cy="75" r="49"/></svg>
             <span>Hold to pour</span>
           </button>
           <p class="mixer-result" aria-live="polite"></p>
@@ -260,31 +274,13 @@
 
   <section id="faq">
     <div class="wrap">
-      <div class="section-head" data-io>
-        <span class="kicker">FAQ</span>
-        <h2>The honest answers.</h2>
-      </div>
+      <div class="section-head" data-io><span class="kicker">FAQ</span><h2>The honest answers.</h2></div>
       <div class="faq-list">
-        <div class="faq-item" data-open="false">
-          <button class="faq-q" aria-expanded="false">How fast will we actually see results?<span class="plus">+</span></button>
-          <div class="faq-a"><p>Paid ads show real data within a couple of weeks. SEO takes longer, usually three to six months before it moves in a real way. We'll tell you which is which before you spend anything.</p></div>
-        </div>
-        <div class="faq-item" data-open="false">
-          <button class="faq-q" aria-expanded="false">Will you run the same playbook you run for everyone else?<span class="plus">+</span></button>
-          <div class="faq-a"><p>No. We start with an audit of your business specifically, and the plan comes from what we find there, not a template we reuse.</p></div>
-        </div>
-        <div class="faq-item" data-open="false">
-          <button class="faq-q" aria-expanded="false">What if it doesn't work?<span class="plus">+</span></button>
-          <div class="faq-a"><p>There's no long contract holding you in. If something isn't earning its keep, we say so and change it or stop it.</p></div>
-        </div>
-        <div class="faq-item" data-open="false">
-          <button class="faq-q" aria-expanded="false">Who actually does the work?<span class="plus">+</span></button>
-          <div class="faq-a"><p>Our own team. Nothing gets handed off to a subcontractor you've never heard of.</p></div>
-        </div>
-        <div class="faq-item" data-open="false">
-          <button class="faq-q" aria-expanded="false">Do we have to use all six services?<span class="plus">+</span></button>
-          <div class="faq-a"><p>No. Start with whichever channel matters most right now. Add more once it's working.</p></div>
-        </div>
+        <div class="faq-item" data-open="false"><button class="faq-q" aria-expanded="false">How fast will we actually see results?<span class="plus">+</span></button><div class="faq-a"><p>Paid ads show real data within a couple of weeks. SEO takes longer, usually three to six months before it moves in a real way. We'll tell you which is which before you spend anything.</p></div></div>
+        <div class="faq-item" data-open="false"><button class="faq-q" aria-expanded="false">Will you run the same playbook you run for everyone else?<span class="plus">+</span></button><div class="faq-a"><p>No. We start with an audit of your business specifically, and the plan comes from what we find there, not a template we reuse.</p></div></div>
+        <div class="faq-item" data-open="false"><button class="faq-q" aria-expanded="false">What if it doesn't work?<span class="plus">+</span></button><div class="faq-a"><p>There's no long contract holding you in. If something isn't earning its keep, we say so and change it or stop it.</p></div></div>
+        <div class="faq-item" data-open="false"><button class="faq-q" aria-expanded="false">Who actually does the work?<span class="plus">+</span></button><div class="faq-a"><p>Our own team. Nothing gets handed off to a subcontractor you've never heard of.</p></div></div>
+        <div class="faq-item" data-open="false"><button class="faq-q" aria-expanded="false">Do we have to use all six services?<span class="plus">+</span></button><div class="faq-a"><p>No. Start with whichever channel matters most right now. Add more once it's working.</p></div></div>
       </div>
     </div>
   </section>
@@ -294,30 +290,16 @@
       <div class="contact-grid">
         <div data-io>
           <span class="kicker">Contact</span>
-          <h2>Let's pour your plan together.</h2>
+          <h2>Let's bring your brand into focus.</h2>
           <p style="color:var(--text-secondary);margin-top:16px;max-width:44ch">Tell us where you're stuck and we'll send back a real plan, not a sales pitch.</p>
         </div>
         <div data-io>
-          <div class="form-success" role="status">
-            <strong>Sent.</strong> Your email app should be opening now, addressed to RapidStudio. If it doesn't, write to <a href="mailto:info@rapidsolutions.live">info@rapidsolutions.live</a> directly.
-          </div>
+          <div class="form-success" role="status"><strong>Sent.</strong> Your email app should be opening now, addressed to RapidStudio. If it doesn't, write to <a href="mailto:info@rapidsolutions.live">info@rapidsolutions.live</a> directly.</div>
           <form id="contact-form">
-            <div class="field">
-              <label for="f-name">Name</label>
-              <input id="f-name" name="name" type="text" required autocomplete="name">
-            </div>
-            <div class="field">
-              <label for="f-email">Email</label>
-              <input id="f-email" name="email" type="email" required autocomplete="email">
-            </div>
-            <div class="field">
-              <label for="f-website">Website (optional)</label>
-              <input id="f-website" name="website" type="text" autocomplete="url">
-            </div>
-            <div class="field">
-              <label for="f-message">What are you stuck on?</label>
-              <textarea id="f-message" name="message" required></textarea>
-            </div>
+            <div class="field"><label for="f-name">Name</label><input id="f-name" name="name" type="text" required autocomplete="name"></div>
+            <div class="field"><label for="f-email">Email</label><input id="f-email" name="email" type="email" required autocomplete="email"></div>
+            <div class="field"><label for="f-website">Website (optional)</label><input id="f-website" name="website" type="text" autocomplete="url"></div>
+            <div class="field"><label for="f-message">What are you stuck on?</label><textarea id="f-message" name="message" required></textarea></div>
             <button class="btn btn-primary" type="submit">Send it</button>
           </form>
         </div>
@@ -331,15 +313,11 @@
   <div class="wrap">
     <div class="footer-grid">
       <a class="brand" href="#top">
-        <svg class="mark" viewBox="0 0 32 32" aria-hidden="true"><path d="M16 5c5.5 8.5 9 12.7 9 16.4a9 9 0 0 1-18 0C7 17.7 10.5 13.5 16 5Z" fill="var(--accent)"/></svg>
+        <svg class="mark" viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="10" fill="none" stroke="var(--accent)" stroke-width="2.4"/><circle cx="16" cy="16" r="3.6" fill="var(--accent-3)"/></svg>
         RapidStudio
       </a>
       <div class="footer-links">
-        <a href="#services">Services</a>
-        <a href="#process">Process</a>
-        <a href="#faq">FAQ</a>
-        <a href="#contact">Contact</a>
-        <a href="mailto:info@rapidsolutions.live">info@rapidsolutions.live</a>
+        <a href="#work">Work</a><a href="#services">Services</a><a href="#process">Process</a><a href="#faq">FAQ</a><a href="mailto:info@rapidsolutions.live">info@rapidsolutions.live</a>
       </div>
     </div>
     <p class="footer-bottom">&copy; 2026 RapidStudio. All rights reserved.</p>
