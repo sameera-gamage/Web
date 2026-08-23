@@ -61,7 +61,7 @@ if (m) {
 }
 
 // 3. make every root-absolute reference relative
-html = html.replace(/(src|href|poster)="\/(?!\/)/g, '$1="./');
+html = html.replace(/(src|href|poster|data-src)="\/(?!\/)/g, '$1="./');
 
 writeFileSync(join(DIST, 'index.html'), html, 'utf8');
 

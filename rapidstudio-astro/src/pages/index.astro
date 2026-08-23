@@ -41,6 +41,22 @@ const faqs = [
 >
 
   <!--
+    ══ loader ══
+    The hero is a megabyte and a half of film; without this the page shows a
+    poster, then jumps when the clip takes over, and nothing tells you it is
+    working. So: hold on the wordmark with a real progress read, and clear only
+    once the footage can actually be scrubbed. It renders as an aperture closing
+    down — the same shape the hero is about to open.
+  -->
+  <div id="boot" class="boot">
+    <div class="boot-in">
+      <span class="boot-mark">Rapid<span class="text-rust">•</span>Studio</span>
+      <span class="boot-iris" aria-hidden="true"><i id="boot-fill"></i></span>
+      <span class="boot-read"><em id="boot-pct">0</em>%<span class="boot-what" id="boot-what">loading the film</span></span>
+    </div>
+  </div>
+
+  <!--
     ══ nav ══
     A floating rig rather than a bar: a wordmark plate on the left and a glass
     capsule of links on the right, both set in by the same margin as the hero
@@ -110,9 +126,14 @@ const faqs = [
           aria-hidden="true"
         >
           {/* VP9 first: smaller, and it covers the Chromium builds that ship
-              without the H.264 decoder. H.264 carries Safari and the rest. */}
-          <source src="/hero-camera-720.webm" type="video/webm" />
-          <source src="/hero-camera-720.mp4" type="video/mp4" />
+              without the H.264 decoder. H.264 carries Safari and the rest.
+
+              The URLs are held in data-src so the browser cannot start on them
+              during parse: preload="none" is only a hint, and Chrome was
+              speculatively pulling the 720 file on phones before the rig had
+              chosen the 480 one. Nothing is fetched until start() picks. */}
+          <source data-src="/hero-camera-720.webm" type="video/webm" />
+          <source data-src="/hero-camera-720.mp4" type="video/mp4" />
         </video>
         </div>
 
@@ -186,38 +207,75 @@ const faqs = [
     </section>
 
     <!-- ══ work ══ -->
-    <section id="work" class="relative bg-bone pt-[14vh]">
-      <div class="edge max-w-edge">
-        <div class="rule flex flex-wrap items-baseline justify-between gap-4 pt-6">
-          <h2 class="rv text-[clamp(2.2rem,6vw,5rem)]">Selected work</h2>
-          <p class="rv label">Six of thirty-one · 2023 to 25</p>
+    <!--
+      ══ work, as a contact sheet ══
+      A grid of pictures is what every studio site does. This is the thing a
+      photographer actually reviews work on: a strip of exposed frames, numbered
+      along the rebate, with the keepers ringed in grease pencil. It travels
+      sideways as the page scrolls down, so the whole reel passes the loupe.
+    -->
+    <section id="work" class="relative bg-ink text-bone" style="height:340vh">
+      <div id="work-stage" class="sticky top-0 flex h-screen flex-col justify-center overflow-hidden">
+
+        <div class="edge w-full max-w-edge shrink-0">
+          <div class="flex flex-wrap items-end justify-between gap-4 border-t border-bone/15 pt-6">
+            <h2 class="text-bone text-[clamp(2.2rem,6vw,5rem)]">Selected work</h2>
+            <p class="label mb-2 text-bone/50">Roll 04 · 2023–25 · six keepers of thirty-one</p>
+          </div>
         </div>
 
-        <!-- deliberately uneven: rows breathe differently -->
-        <div class="mt-20 grid grid-cols-12 gap-x-6 gap-y-20">
-          {work.map((w, i) => {
-            const spans = ['col-span-12 md:col-span-7','col-span-12 md:col-span-4 md:col-start-9','col-span-12 md:col-span-5 md:col-start-2','col-span-12 md:col-span-6 md:col-start-7','col-span-12 md:col-span-6','col-span-12 md:col-span-8 md:col-start-4'];
-            const ars   = ['4/5','1/1','5/4','3/4','1/1','16/10'];
-            const nudge = ['','md:-mt-28','md:mt-10','md:-mt-16','md:mt-6','md:-mt-10'];
-            return (
-              <figure class={`rv group ${spans[i]} ${nudge[i]}`}>
-                <div class="relative overflow-hidden bg-clay" style={`aspect-ratio:${ars[i]}`}>
-                  <img src={w.img} alt={`${w.t}, ${w.tag}`} loading="lazy" decoding="async"
-                       class="h-full w-full object-cover transition-transform duration-[900ms] ease-[cubic-bezier(.22,.8,.28,1)] group-hover:scale-[1.04]" />
+        <!-- the reel -->
+        <div class="mt-[6vh] shrink-0">
+          <div id="reel" class="sheet flex w-max items-stretch gap-[3px] will-change-transform">
+            {work.map((w, i) => (
+              <figure class="frame group" data-frame={i}>
+                <span class="frame-rebate frame-rebate-t" aria-hidden="true"></span>
+                <div class="frame-img">
+                  <img src={w.img} alt={`${w.t}, ${w.tag}`} loading="lazy" decoding="async" />
+                  {/* the grease-pencil ring a picture editor draws round a keeper */}
+                  <svg class="frame-ring" viewBox="0 0 200 150" fill="none" aria-hidden="true">
+                    <ellipse cx="100" cy="75" rx="86" ry="62" stroke="currentColor" stroke-width="2.6"
+                             stroke-linecap="round" pathLength="100" />
+                  </svg>
+                  <figcaption class="frame-cap">
+                    <span class="frame-title">{w.t}</span>
+                    <span class="frame-tag">{w.tag} · ’{w.yr}</span>
+                  </figcaption>
                 </div>
-                <figcaption class="mt-4 flex items-baseline justify-between gap-4 border-t border-ink/15 pt-3">
-                  <span class="font-display text-[19px] font-bold">{w.t}</span>
-                  <span class="label shrink-0">{w.id} / {w.tag} / ’{w.yr}</span>
-                </figcaption>
+                <span class="frame-rebate frame-rebate-b" aria-hidden="true">
+                  <em>{w.id}</em><em>{w.id}A</em>
+                </span>
               </figure>
-            );
-          })}
+            ))}
+
+            <!-- the tail of the roll: where the strip runs out, so does the work -->
+            <figure class="frame frame-end">
+              <span class="frame-rebate frame-rebate-t" aria-hidden="true"></span>
+              <div class="frame-img frame-blank">
+                <p class="font-display text-[clamp(1.3rem,2.4vw,2rem)] font-extrabold leading-[1.05]">
+                  Yours is<br />the next<br /><span class="text-rust">frame.</span>
+                </p>
+                <a href="#contact" class="mt-5 inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.2em] text-bone/70 hover:text-bone">
+                  Start a brief <span aria-hidden="true">→</span>
+                </a>
+              </div>
+              <span class="frame-rebate frame-rebate-b" aria-hidden="true"><em>007</em><em>007A</em></span>
+            </figure>
+          </div>
+        </div>
+
+        <div class="edge mt-[6vh] w-full max-w-edge shrink-0">
+          <div class="flex items-center gap-4">
+            <span class="label text-bone/40">Scrub the roll</span>
+            <span class="h-px flex-1 bg-bone/15"><span id="reel-bar" class="block h-px w-0 bg-rust"></span></span>
+            <span id="reel-count" class="label text-bone/40">01/07</span>
+          </div>
         </div>
       </div>
     </section>
 
     <!-- ══ ticker ══ -->
-    <div class="relative mt-[14vh] overflow-hidden border-y border-ink/15 bg-ochre py-5">
+    <div class="relative mt-[14vh] overflow-hidden border-y border-ink/15 bg-ochre py-5" data-nav="paper">
       <div class="marquee flex w-max gap-10 whitespace-nowrap font-display text-[clamp(1.4rem,3.4vw,2.6rem)] font-extrabold">
         {Array.from({ length: 6 }).map(() => (
           <>
@@ -233,7 +291,7 @@ const faqs = [
     </div>
 
     <!-- ══ studio / services as an index, not cards ══ -->
-    <section id="studio" class="bg-bone py-[14vh]">
+    <section id="studio" class="bg-bone py-[14vh]" data-nav="paper">
       <div class="edge max-w-edge">
         <div class="grid grid-cols-12 gap-x-6">
           <div class="col-span-12 md:col-span-4">
@@ -294,8 +352,10 @@ const faqs = [
       </div>
     </section>
 
-    <!-- ══ the pull quote ══ -->
-    <section class="bg-moss py-[16vh] text-bone">
+    <!-- ══ the pull quote ══
+         Was moss green, which appears nowhere in the film and so read as a
+         different website. Now the cool shadow sampled out of the hero. -->
+    <section class="bg-deep py-[16vh] text-bone">
       <div class="edge max-w-edge">
         <p class="rv max-w-[20ch] font-display text-[clamp(2rem,6.5vw,5.5rem)] font-extrabold leading-[0.98]">
           Beautiful is the entry&nbsp;fee. <span class="text-ochre">Working is the job.</span>
@@ -308,7 +368,7 @@ const faqs = [
     </section>
 
     <!-- ══ faq ══ -->
-    <section id="faq" class="bg-bone py-[14vh]">
+    <section id="faq" class="bg-bone py-[14vh]" data-nav="paper">
       <div class="edge max-w-edge">
         <div class="grid grid-cols-12 gap-x-6">
           <div class="col-span-12 md:col-span-4">
@@ -331,7 +391,7 @@ const faqs = [
     </section>
 
     <!-- ══ contact ══ -->
-    <section id="contact" class="bg-rust py-[14vh] text-bone">
+    <section id="contact" class="bg-rust py-[14vh] text-bone" data-nav="hot">
       <div class="edge max-w-edge">
         <div class="grid grid-cols-12 gap-x-6 gap-y-14">
           <div class="col-span-12 lg:col-span-6">
@@ -420,6 +480,64 @@ const faqs = [
       });
     }
 
+    /* ---- loader ----
+       A real read, not a fake timer: fonts, then how much of the hero clip has
+       actually arrived. It clears when the footage can be scrubbed, and it has
+       a hard ceiling so a stalled network can never lock anyone out. */
+    const boot = document.getElementById('boot');
+    function runBoot(vid) {
+      if (!boot) return () => {};
+      const fill = document.getElementById('boot-fill');
+      const pct = document.getElementById('boot-pct');
+      const what = document.getElementById('boot-what');
+      let shown = 0, done = false, raf = 0;
+
+      const finish = () => {
+        if (done) return;
+        done = true;
+        cancelAnimationFrame(raf);
+        fill.style.setProperty('--fill', '100%');
+        pct.textContent = '100';
+        what.textContent = 'ready';
+        setTimeout(() => {
+          boot.classList.add('is-done');
+          document.body.style.overflow = '';
+          setTimeout(() => { boot.hidden = true; }, 750);
+        }, 260);
+      };
+
+      const real = () => {
+        let v = 0.12;
+        if (document.fonts && document.fonts.status === 'loaded') v += 0.18;
+        if (vid) {
+          if (vid.readyState >= 1) v += 0.12;
+          try {
+            if (vid.buffered.length && vid.duration) {
+              v += 0.58 * Math.min(1, vid.buffered.end(vid.buffered.length - 1) / vid.duration);
+            }
+          } catch {}
+        }
+        return Math.min(1, v);
+      };
+
+      const tick = () => {
+        // ease toward the true figure so the number never jumps or stalls dead
+        shown += (real() - shown) * 0.06;
+        const n = Math.min(99, Math.round(shown * 100));
+        fill.style.setProperty('--fill', `${n}%`);
+        pct.textContent = String(n);
+        if (!done) raf = requestAnimationFrame(tick);
+      };
+
+      document.body.style.overflow = 'hidden';
+      scrollTo(0, 0);
+      raf = requestAnimationFrame(tick);
+      // canplaythrough is the honest signal that scrubbing will not stutter
+      if (vid) vid.addEventListener('canplaythrough', finish, { once: true });
+      setTimeout(finish, 7000);
+      return finish;
+    }
+
     /* ---- the camera rig ---- */
     const video = document.getElementById('cam');
     if (video) {
@@ -503,9 +621,13 @@ const faqs = [
         heroB.style.opacity = 0;
         scrim.style.opacity = 1;
         smoke.style.opacity = 0;
+        runBoot(null)();          // nothing to wait for, so do not make anyone wait
       } else {
         let progress = 0;
+        const bootDone = runBoot(video);
         rig.start();
+        // if the clip cannot be fetched at all, the page must still open
+        video.addEventListener('error', () => bootDone(), { once: true });
         ScrollTrigger.create({
           trigger: '#top',
           start: 'top top',
@@ -523,6 +645,35 @@ const faqs = [
       }
     }
 
+    /* ---- the contact sheet ----
+       Vertical scroll drives the reel sideways. The distance is measured from
+       the strip itself rather than assumed, so adding or removing a frame needs
+       no maths here. */
+    const reel = document.getElementById('reel');
+    if (reel && !reduced) {
+      const bar = document.getElementById('reel-bar');
+      const count = document.getElementById('reel-count');
+      const frames = reel.querySelectorAll('.frame').length;
+      let travel = 0;
+      const measure = () => { travel = Math.max(0, reel.scrollWidth - innerWidth); };
+      measure();
+      addEventListener('resize', () => { measure(); ScrollTrigger.refresh(); });
+
+      ScrollTrigger.create({
+        trigger: '#work',
+        start: 'top top',
+        end: 'bottom bottom',
+        scrub: 0.6,
+        onUpdate: (self) => {
+          const p = self.progress;
+          reel.style.transform = `translate3d(${(-travel * p).toFixed(1)}px,0,0)`;
+          if (bar) bar.style.width = `${(p * 100).toFixed(1)}%`;
+          if (count) count.textContent =
+            String(Math.min(frames, Math.floor(p * frames) + 1)).padStart(2, '0') + '/' + String(frames).padStart(2, '0');
+        },
+      });
+    }
+
     /* ---- nav ----
        It carries two colourways and swaps at the moment the page under it turns
        from the ink hero to the bone work section. */
@@ -531,15 +682,27 @@ const faqs = [
     const navSheet = document.getElementById('nav-sheet');
 
     if (nav) {
-      const top = document.getElementById('top');
-      const onPaper = () => {
-        // the hero card ends where its section does; below that the page is bone
-        const b = top.getBoundingClientRect().bottom;
-        nav.classList.toggle('is-paper', b <= 72);
+      // The page runs ink, ink, bone, ink, deep, bone, rust, ink. Rather than
+      // hard-code where it turns, the light sections declare themselves and the
+      // nav asks which one is under it. Rust needs its own state: bone type
+      // still reads, but the rust button would vanish into the background.
+      const zones = [...document.querySelectorAll('[data-nav]')];
+      const PROBE = 46;   // the vertical middle of the nav rig
+      let lastMode = '';
+      const onZone = () => {
+        let mode = '';
+        for (const z of zones) {
+          const r = z.getBoundingClientRect();
+          if (r.top <= PROBE && r.bottom >= PROBE) { mode = z.dataset.nav; break; }
+        }
+        if (mode === lastMode) return;
+        nav.classList.toggle('is-paper', mode === 'paper');
+        nav.classList.toggle('is-hot', mode === 'hot');
+        lastMode = mode;
       };
-      onPaper();
-      addEventListener('scroll', onPaper, { passive: true });
-      addEventListener('resize', onPaper);
+      onZone();
+      addEventListener('scroll', onZone, { passive: true });
+      addEventListener('resize', onZone);
     }
 
     if (navToggle && navSheet) {

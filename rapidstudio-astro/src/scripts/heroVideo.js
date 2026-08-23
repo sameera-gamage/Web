@@ -108,13 +108,14 @@ export function createHeroVideo(video, opts = {}) {
 
   function start() {
     // Narrow viewports render the frame at a few hundred CSS pixels; the 720p
-    // file is a megabyte of detail nobody can see there. Rewriting the <source>
-    // list before load() means only the chosen size is ever fetched.
-    if (innerWidth < 700) {
-      video.querySelectorAll('source').forEach((s) => {
-        s.setAttribute('src', s.getAttribute('src').replace('-720.', '-480.'));
-      });
-    }
+    // file is a megabyte of detail nobody can see there. The sources carry no
+    // src at all until this runs, so exactly one size is ever requested.
+    const small = innerWidth < 700;
+    video.querySelectorAll('source').forEach((s) => {
+      const url = s.dataset.src;
+      if (!url) return;
+      s.setAttribute('src', small ? url.replace('-720.', '-480.') : url);
+    });
     video.preload = 'auto';
     video.load();
 
