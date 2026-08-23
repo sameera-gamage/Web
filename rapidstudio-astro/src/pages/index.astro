@@ -108,6 +108,13 @@ const faqs = [
 
     <!-- ══ the rig ══ -->
     <section id="top" class="relative" style="height:300vh">
+      <!--
+        Once the card is masked, whatever sits behind it shows through the hole
+        — and above the work section that is the bone page. This is an ink bed
+        under the card and under the work section, faded in just before the
+        aperture opens, so the hole never lets the paper through.
+      -->
+      <div id="hero-bed" class="hero-bed" aria-hidden="true"></div>
       <div id="hero-frame" class="hero-frame bg-ink">
         <!--
           Real footage, not a drawing. Scroll scrubs it: the camera turns to
@@ -214,7 +221,13 @@ const faqs = [
       along the rebate, with the keepers ringed in grease pencil. It travels
       sideways as the page scrolls down, so the whole reel passes the loupe.
     -->
-    <section id="work" class="relative bg-ink text-bone" style="height:340vh">
+    <!--
+      The roll is pulled up under the hero's last screen (see .work-under) so the
+      aperture can open ONTO it: the hero card punches a hole from the lens
+      centre and this is what is behind. The extra 100vh of height gives the reel
+      back the scrub distance that overlap costs it.
+    -->
+    <section id="work" class="work-under relative bg-ink text-bone" style="height:440vh">
       <div id="work-stage" class="sticky top-0 flex h-screen flex-col justify-center overflow-hidden">
 
         <div class="edge w-full max-w-edge shrink-0">
@@ -560,6 +573,7 @@ const faqs = [
       //   0.50 - 0.62  square on, the iris still closed
       //   0.62 - 1.00  the blades retract and the aperture opens
       const smoke = document.getElementById('hero-smoke');
+      const bedEl = document.getElementById('hero-bed');
       const well = document.getElementById('hero-well');
       const frame = document.getElementById('hero-frame');
 
@@ -569,18 +583,20 @@ const faqs = [
       function paintCopy(v) {
         const a = 1 - ease(0.06, 0.30, v);   // opening copy leaves as the turn starts
         const m = ease(0.32, 0.44, v) * (1 - ease(0.58, 0.68, v));  // trades, over the turn
-        const b = ease(0.70, 0.86, v) * (1 - ease(0.93, 0.99, v));  // lands on the open iris, gone before the dive
+        const b = ease(0.70, 0.85, v) * (1 - ease(0.86, 0.92, v));  // lands on the open iris, gone before the hole opens
         const c = 1 - span(0, 0.08, v);      // scroll cue
         const s = 1 - 0.75 * ease(0.10, 0.45, v);  // scrim lifts off the footage
         const sm = 1 - ease(0.05, 0.26, v);  // smoke retires once the plate moves
 
-        // The dive. It runs long and accelerates hard: by the end the aperture
-        // is wider than the screen and we are inside the barrel, so the card
-        // sheds its inset and goes full-bleed exactly as we pass through.
-        const dive = ease(0.80, 1, v);
+        // The tail, in order: we accelerate into the glass, the barrel goes
+        // dark around us, and then the far end opens from the middle and the
+        // work is on the other side of it.
+        const dive = ease(0.78, 0.97, v);
         const k = 1 + 6.2 * dive * dive;
-        const w = ease(0.90, 1, v);          // and the far side of the glass is dark
-        const open = ease(0.86, 1, v);       // card -> full bleed
+        const w = ease(0.84, 0.93, v) * (1 - 0.35 * ease(0.94, 1, v));  // inside the barrel
+        const open = ease(0.84, 0.95, v);    // card -> full bleed
+        const rev = ease(0.90, 1, v);        // the aperture opens onto the next section
+        const bed = ease(0.76, 0.88, v);     // ink behind the card, before the hole
 
         set(heroA, 'opacity', a, 'a');
         set(heroA, 'transform', `translateY(${((1 - a) * -40).toFixed(1)}px)`, 'at');
@@ -592,9 +608,31 @@ const faqs = [
         set(scrim, 'opacity', s, 's');
         set(smoke, 'opacity', sm, 'sm');
         set(well, 'opacity', w, 'w');
+        set(bedEl, 'opacity', bed, 'bed');
 
         if (state.k !== k) { rig.push(k); state.k = k; }
         if (state.sm2 !== sm) { rig.setFloat(sm); state.sm2 = sm; }
+
+        // The reveal. A hole is punched in the card at the lens centre and grown
+        // until it clears the corners; the work section sits directly behind, so
+        // what comes through the hole IS the next section rather than a picture
+        // of it. The mask is only attached while it is doing something — a mask
+        // forces its own compositing pass, and there is no reason to pay for it
+        // through the other 90% of the scroll.
+        if (state.r !== rev) {
+          if (rev <= 0.0001) {
+            set(frame, 'webkitMaskImage', '', 'mk');
+            set(frame, 'maskImage', '', 'mk2');
+          } else {
+            const R = (rev * rev * 0.55 + rev * 0.45) * HOLE;   // slow open, then away
+            const soft = Math.max(2, R * 0.10);
+            const g = `radial-gradient(circle at var(--lens-x) var(--lens-y),` +
+                      ` transparent 0 ${(R - soft).toFixed(1)}px, #000 ${R.toFixed(1)}px)`;
+            set(frame, 'webkitMaskImage', g, 'mk');
+            set(frame, 'maskImage', g, 'mk2');
+          }
+          state.r = rev;
+        }
         if (state.o !== open) {
           // Growing the card by scale rather than by shrinking its margins: the
           // margins would relayout the video — and so re-derive its object-fit
@@ -607,12 +645,14 @@ const faqs = [
         }
       }
       const readPx = (n) => parseFloat(getComputedStyle(document.documentElement).getPropertyValue(n)) || 0;
-      let BASE_INSET = 12, BASE_RADIUS = 26, SX = 1, SY = 1;
+      let BASE_INSET = 12, BASE_RADIUS = 26, SX = 1, SY = 1, HOLE = 1200;
       function measureFrame() {
         BASE_INSET = readPx('--hero-inset') || 12;
         BASE_RADIUS = readPx('--hero-radius') || 26;
         SX = innerWidth / Math.max(1, innerWidth - BASE_INSET * 2);
         SY = innerHeight / Math.max(1, innerHeight - BASE_INSET * 2);
+        // far enough that the hole has cleared the furthest corner from the lens
+        HOLE = Math.hypot(innerWidth, innerHeight) * 1.05;
       }
       measureFrame();
 
@@ -624,6 +664,7 @@ const faqs = [
         heroB.style.opacity = 0;
         scrim.style.opacity = 1;
         smoke.style.opacity = 0;
+        bedEl.style.opacity = 0;
         runBoot(null, null)();    // nothing to wait for, so do not make anyone wait
       } else {
         let progress = 0;
@@ -664,7 +705,9 @@ const faqs = [
 
       ScrollTrigger.create({
         trigger: '#work',
-        start: 'top top',
+        // the section starts a screen early so the hero can open onto it; the
+        // roll should be sitting on frame one when it appears, not part-scrubbed
+        start: () => 'top+=' + innerHeight + ' top',
         end: 'bottom bottom',
         scrub: 0.6,
         onUpdate: (self) => {

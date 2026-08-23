@@ -22,7 +22,10 @@
   body::after {
     content: '';
     position: fixed; inset: 0; z-index: 40; pointer-events: none;
-    opacity: .055; mix-blend-mode: multiply;
+    /* No blend mode. multiply on a fixed full-screen layer forced a compositing
+       pass on every frame — it halved the frame rate on its own — and plain
+       alpha over the paper reads the same at this opacity. */
+    opacity: .05;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.82' numOctaves='3'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
   }
 
@@ -102,6 +105,27 @@
    footage go full-bleed exactly as we pass through the front element. */
 :root { --hero-inset: 12px; --hero-radius: 26px; }
 
+/* the lens centre, in the card's own coordinates — the hole is punched here */
+:root { --lens-x: 49.6%; --lens-y: 52.5%; }
+@media (max-aspect-ratio: 3/4) { :root { --lens-y: 46%; } }
+
+/* the roll is pulled up under the hero's last screen so the aperture opens onto
+   it; the hero card is z-41 and covers it until the hole is punched */
+.work-under { margin-top: -100vh; }
+
+/* Sticky, so it tracks the viewport for the whole hero, and z-auto so the work
+   section — which comes later in the document — paints over it. It only has to
+   cover the sliver above the work section while that is still sliding up. */
+.hero-bed {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  margin-bottom: -100vh;
+  background: #12100E;
+  opacity: 0;
+  pointer-events: none;
+}
+
 .hero-frame {
   position: sticky;
   top: var(--hero-inset);
@@ -119,25 +143,35 @@
 }
 
 /* ---- smoke ----
-   Two soft fields on long, prime-ish periods so they never visibly loop
-   together. Screen blend: they add light and never muddy the blacks. */
-.hero-smoke { mix-blend-mode: screen; will-change: opacity; }
+   Measured, not guessed. The first cut of this used filter: blur(46px) on two
+   large screen-blended elements, and cost 183ms a frame — five and a half
+   frames a second on the idle hero. A blur is re-computed every frame it moves,
+   and a blend mode forces its own compositing pass on top of that.
+
+   A radial gradient is already soft, so the blur bought nothing the stops could
+   not give. Alpha over a near-black plate lightens on its own, so the screen
+   blend bought nothing either. What is left is two transform-only layers, which
+   the compositor moves without ever repainting them. */
+.hero-smoke { will-change: opacity; }
 .smoke {
   position: absolute;
   display: block;
-  border-radius: 50%;
-  filter: blur(46px);
   will-change: transform;
+  backface-visibility: hidden;
 }
 .smoke-warm {
-  top: -20%; right: -24%; width: 84%; height: 122%;
-  background: radial-gradient(closest-side, rgba(214,90,31,.40), rgba(233,162,39,.14) 55%, transparent 80%);
+  top: -24%; right: -26%; width: 86%; height: 126%;
+  background: radial-gradient(closest-side,
+    rgba(214,90,31,.34) 0%, rgba(214,90,31,.24) 24%,
+    rgba(233,162,39,.11) 52%, rgba(233,162,39,.03) 74%, transparent 88%);
   animation: drift-warm 37s ease-in-out infinite;
 }
 .smoke-cool {
-  bottom: -28%; left: -22%; width: 72%; height: 104%;
+  bottom: -30%; left: -24%; width: 74%; height: 108%;
   /* the teal sampled off the barrel's rim light, not the old dusty blue */
-  background: radial-gradient(closest-side, rgba(20,140,146,.30), rgba(81,215,223,.08) 55%, transparent 80%);
+  background: radial-gradient(closest-side,
+    rgba(20,140,146,.26) 0%, rgba(20,140,146,.17) 26%,
+    rgba(81,215,223,.06) 54%, rgba(81,215,223,.02) 76%, transparent 90%);
   animation: drift-cool 47s ease-in-out infinite;
 }
 /* Periods that do not divide into one another, and travel large enough to read
@@ -450,7 +484,7 @@
   .rv { opacity: 1 !important; transform: none !important; }
   /* nothing is being scrubbed, so don't make anyone scroll past the pins */
   #top { height: 100vh !important; }
-  #work { height: auto !important; }
+  #work { height: auto !important; margin-top: 0 !important; }
   #work-stage { position: static; height: auto; padding-block: 12vh; overflow: visible; }
   /* the reel is never going to travel, so lay the roll out as a sheet */
   .sheet { flex-wrap: wrap; justify-content: center; width: 100%; gap: 22px 3px; padding-inline: var(--edge); }
