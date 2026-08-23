@@ -1,48 +1,58 @@
 /*
-  Camera rig on a 2D canvas.
-  Four beats, driven by one scroll progress value 0..1:
-    0.00 - 0.22  camera sits at a three-quarter angle, breathing
-    0.22 - 0.48  it swings round to face you
-    0.48 - 0.74  push in until the lens fills the frame
-    0.74 - 1.00  aperture opens, the frame behind it lands
+  Hero rig, built on a real photograph rather than a drawn camera.
+
+  Two plates of the SAME studio frame are cross-dissolved so the push stays
+  sharp all the way in:
+    cam-wide  the whole camera, 1180px
+    cam-lens  a native-resolution crop centred on the lens
+
+  Both carry the lens centre and glass radius as normalised constants, so the
+  dissolve lands pixel-on-pixel and reads as one continuous move.
+
+  Beats, driven by one scroll progress value 0..1:
+    0.00 - 0.10  the frame sits, breathing
+    0.10 - 0.62  dolly in, centred on the glass
+    0.40 - 0.58  the native lens crop takes over the centre
+    0.46 - 0.62  the glass darkens and the blades appear
+    0.60 - 0.95  we pass through the front element
+    0.64 - 0.93  the aperture opens and the work lands behind it
 */
 
 const BLADES = 9;
 
-// Perspective projection of a point on the camera's own plane.
-// yaw is radians; z is depth out of the body (positive = toward viewer).
-function project(x, y, z, yaw, dist) {
-  const cos = Math.cos(yaw);
-  const sin = Math.sin(yaw);
-  const rx = x * cos + z * sin;
-  const rz = z * cos - x * sin;
-  const k = dist / (dist + rz);
-  return [rx * k, y * k, k];
+// Where the lens lives in each plate: centre as a fraction of the plate, and a
+// reference radius as a fraction of plate WIDTH.
+//
+// These are measured, not eyeballed: the barrel is rotationally symmetric, so
+// the true centre is the one minimising angular variance, and the engraving
+// shows up as angular high-frequency energy. That puts the lens centre at
+// (666, 734) in the 2048x1152 source, with the smooth front element ending at
+// r = 72 and the engraved band (since blurred out) at r = 75..190.
+//
+// The reference radius is the barrel's front face (r = 196), NOT the glass.
+// The glass is only 144px across in the source, so sizing the rig to it would
+// demand a 6x upscale to fill a viewport; the barrel face needs barely 2x, and
+// an iris belongs at the barrel opening anyway.
+const REF = 196;
+const PLATES = {
+  wide: { u: 666 / 2048, v: 734 / 1152, r: REF / 2048 },
+  lens: { u: 0.5, v: 0.5, r: REF / 520 },
+};
+
+function ease(a, b, x) {
+  const u = Math.min(1, Math.max(0, (x - a) / (b - a)));
+  return u * u * (3 - 2 * u);
 }
 
-function roundRect(ctx, x, y, w, h, r) {
-  ctx.beginPath();
-  ctx.moveTo(x + r, y);
-  ctx.arcTo(x + w, y, x + w, y + h, r);
-  ctx.arcTo(x + w, y + h, x, y + h, r);
-  ctx.arcTo(x, y + h, x, y, r);
-  ctx.arcTo(x, y, x + w, y, r);
-  ctx.closePath();
-}
-
-// Quad from four projected points, used for every slab of the body.
-function quad(ctx, pts, fill) {
-  ctx.beginPath();
-  ctx.moveTo(pts[0][0], pts[0][1]);
-  for (let i = 1; i < pts.length; i++) ctx.lineTo(pts[i][0], pts[i][1]);
-  ctx.closePath();
-  ctx.fillStyle = fill;
-  ctx.fill();
+function ready(img) {
+  return img && img.complete && img.naturalWidth > 0;
 }
 
 export function createCamera(canvas, opts = {}) {
   const ctx = canvas.getContext('2d', { alpha: true });
-  const photo = opts.photo || null;
+  const photo = opts.photo || null;   // the work frame revealed through the iris
+  const wide = opts.wide || null;
+  const lens = opts.lens || null;
   let W = 0, H = 0, DPR = 1;
 
   function resize() {
@@ -54,9 +64,29 @@ export function createCamera(canvas, opts = {}) {
     ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
   }
 
+  // Draw a plate so its reference circle lands at (cx, cy) on screen with radius R.
+  function drawPlate(img, meta, cx, cy, R, alpha) {
+    if (!ready(img) || alpha <= 0.001) return;
+    const dw = R / meta.r;
+    const dh = dw * (img.naturalHeight / img.naturalWidth);
+    ctx.globalAlpha = alpha;
+    ctx.drawImage(img, cx - meta.u * dw, cy - meta.v * dh, dw, dh);
+    ctx.globalAlpha = 1;
+  }
+
+  // Where the lens sits, and how big its reference circle is, before any push.
+  function restingGlass(img, meta) {
+    if (!ready(img)) return { x: W / 2, y: H / 2, r: Math.min(W, H) * 0.12 };
+    const s = Math.max(W / img.naturalWidth, H / img.naturalHeight);
+    const pw = img.naturalWidth * s;
+    const ph = img.naturalHeight * s;
+    const px = (W - pw) / 2;
+    const py = (H - ph) / 2;
+    return { x: px + meta.u * pw, y: py + meta.v * ph, r: meta.r * pw };
+  }
+
   // ---- the aperture ----
-  function drawIris(cx, cy, R, open, rot) {
-    // opening radius: closed is a pinhole, open clears the barrel
+  function drawIris(cx, cy, R, open, rot, alpha) {
     const r = R * (0.045 + 0.955 * open);
 
     // what sits behind the blades
@@ -65,11 +95,19 @@ export function createCamera(canvas, opts = {}) {
     ctx.arc(cx, cy, R, 0, Math.PI * 2);
     ctx.clip();
 
-    if (photo && photo.complete && photo.naturalWidth) {
-      const s = Math.max((R * 2) / photo.naturalWidth, (R * 2) / photo.naturalHeight) * 1.25;
+    if (ready(photo)) {
+      // Cover the VIEWPORT, not the iris circle. Once the aperture is wider
+      // than the screen, sizing to the circle would magnify a 620px frame past
+      // 4x; covering the viewport keeps it to what the frame can carry.
+      const s = Math.max(W / photo.naturalWidth, H / photo.naturalHeight);
       const pw = photo.naturalWidth * s, ph = photo.naturalHeight * s;
       ctx.globalAlpha = Math.min(1, open * 1.5);
-      ctx.drawImage(photo, cx - pw / 2, cy - ph / 2, pw, ph);
+      ctx.drawImage(photo, W / 2 - pw / 2, H / 2 - ph / 2, pw, ph);
+      // sit it back a little so the closing copy reads over it, and so the
+      // softness of a blown-up frame reads as depth of field
+      ctx.globalAlpha = Math.min(1, open) * 0.42;
+      ctx.fillStyle = '#12100E';
+      ctx.fillRect(cx - R, cy - R, R * 2, R * 2);
       ctx.globalAlpha = 1;
     }
     // light spilling through the hole
@@ -98,6 +136,7 @@ export function createCamera(canvas, opts = {}) {
       ctx.quadraticCurveTo(cx + cr * Math.cos(mid), cy + cr * Math.sin(mid), nxt[0], nxt[1]);
     }
     ctx.closePath();
+    ctx.globalAlpha = alpha;
     const g = ctx.createLinearGradient(cx - R, cy - R, cx + R, cy + R);
     g.addColorStop(0, '#3a3530');
     g.addColorStop(0.5, '#1d1a17');
@@ -115,174 +154,99 @@ export function createCamera(canvas, opts = {}) {
       ctx.lineTo(cx + R * Math.cos(a), cy + R * Math.sin(a));
       ctx.stroke();
     }
+    ctx.globalAlpha = 1;
     ctx.restore();
   }
 
-  // ---- the whole rig for one frame ----
+  // ---- one frame ----
   function render(p, t) {
     ctx.clearRect(0, 0, W, H);
     if (!W) return;
 
-    const ease = (a, b, x) => {
-      const u = Math.min(1, Math.max(0, (x - a) / (b - a)));
-      return u * u * (3 - 2 * u);
-    };
+    const push = ease(0.10, 0.62, p);   // dolly in on the glass
+    const swap = ease(0.40, 0.58, p);   // native lens crop takes over the centre
+    const well = ease(0.46, 0.62, p);   // glass goes dark, blades fade in
+    const fly  = ease(0.60, 0.95, p);   // we pass through the front element
+    const open = ease(0.64, 0.93, p);   // aperture
+    const fade = ease(0.62, 0.82, p);   // plate retires once we are inside
 
-    const turn  = ease(0.20, 0.48, p);   // three-quarter -> face on
-    const push  = ease(0.48, 0.80, p);   // dolly in
-    const open  = ease(0.72, 0.97, p);   // aperture
-    const yaw   = (-0.62) * (1 - turn);
-    const breathe = Math.sin(t / 1400) * 0.012 * (1 - turn);
+    // a slow float before the push takes hold
+    const drift = Math.sin(t / 2600) * 0.004 * (1 - push);
 
-    // narrow screens have no room beside the copy, so the rig drops below it
-    // and only climbs back to centre once the push takes over the frame
-    const narrow = W < 820;
-    const base = narrow
-      ? Math.min(W / 760, H / 1180)
-      : Math.min(W / 1180, H / 780);
-    const scale = base * (1 + (narrow ? 9.5 : 7.2) * push);
-    const cx = narrow
-      ? W * (0.5 + 0.06 * (1 - push))
-      : W / 2 + (1 - push) * W * 0.14;
-    const cy = narrow
-      ? H * (0.72 - 0.22 * push)
-      : H / 2;
+    const rest = restingGlass(wide, PLATES.wide);
 
-    ctx.save();
-    ctx.translate(cx, cy);
-    ctx.scale(scale, scale);
-    ctx.rotate(breathe);
+    // The plate only zooms as far as its own pixels allow — a hard 2x cap on
+    // the dolly. Past that the iris keeps growing on its own, which is what
+    // sells flying into the lens without ever magnifying the photograph
+    // further than it can carry.
+    const plateMax = rest.r * 2;
+    const irisMax = Math.max(W, H) * 0.68;
 
-    const dist = 1500;
-    const P = (x, y, z) => project(x, y, z, yaw + breathe, dist);
+    const Rplate = rest.r + (plateMax - rest.r) * push;
+    const R = Rplate + (irisMax - plateMax) * fly;
 
-    const bodyAlpha = 1 - ease(0.60, 0.78, p);   // body dissolves as we enter the glass
-    const BW = 470, BH = 300, BD = 96;           // half-width, half-height, depth
+    const cx = rest.x + (W / 2 - rest.x) * push + W * drift;
+    const cy = rest.y + (H / 2 - rest.y) * push;
 
-    // ---------- body ----------
-    if (bodyAlpha > 0.01) {
-      ctx.globalAlpha = bodyAlpha;
-
-      // right side slab (only reads while angled)
-      const sideShow = Math.max(0, -Math.sin(yaw));
-      if (sideShow > 0.01) {
-        quad(ctx, [P(BW, -BH, 0), P(BW, -BH, -BD), P(BW, BH, -BD), P(BW, BH, 0)], '#1a1613');
-      }
-
-      // top plate
-      quad(ctx, [P(-BW, -BH, 0), P(BW, -BH, 0), P(BW, -BH, -BD), P(-BW, -BH, -BD)], '#4a423b');
-
-      // viewfinder hump
-      const hw = 105, hh = 62;
-      quad(ctx, [P(-hw, -BH, 0), P(hw, -BH, 0), P(hw, -BH - hh, -BD * .5), P(-hw, -BH - hh, -BD * .5)], '#544a42');
-      quad(ctx, [P(-hw, -BH - hh, -BD * .5), P(hw, -BH - hh, -BD * .5), P(hw, -BH - hh, -BD), P(-hw, -BH - hh, -BD)], '#332c27');
-
-      // front face
-      const f = [P(-BW, -BH, 0), P(BW, -BH, 0), P(BW, BH, 0), P(-BW, BH, 0)];
-      const bg = ctx.createLinearGradient(f[0][0], f[0][1], f[2][0], f[2][1]);
-      bg.addColorStop(0, '#585049');
-      bg.addColorStop(0.45, '#3b3530');
-      bg.addColorStop(1, '#241f1c');
-      quad(ctx, f, bg);
-
-      // grip, hand side
-      const gx0 = BW - 150;
-      quad(ctx, [P(gx0, -BH + 26, 2), P(BW - 12, -BH + 26, 2), P(BW - 12, BH - 26, 2), P(gx0, BH - 26, 2)], '#2b2521');
-
-      // leatherette panel, left of the barrel
-      quad(ctx, [P(-BW + 24, -BH + 34, 2), P(-BW + 210, -BH + 34, 2), P(-BW + 210, BH - 34, 2), P(-BW + 24, BH - 34, 2)], '#211c19');
-
-      // mode dial and shutter release on the top plate
-      const dial = P(-300, -BH - 22, -BD * .45);
-      ctx.beginPath();
-      ctx.ellipse(dial[0], dial[1], 46 * dial[2], 17 * dial[2], 0, 0, Math.PI * 2);
-      ctx.fillStyle = '#6b6058';
-      ctx.fill();
-      const rel = P(300, -BH - 16, -BD * .45);
-      ctx.beginPath();
-      ctx.ellipse(rel[0], rel[1], 30 * rel[2], 12 * rel[2], 0, 0, Math.PI * 2);
-      ctx.fillStyle = '#d6461f';
-      ctx.fill();
-
-      // hot-shoe
-      const shoe = P(0, -BH - hh - 6, -BD * .5);
-      ctx.beginPath();
-      ctx.ellipse(shoe[0], shoe[1], 52 * shoe[2], 10 * shoe[2], 0, 0, Math.PI * 2);
-      ctx.fillStyle = '#100e0c';
-      ctx.fill();
-
-      // engraved wordmark
-      const wm = P(-BW + 250, -BH + 78, 3);
-      ctx.globalAlpha = bodyAlpha * 0.5;
-      ctx.fillStyle = '#cbbfae';
-      ctx.font = `600 ${26 * wm[2]}px "DM Mono", monospace`;
-      ctx.fillText('RAPIDSTUDIO', wm[0], wm[1]);
-      ctx.globalAlpha = bodyAlpha;
+    // Both plates are the same frame. The crop is laid OVER the wide plate
+    // rather than cross-faded against it: the crop only covers the middle, so
+    // fading one out as the other comes in would show the crop's edge as a
+    // rectangle. Stacked, the seam is invisible because the content matches.
+    const plateA = 1 - fade;
+    if (plateA > 0.001) {
+      drawPlate(wide, PLATES.wide, cx, cy, Rplate, plateA);
+      drawPlate(lens, PLATES.lens, cx, cy, Rplate, swap * plateA);
     }
 
-    // ---------- barrel + glass ----------
-    // barrel centre sits on the body's front face, so the push lands on it
-    const c = P(0, 0, 0);
-    const bx = c[0], by = c[1];
-    // foreshorten the barrel across the turn
-    const squash = Math.cos(yaw + breathe);
-    const R = 188 * c[2];
-
-    ctx.save();
-    ctx.translate(bx, by);
-    ctx.scale(Math.max(0.08, Math.abs(squash)), 1);
-
-    if (bodyAlpha > 0.01) {
-      ctx.globalAlpha = bodyAlpha;
-      // barrel rings, outermost first
-      const rings = [[1.34, '#14100e'], [1.22, '#4a423b'], [1.13, '#1b1714'], [1.05, '#3d3630']];
-      for (const [k, col] of rings) {
-        ctx.beginPath();
-        ctx.arc(0, 0, R * k, 0, Math.PI * 2);
-        ctx.fillStyle = col;
-        ctx.fill();
-      }
-      // knurled focus ring
-      ctx.strokeStyle = 'rgba(190,178,160,.28)';
-      ctx.lineWidth = Math.max(1, R * 0.012);
-      for (let i = 0; i < 72; i++) {
-        const a = (i / 72) * Math.PI * 2;
-        ctx.beginPath();
-        ctx.moveTo(Math.cos(a) * R * 1.21, Math.sin(a) * R * 1.21);
-        ctx.lineTo(Math.cos(a) * R * 1.29, Math.sin(a) * R * 1.29);
-        ctx.stroke();
-      }
-      ctx.globalAlpha = 1;
+    // scrim so the opening copy stays readable over the photograph;
+    // it lifts as the copy goes and the push takes the frame
+    const scrimA = 0.72 * (1 - ease(0.06, 0.34, p));
+    if (scrimA > 0.001) {
+      const sc = ctx.createLinearGradient(0, 0, W * 0.9, H * 0.4);
+      sc.addColorStop(0, `rgba(18,16,14,${scrimA})`);
+      sc.addColorStop(0.55, `rgba(18,16,14,${scrimA * 0.45})`);
+      sc.addColorStop(1, 'rgba(18,16,14,0)');
+      ctx.fillStyle = sc;
+      ctx.fillRect(0, 0, W, H);
     }
 
-    // glass well
+    // Nothing is drawn over the lens until the push has arrived: at rest the
+    // hero is simply the photograph.
+    if (well <= 0.001) return;
+
+    // the glass darkens down, so the blades read as the lens itself stopping
+    // down rather than a disc pasted on top
+    ctx.save();
+    ctx.globalAlpha = well;
     ctx.beginPath();
-    ctx.arc(0, 0, R, 0, Math.PI * 2);
+    ctx.arc(cx, cy, R, 0, Math.PI * 2);
     ctx.fillStyle = '#070605';
     ctx.fill();
+    ctx.restore();
 
-    drawIris(0, 0, R, open, 0.22 + 0.5 * open);
+    drawIris(cx, cy, R, open, 0.22 + 0.5 * open, well);
 
-    // coating sheen across the glass, dies off as it opens
-    const sheen = ctx.createLinearGradient(-R, -R, R * 0.5, R);
-    sheen.addColorStop(0, `rgba(143,184,201,${0.14 * (1 - open)})`);
-    sheen.addColorStop(0.45, 'rgba(143,184,201,0)');
-    sheen.addColorStop(0.75, `rgba(214,70,31,${0.08 * (1 - open)})`);
-    sheen.addColorStop(1, 'rgba(0,0,0,0)');
-    ctx.beginPath();
-    ctx.arc(0, 0, R, 0, Math.PI * 2);
-    ctx.fillStyle = sheen;
-    ctx.fill();
+    // coating sheen, dies off as the aperture clears
+    if (open < 0.999) {
+      const sheen = ctx.createLinearGradient(cx - R, cy - R, cx + R * 0.5, cy + R);
+      sheen.addColorStop(0, `rgba(143,184,201,${0.16 * (1 - open) * well})`);
+      sheen.addColorStop(0.45, 'rgba(143,184,201,0)');
+      sheen.addColorStop(0.75, `rgba(214,70,31,${0.1 * (1 - open) * well})`);
+      sheen.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.beginPath();
+      ctx.arc(cx, cy, R, 0, Math.PI * 2);
+      ctx.fillStyle = sheen;
+      ctx.fill();
+    }
 
     // inner lip
+    ctx.globalAlpha = well;
     ctx.beginPath();
-    ctx.arc(0, 0, R * 0.995, 0, Math.PI * 2);
+    ctx.arc(cx, cy, R * 0.995, 0, Math.PI * 2);
     ctx.strokeStyle = 'rgba(255,255,255,.09)';
     ctx.lineWidth = Math.max(1, R * 0.02);
     ctx.stroke();
-
-    ctx.restore();
-    ctx.restore();
+    ctx.globalAlpha = 1;
   }
 
   resize();

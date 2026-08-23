@@ -18,7 +18,8 @@ const DIST = new URL('../dist/', import.meta.url).pathname;
 
 const html0 = readFileSync(join(DIST, 'index.html'), 'utf8');
 
-// 1. find the module bundle Astro emitted
+// 1. find the module bundle Astro emitted. Astro references the same hoisted
+// bundle once per <script> block on the page, so expect several identical tags.
 const m = html0.match(/<script[^>]+src="\/(_astro\/[^"]+\.js)"[^>]*><\/script>/);
 if (!m) {
   console.log('portable: no module script found, nothing to inline');
@@ -45,7 +46,16 @@ if (m) {
   const deferred =
     `<script>(function(){function go(){${code}}` +
     `if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',go)}else{go()}})();</script>`;
-  html = html.replace(m[0], deferred);
+  // Inline it once. The replacement MUST go through a function: minified GSAP
+  // uses `$` as a variable, so the bundle contains `$&`, which a string
+  // replacement would expand into the matched <script> tag and splice HTML
+  // into the middle of the JS.
+  html = html.replace(m[0], () => deferred);
+  const stray = new RegExp(
+    `<script[^>]+src="\\/?\\.?\\/?${m[1].replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}"[^>]*></script>`,
+    'g',
+  );
+  html = html.replace(stray, '');
   // the module file is no longer referenced
   rmSync(entry, { force: true });
 }

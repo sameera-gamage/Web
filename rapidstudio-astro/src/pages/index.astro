@@ -337,7 +337,14 @@ const faqs = [
       const photo = new Image();
       photo.src = '/work/w1.webp';
 
-      const cam = createCamera(canvas, { photo });
+      // the two halves of the same studio frame; the rig cross-dissolves them
+      // so the push into the glass stays sharp at full zoom
+      const wide = new Image();
+      wide.src = '/cam-wide.webp';
+      const lens = new Image();
+      lens.src = '/cam-lens.webp';
+
+      const cam = createCamera(canvas, { photo, wide, lens });
       let p = 0;
       let raf = null;
 
@@ -345,6 +352,8 @@ const faqs = [
       const request = () => { if (raf === null) raf = requestAnimationFrame(paint); };
 
       photo.onload = request;
+      wide.onload = request;
+      lens.onload = request;
       addEventListener('resize', () => { cam.resize(); request(); });
 
       // one source of truth: the rig's progress drives the canvas AND the copy,
