@@ -16,10 +16,12 @@
 
   h1, h2, h3 { @apply font-display; letter-spacing: -0.03em; line-height: 0.94; }
 
-  /* film grain, sits over everything, costs nothing */
+  /* Film grain over the paper sections. It sits BELOW the hero card (z-41) on
+     purpose: multiplying noise onto near-black footage reads as compression
+     dirt rather than paper, and the hero has its own grain in the negative. */
   body::after {
     content: '';
-    position: fixed; inset: 0; z-index: 60; pointer-events: none;
+    position: fixed; inset: 0; z-index: 40; pointer-events: none;
     opacity: .055; mix-blend-mode: multiply;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.82' numOctaves='3'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
   }
@@ -56,6 +58,67 @@
   .ulink:hover::after { transform: scaleX(1); transform-origin: left; }
 }
 
+/* ---- the hero card ----
+   The hero is a rounded plate set into the page rather than a full-bleed
+   band, so the page reads as a sheet with something laid on it. At the very
+   end of the dive the inset and the radius are driven to zero, which lets the
+   footage go full-bleed exactly as we pass through the front element. */
+:root { --hero-inset: 12px; --hero-radius: 26px; }
+
+.hero-frame {
+  position: sticky;
+  top: var(--hero-inset);
+  height: calc(100vh - var(--hero-inset) * 2);
+  margin-inline: var(--hero-inset);
+  border-radius: var(--hero-radius);
+  overflow: hidden;
+  /* own layer: keeps the radius clipping the scaled video, and lifts the card
+     above the page grain so the film does not pick up paper texture */
+  transform: translateZ(0);
+  z-index: 41;
+}
+@media (max-width: 640px) {
+  :root { --hero-inset: 8px; --hero-radius: 18px; }
+}
+
+/* ---- smoke ----
+   Two soft fields on long, prime-ish periods so they never visibly loop
+   together. Screen blend: they add light and never muddy the blacks. */
+.hero-smoke { mix-blend-mode: screen; will-change: opacity; }
+.smoke {
+  position: absolute;
+  display: block;
+  border-radius: 50%;
+  filter: blur(46px);
+  will-change: transform;
+}
+.smoke-warm {
+  top: -18%; right: -22%; width: 78%; height: 116%;
+  background: radial-gradient(closest-side, rgba(214,90,31,.30), rgba(233,162,39,.10) 55%, transparent 78%);
+  animation: drift-warm 41s ease-in-out infinite;
+}
+.smoke-cool {
+  bottom: -26%; left: -20%; width: 66%; height: 96%;
+  background: radial-gradient(closest-side, rgba(143,184,201,.20), rgba(143,184,201,.06) 55%, transparent 78%);
+  animation: drift-cool 53s ease-in-out infinite;
+}
+@keyframes drift-warm {
+  0%,100% { transform: translate3d(0,0,0) scale(1); }
+  33%     { transform: translate3d(-5%,4%,0) scale(1.12); }
+  66%     { transform: translate3d(3%,-3%,0) scale(.94); }
+}
+@keyframes drift-cool {
+  0%,100% { transform: translate3d(0,0,0) scale(1); }
+  40%     { transform: translate3d(6%,-5%,0) scale(1.15); }
+  75%     { transform: translate3d(-4%,3%,0) scale(.96); }
+}
+
+.hero-well {
+  background:
+    radial-gradient(58% 46% at 50% 52%, rgba(233,162,39,.13), rgba(214,70,31,.06) 42%, transparent 72%),
+    #12100E;
+}
+
 /* ---- hero footage ----
    Landscape: the clip simply covers the viewport.
 
@@ -88,6 +151,139 @@
     -webkit-mask-image: linear-gradient(to bottom, transparent, #000 13%, #000 87%, transparent);
             mask-image: linear-gradient(to bottom, transparent, #000 13%, #000 87%, transparent);
   }
+}
+
+/* ---- nav ----
+   Two floating pieces set in on the same margin as the hero card. Colour is a
+   single pair of custom properties so the whole rig inverts in one place when
+   the page turns from ink to bone under it. */
+.nav {
+  --nav-ink: #F2EDE4;
+  --nav-line: rgba(242,237,228,.22);
+  --nav-glass: rgba(18,16,14,.34);
+  padding: calc(var(--hero-inset) + 10px) calc(var(--hero-inset) + 10px) 0;
+  transition: color .4s ease;
+}
+.nav-in { max-width: 1560px; margin-inline: auto; }
+
+.nav.is-paper {
+  --nav-ink: #12100E;
+  --nav-line: rgba(18,16,14,.18);
+  --nav-glass: rgba(242,237,228,.62);
+}
+
+.nav-mark {
+  display: inline-flex; align-items: center; gap: .55rem;
+  font-family: 'Syne', ui-sans-serif, system-ui, sans-serif;
+  font-weight: 800; font-size: 17px; letter-spacing: -.02em;
+  color: var(--nav-ink);
+  padding: .5rem .95rem .5rem .7rem;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  transition: color .4s ease, border-color .4s ease, background-color .4s ease;
+}
+.nav.is-paper .nav-mark { border-color: var(--nav-line); background: rgba(242,237,228,.5); }
+.nav-sep { color: #D6461F; }
+
+/* the aperture, closed — a small nod to what the hero is doing */
+.nav-dot {
+  width: 9px; height: 9px; border-radius: 50%;
+  background: #D6461F;
+  box-shadow: 0 0 0 3px rgba(214,70,31,.18);
+  transition: transform .5s cubic-bezier(.22,.8,.28,1), box-shadow .5s ease;
+}
+.nav-mark:hover .nav-dot { transform: scale(1.5); box-shadow: 0 0 0 6px rgba(214,70,31,.14); }
+
+.nav-pill {
+  align-items: center; gap: .25rem;
+  padding: .4rem .4rem .4rem .75rem;
+  border-radius: 999px;
+  border: 1px solid var(--nav-line);
+  background: var(--nav-glass);
+  -webkit-backdrop-filter: blur(14px) saturate(1.3);
+          backdrop-filter: blur(14px) saturate(1.3);
+  transition: background-color .4s ease, border-color .4s ease;
+}
+
+.nav-link {
+  position: relative;
+  display: inline-flex; align-items: baseline; gap: .45rem;
+  padding: .5rem .85rem;
+  border-radius: 999px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 11px; letter-spacing: .2em; text-transform: uppercase;
+  color: var(--nav-ink);
+  transition: color .3s ease;
+}
+.nav-num { font-size: 9px; opacity: .5; }
+/* the fill grows from the baseline rather than fading, so it reads as a
+   printed block dropping in behind the word */
+.nav-link::before {
+  content: ''; position: absolute; inset: 0;
+  border-radius: 999px; background: currentColor; opacity: 0;
+  transform: scaleY(.2); transform-origin: bottom;
+  transition: transform .4s cubic-bezier(.22,.8,.28,1), opacity .3s ease;
+}
+.nav-link:hover::before { opacity: .12; transform: scaleY(1); }
+.nav-link > span { position: relative; }
+
+.nav-cta {
+  display: inline-flex; align-items: center;
+  margin-left: .35rem; padding: .6rem 1.15rem;
+  border-radius: 999px; background: #D6461F; color: #F2EDE4;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 11px; letter-spacing: .16em; text-transform: uppercase;
+  transition: transform .35s cubic-bezier(.22,.8,.28,1), background-color .3s ease;
+}
+.nav-cta:hover { transform: translateY(-1px); background: #E9A227; color: #12100E; }
+
+/* phone: a labelled control, not a bare glyph */
+.nav-burger {
+  display: inline-flex; align-items: center; gap: .6rem;
+  padding: .55rem 1rem; border-radius: 999px;
+  border: 1px solid var(--nav-line); background: var(--nav-glass);
+  -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px);
+  color: var(--nav-ink);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 11px; letter-spacing: .2em; text-transform: uppercase;
+}
+.nav-burger-lines { display: block; width: 16px; }
+.nav-burger-lines i {
+  display: block; height: 1.5px; background: currentColor; border-radius: 2px;
+  transition: transform .35s cubic-bezier(.22,.8,.28,1);
+}
+.nav-burger-lines i + i { margin-top: 4px; }
+.nav-burger[aria-expanded='true'] .nav-burger-lines i:first-child { transform: translateY(2.75px) rotate(45deg); }
+.nav-burger[aria-expanded='true'] .nav-burger-lines i + i { transform: translateY(-2.75px) rotate(-45deg); }
+
+.nav-sheet {
+  position: fixed; inset: 0; z-index: 49;
+  overflow: hidden;
+  background: #12100E;
+  opacity: 0; transition: opacity .45s ease;
+  display: flex; align-items: center;
+}
+.nav-sheet.is-open { opacity: 1; }
+.nav-sheet-in { padding-inline: calc(var(--hero-inset) + 22px); width: 100%; }
+.nav-sheet-link {
+  display: flex; align-items: baseline; gap: 1rem;
+  padding: .5rem 0;
+  font-family: 'Syne', ui-sans-serif, system-ui, sans-serif;
+  font-weight: 800; letter-spacing: -.03em; line-height: 1;
+  font-size: clamp(1.9rem, 10.2vw, 3.4rem); color: #F2EDE4;
+  opacity: 0; transform: translateY(18px);
+  transition: opacity .5s ease, transform .5s cubic-bezier(.22,.8,.28,1);
+}
+.nav-sheet.is-open .nav-sheet-link { opacity: 1; transform: none; }
+.nav-sheet-link:nth-child(1) { transition-delay: .06s; }
+.nav-sheet-link:nth-child(2) { transition-delay: .12s; }
+.nav-sheet-link:nth-child(3) { transition-delay: .18s; }
+.nav-sheet-link:nth-child(4) { transition-delay: .24s; }
+.nav-sheet-link .nav-num { font-size: 12px; color: #D6461F; opacity: 1; }
+.nav-sheet-mail {
+  display: inline-block; margin-top: 2.2rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 12px; letter-spacing: .18em; color: rgba(242,237,228,.6);
 }
 
 /* reveal: set by GSAP, but safe if JS never runs */

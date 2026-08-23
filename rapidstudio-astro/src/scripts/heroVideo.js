@@ -131,12 +131,39 @@ export function createHeroVideo(video, opts = {}) {
     addEventListener('touchstart', prime, { once: true, passive: true });
   }
 
-  // The last beat pushes toward the open aperture. Scaling the element itself
-  // keeps it on the compositor — no repaint, no decode — so it stays smooth
-  // even while seeks are still landing.
-  function push(k) {
-    video.style.transform = k > 1.0001 ? `scale(${k})` : '';
+  // ---- transform ----
+  // Two things drive it: the closing dive toward the open aperture, and an idle
+  // float while the rig is parked at the top. They compose into one string so
+  // neither clobbers the other, and it all stays on the compositor — no
+  // repaint, no decode — so it holds up while seeks are still landing.
+  let scale = 1, fx = 0, fy = 0, fs = 1, lastT = '';
+  function applyTransform() {
+    const t = (fx || fy ? `translate3d(${fx.toFixed(2)}px, ${fy.toFixed(2)}px, 0) ` : '') +
+              (scale * fs > 1.0001 ? `scale(${(scale * fs).toFixed(4)})` : '');
+    if (t !== lastT) { video.style.transform = t; lastT = t; }
   }
 
-  return { start, seek, push, get duration() { return duration; } };
+  function push(k) { scale = k; applyTransform(); }
+
+  // A locked-off plate is a photograph, not a shot. A slow, barely-there breath
+  // on two different periods keeps it alive while nobody is scrolling, and it
+  // gets out of the way the moment the footage has motion of its own.
+  let floatAmp = 1, floating = false;
+  function floatTick(now) {
+    if (!floating) return;
+    fx = Math.sin(now / 4100) * 7 * floatAmp;
+    fy = Math.cos(now / 5300) * 5 * floatAmp;
+    fs = 1 + 0.006 * (1 + Math.sin(now / 6700)) * floatAmp;
+    applyTransform();
+    requestAnimationFrame(floatTick);
+  }
+  function setFloat(amount) {
+    floatAmp = amount;
+    if (amount > 0.002 && !floating) { floating = true; requestAnimationFrame(floatTick); }
+    else if (amount <= 0.002 && floating) {
+      floating = false; fx = 0; fy = 0; fs = 1; applyTransform();
+    }
+  }
+
+  return { start, seek, push, setFloat, get duration() { return duration; } };
 }

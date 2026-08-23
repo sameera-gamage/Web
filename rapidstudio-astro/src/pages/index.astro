@@ -40,26 +40,59 @@ const faqs = [
   description="An independent studio running search, paid media, social, brand, film and photography for businesses that would rather hire one team than five."
 >
 
-  <!-- ══ nav ══ -->
-  <header class="fixed inset-x-0 top-0 z-50 mix-blend-difference">
-    <div class="edge flex items-center justify-between py-6">
-      <a href="#top" class="font-display text-[17px] font-extrabold tracking-tight text-bone">
-        Rapid<span class="text-rust">•</span>Studio
+  <!--
+    ══ nav ══
+    A floating rig rather than a bar: a wordmark plate on the left and a glass
+    capsule of links on the right, both set in by the same margin as the hero
+    card so they read as parts of one frame.
+
+    It inverts on its own. Over the hero the page is ink and the nav is bone;
+    from the work section down the page is bone and the nav flips to ink. That
+    used to be mix-blend-difference, which is free but rules out the blur — so
+    the state is now driven off the hero's own scroll trigger instead.
+  -->
+  <header id="nav" class="nav pointer-events-none fixed inset-x-0 top-0 z-50">
+    <div class="nav-in flex items-center justify-between gap-4">
+      <a href="#top" class="nav-mark pointer-events-auto">
+        <span class="nav-dot" aria-hidden="true"></span>
+        <span>Rapid<span class="nav-sep">•</span>Studio</span>
       </a>
-      <nav class="hidden items-center gap-9 md:flex">
-        {['Work','Studio','Process','Contact'].map((l) => (
-          <a href={`#${l.toLowerCase()}`} class="ulink font-mono text-[11px] uppercase tracking-[0.2em] text-bone">{l}</a>
+
+      <nav class="nav-pill pointer-events-auto hidden md:flex" aria-label="Primary">
+        {['Work','Studio','Process'].map((l, i) => (
+          <a href={`#${l.toLowerCase()}`} class="nav-link">
+            <span class="nav-num">{String(i + 1).padStart(2, '0')}</span>
+            <span>{l}</span>
+          </a>
         ))}
+        <a href="#contact" class="nav-cta">Start a brief</a>
       </nav>
-      <a href="#contact" class="font-mono text-[11px] uppercase tracking-[0.2em] text-bone md:hidden">Contact</a>
+
+      <button id="nav-toggle" class="nav-burger pointer-events-auto md:hidden"
+              aria-expanded="false" aria-controls="nav-sheet">
+        <span class="nav-burger-lines" aria-hidden="true"><i></i><i></i></span>
+        <span class="nav-burger-label">Menu</span>
+      </button>
     </div>
   </header>
+
+  <!-- full-screen menu for phones -->
+  <div id="nav-sheet" class="nav-sheet" hidden>
+    <nav class="nav-sheet-in" aria-label="Primary, mobile">
+      {['Work','Studio','Process','Contact'].map((l, i) => (
+        <a href={`#${l.toLowerCase()}`} class="nav-sheet-link">
+          <span class="nav-num">{String(i + 1).padStart(2, '0')}</span>{l}
+        </a>
+      ))}
+      <a href="mailto:info@rapidsolutions.live" class="nav-sheet-mail">info@rapidsolutions.live</a>
+    </nav>
+  </div>
 
   <main id="main">
 
     <!-- ══ the rig ══ -->
-    <section id="top" class="relative" style="height:260vh">
-      <div class="sticky top-0 h-screen overflow-hidden bg-ink">
+    <section id="top" class="relative" style="height:300vh">
+      <div id="hero-frame" class="hero-frame bg-ink">
         <!--
           Real footage, not a drawing. Scroll scrubs it: the camera turns to
           face you, then the iris opens. preload="none" keeps the megabyte off
@@ -83,9 +116,26 @@ const faqs = [
         </video>
         </div>
 
+        <!--
+          Smoke. The plate has haze baked in but it is frozen, so while the rig
+          is parked at the top two slow drifting fields ride over it — warm off
+          the key on the right, cool off the rim on the left. They screen in, so
+          they only ever add light, and they retire once the scrub takes over
+          and the real footage has motion of its own.
+        -->
+        <div id="hero-smoke" class="hero-smoke pointer-events-none absolute inset-0">
+          <span class="smoke smoke-warm"></span>
+          <span class="smoke smoke-cool"></span>
+        </div>
+
         <!-- corners pulled down so the copy always has something to sit on -->
         <div class="pointer-events-none absolute inset-0 bg-[radial-gradient(115%_85%_at_50%_45%,transparent_35%,rgba(18,16,14,.72)_100%)]"></div>
         <div id="hero-scrim" class="hero-scrim pointer-events-none absolute inset-0"></div>
+
+        <!-- Inside the barrel. Not flat black: a little of the key light still
+             reaches down the tube, which gives the dive somewhere to land and
+             the bone section below something to emerge from. -->
+        <div id="hero-well" class="hero-well pointer-events-none absolute inset-0 opacity-0"></div>
 
         <!-- opening frame: top-aligned on phones so the rig sits clear below it -->
         <div id="hero-a" class="pointer-events-none absolute inset-0 flex items-start pt-[19vh] md:items-center md:pt-0">
@@ -388,44 +438,131 @@ const faqs = [
       //   0.00 - 0.50  the body turns, bringing the lens round to face us
       //   0.50 - 0.62  square on, the iris still closed
       //   0.62 - 1.00  the blades retract and the aperture opens
-      let lastA = -1, lastM = -1, lastB = -1, lastC = -1, lastS = -1, lastK = -1;
+      const smoke = document.getElementById('hero-smoke');
+      const well = document.getElementById('hero-well');
+      const frame = document.getElementById('hero-frame');
+
+      const set = (el, prop, v, key) => { if (state[key] !== v) { el.style[prop] = v; state[key] = v; } };
+      const state = {};
+
       function paintCopy(v) {
         const a = 1 - ease(0.06, 0.30, v);   // opening copy leaves as the turn starts
         const m = ease(0.32, 0.44, v) * (1 - ease(0.58, 0.68, v));  // trades, over the turn
-        const b = ease(0.72, 0.92, v);       // closing copy lands on the open iris
+        const b = ease(0.70, 0.86, v) * (1 - ease(0.93, 0.99, v));  // lands on the open iris, gone before the dive
         const c = 1 - span(0, 0.08, v);      // scroll cue
         const s = 1 - 0.75 * ease(0.10, 0.45, v);  // scrim lifts off the footage
-        const k = 1 + 0.34 * ease(0.86, 1, v);     // final push toward the glass
+        const sm = 1 - ease(0.05, 0.26, v);  // smoke retires once the plate moves
 
-        if (a !== lastA) { heroA.style.opacity = a; heroA.style.transform = `translateY(${(1 - a) * -40}px)`; lastA = a; }
-        if (m !== lastM) { heroM.style.opacity = m; heroM.style.transform = `translateY(${(1 - m) * 18}px)`; lastM = m; }
-        if (b !== lastB) { heroB.style.opacity = b; heroB.style.transform = `translateY(${(1 - b) * 30}px)`; lastB = b; }
-        if (c !== lastC) { cue.style.opacity = c; lastC = c; }
-        if (s !== lastS) { scrim.style.opacity = s; lastS = s; }
-        if (k !== lastK) { rig.push(k); lastK = k; }
+        // The dive. It runs long and accelerates hard: by the end the aperture
+        // is wider than the screen and we are inside the barrel, so the card
+        // sheds its inset and goes full-bleed exactly as we pass through.
+        const dive = ease(0.80, 1, v);
+        const k = 1 + 6.2 * dive * dive;
+        const w = ease(0.90, 1, v);          // and the far side of the glass is dark
+        const open = ease(0.86, 1, v);       // card -> full bleed
+
+        set(heroA, 'opacity', a, 'a');
+        set(heroA, 'transform', `translateY(${((1 - a) * -40).toFixed(1)}px)`, 'at');
+        set(heroM, 'opacity', m, 'm');
+        set(heroM, 'transform', `translateY(${((1 - m) * 18).toFixed(1)}px)`, 'mt');
+        set(heroB, 'opacity', b, 'b');
+        set(heroB, 'transform', `translateY(${((1 - b) * 30).toFixed(1)}px)`, 'bt');
+        set(cue, 'opacity', c, 'c');
+        set(scrim, 'opacity', s, 's');
+        set(smoke, 'opacity', sm, 'sm');
+        set(well, 'opacity', w, 'w');
+
+        if (state.k !== k) { rig.push(k); state.k = k; }
+        if (state.sm2 !== sm) { rig.setFloat(sm); state.sm2 = sm; }
+        if (state.o !== open) {
+          // Growing the card by scale rather than by shrinking its margins: the
+          // margins would relayout the video — and so re-derive its object-fit
+          // crop — on every scroll frame. The card is inset by the same amount
+          // on all four sides, so scaling from the centre by exactly
+          // viewport/(viewport - 2*inset) lands its edges on the viewport edges.
+          set(frame, 'transform', `translateZ(0) scale(${(1 + (SX - 1) * open).toFixed(4)}, ${(1 + (SY - 1) * open).toFixed(4)})`, 'ft');
+          set(frame, 'borderRadius', `${(BASE_RADIUS * (1 - open)).toFixed(1)}px`, 'fr');
+          state.o = open;
+        }
       }
+      const readPx = (n) => parseFloat(getComputedStyle(document.documentElement).getPropertyValue(n)) || 0;
+      let BASE_INSET = 12, BASE_RADIUS = 26, SX = 1, SY = 1;
+      function measureFrame() {
+        BASE_INSET = readPx('--hero-inset') || 12;
+        BASE_RADIUS = readPx('--hero-radius') || 26;
+        SX = innerWidth / Math.max(1, innerWidth - BASE_INSET * 2);
+        SY = innerHeight / Math.max(1, innerHeight - BASE_INSET * 2);
+      }
+      measureFrame();
 
       const rig = createHeroVideo(video);
 
       if (reduced) {
-        // no pin, no scrub: the poster frame is the hero and the copy simply sits
+        // no pin, no scrub, no drift: the poster frame is the hero and the copy sits
         heroA.style.opacity = 1;
         heroB.style.opacity = 0;
         scrim.style.opacity = 1;
+        smoke.style.opacity = 0;
       } else {
+        let progress = 0;
         rig.start();
         ScrollTrigger.create({
           trigger: '#top',
           start: 'top top',
           end: 'bottom bottom',
           scrub: true,
-          onUpdate: (self) => { rig.seek(self.progress); paintCopy(self.progress); },
+          onUpdate: (self) => { progress = self.progress; rig.seek(progress); paintCopy(progress); },
         });
         paintCopy(0);
+        // the full-bleed scale is derived from the viewport, so it has to be
+        // re-derived when the viewport changes — and repainted where we stand
+        addEventListener('resize', () => { measureFrame(); state.o = -1; paintCopy(progress); });
 
         // headline lines lift in on load
         gsap.from('.ln', { yPercent: 115, duration: 1.15, ease: 'expo.out', stagger: 0.09 });
       }
+    }
+
+    /* ---- nav ----
+       It carries two colourways and swaps at the moment the page under it turns
+       from the ink hero to the bone work section. */
+    const nav = document.getElementById('nav');
+    const navToggle = document.getElementById('nav-toggle');
+    const navSheet = document.getElementById('nav-sheet');
+
+    if (nav) {
+      const top = document.getElementById('top');
+      const onPaper = () => {
+        // the hero card ends where its section does; below that the page is bone
+        const b = top.getBoundingClientRect().bottom;
+        nav.classList.toggle('is-paper', b <= 72);
+      };
+      onPaper();
+      addEventListener('scroll', onPaper, { passive: true });
+      addEventListener('resize', onPaper);
+    }
+
+    if (navToggle && navSheet) {
+      let open = false;
+      const setOpen = (v) => {
+        open = v;
+        navToggle.setAttribute('aria-expanded', String(v));
+        if (v) {
+          navSheet.hidden = false;
+          // one frame with the element laid out, so the transition has a start
+          requestAnimationFrame(() => navSheet.classList.add('is-open'));
+          document.body.style.overflow = 'hidden';
+        } else {
+          navSheet.classList.remove('is-open');
+          document.body.style.overflow = '';
+          setTimeout(() => { if (!open) navSheet.hidden = true; }, 450);
+        }
+      };
+      navToggle.addEventListener('click', () => setOpen(!open));
+      navSheet.addEventListener('click', (e) => {
+        if (e.target.closest('a')) setOpen(false);
+      });
+      addEventListener('keydown', (e) => { if (e.key === 'Escape' && open) setOpen(false); });
     }
 
     /* ---- reveals ---- */
