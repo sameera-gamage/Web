@@ -485,8 +485,8 @@ const faqs = [
        actually arrived. It clears when the footage can be scrubbed, and it has
        a hard ceiling so a stalled network can never lock anyone out. */
     const boot = document.getElementById('boot');
-    function runBoot(vid) {
-      if (!boot) return () => {};
+    function runBoot(vid, onClear) {
+      if (!boot) { onClear && onClear(); return () => {}; }
       const fill = document.getElementById('boot-fill');
       const pct = document.getElementById('boot-pct');
       const what = document.getElementById('boot-what');
@@ -502,6 +502,9 @@ const faqs = [
         setTimeout(() => {
           boot.classList.add('is-done');
           document.body.style.overflow = '';
+          // the entrance runs WITH the curtain, not after it, so the camera is
+          // already moving by the time anyone can see it
+          onClear && onClear();
           setTimeout(() => { boot.hidden = true; }, 750);
         }, 260);
       };
@@ -621,10 +624,13 @@ const faqs = [
         heroB.style.opacity = 0;
         scrim.style.opacity = 1;
         smoke.style.opacity = 0;
-        runBoot(null)();          // nothing to wait for, so do not make anyone wait
+        runBoot(null, null)();    // nothing to wait for, so do not make anyone wait
       } else {
         let progress = 0;
-        const bootDone = runBoot(video);
+        const bootDone = runBoot(video, () => {
+          rig.intro();
+          gsap.from('.ln', { yPercent: 115, duration: 1.15, ease: 'expo.out', stagger: 0.09 });
+        });
         rig.start();
         // if the clip cannot be fetched at all, the page must still open
         video.addEventListener('error', () => bootDone(), { once: true });
@@ -639,9 +645,6 @@ const faqs = [
         // the full-bleed scale is derived from the viewport, so it has to be
         // re-derived when the viewport changes — and repainted where we stand
         addEventListener('resize', () => { measureFrame(); state.o = -1; paintCopy(progress); });
-
-        // headline lines lift in on load
-        gsap.from('.ln', { yPercent: 115, duration: 1.15, ease: 'expo.out', stagger: 0.09 });
       }
     }
 

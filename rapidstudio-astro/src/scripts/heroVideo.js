@@ -133,28 +133,36 @@ export function createHeroVideo(video, opts = {}) {
   }
 
   // ---- transform ----
-  // Two things drive it: the closing dive toward the open aperture, and an idle
-  // float while the rig is parked at the top. They compose into one string so
-  // neither clobbers the other, and it all stays on the compositor — no
-  // repaint, no decode — so it holds up while seeks are still landing.
-  let scale = 1, fx = 0, fy = 0, fs = 1, lastT = '';
+  // Three things drive it: the entrance that runs once the loader clears, an
+  // idle float while the rig is parked at the top, and the closing dive toward
+  // the open aperture. They compose into one string so none clobbers another,
+  // and it all stays on the compositor — no repaint, no decode — so it holds up
+  // while seeks are still landing.
+  let scale = 1;                       // the dive
+  let fx = 0, fy = 0, fs = 1;          // the float
+  let ix = 0, iy = 0, is = 1;          // the entrance
+  let lastT = '';
+
   function applyTransform() {
-    const t = (fx || fy ? `translate3d(${fx.toFixed(2)}px, ${fy.toFixed(2)}px, 0) ` : '') +
-              (scale * fs > 1.0001 ? `scale(${(scale * fs).toFixed(4)})` : '');
+    const tx = fx + ix, ty = fy + iy, k = scale * fs * is;
+    const t = (Math.abs(tx) > 0.01 || Math.abs(ty) > 0.01
+                ? `translate3d(${tx.toFixed(2)}px, ${ty.toFixed(2)}px, 0) ` : '') +
+              (k > 1.0001 ? `scale(${k.toFixed(4)})` : '');
     if (t !== lastT) { video.style.transform = t; lastT = t; }
   }
 
   function push(k) { scale = k; applyTransform(); }
 
-  // A locked-off plate is a photograph, not a shot. A slow, barely-there breath
-  // on two different periods keeps it alive while nobody is scrolling, and it
-  // gets out of the way the moment the footage has motion of its own.
+  // A locked-off plate is a photograph, not a shot. Two slow periods that do not
+  // divide into each other, so the drift never visibly repeats, and enough
+  // amplitude to actually read at desk distance — the old seven pixels on a
+  // 1440-wide screen was motion you had to be told about.
   let floatAmp = 1, floating = false;
   function floatTick(now) {
     if (!floating) return;
-    fx = Math.sin(now / 4100) * 7 * floatAmp;
-    fy = Math.cos(now / 5300) * 5 * floatAmp;
-    fs = 1 + 0.006 * (1 + Math.sin(now / 6700)) * floatAmp;
+    fx = Math.sin(now / 4300) * 19 * floatAmp;
+    fy = Math.cos(now / 5900) * 13 * floatAmp;
+    fs = 1 + 0.011 * (1 + Math.sin(now / 7300)) * floatAmp;
     applyTransform();
     requestAnimationFrame(floatTick);
   }
@@ -166,5 +174,23 @@ export function createHeroVideo(video, opts = {}) {
     }
   }
 
-  return { start, seek, push, setFloat, get duration() { return duration; } };
+  // The entrance. The loader lifts on a frame that has been sitting still behind
+  // it, which lands flat; this settles the camera into place instead — a slow
+  // release out of a slight push, handed straight over to the float.
+  function intro(ms = 2000) {
+    const t0 = performance.now();
+    const step = (now) => {
+      const u = Math.min(1, (now - t0) / ms);
+      const e = 1 - Math.pow(1 - u, 4);        // quartic out: fast release, long settle
+      is = 1.075 - 0.075 * e;
+      iy = 26 * (1 - e);
+      ix = -14 * (1 - e);
+      applyTransform();
+      if (u < 1) requestAnimationFrame(step);
+      else { is = 1; ix = 0; iy = 0; applyTransform(); }
+    };
+    requestAnimationFrame(step);
+  }
+
+  return { start, seek, push, setFloat, intro, get duration() { return duration; } };
 }

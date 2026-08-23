@@ -130,24 +130,27 @@
   will-change: transform;
 }
 .smoke-warm {
-  top: -18%; right: -22%; width: 78%; height: 116%;
-  background: radial-gradient(closest-side, rgba(214,90,31,.30), rgba(233,162,39,.10) 55%, transparent 78%);
-  animation: drift-warm 41s ease-in-out infinite;
+  top: -20%; right: -24%; width: 84%; height: 122%;
+  background: radial-gradient(closest-side, rgba(214,90,31,.40), rgba(233,162,39,.14) 55%, transparent 80%);
+  animation: drift-warm 37s ease-in-out infinite;
 }
 .smoke-cool {
-  bottom: -26%; left: -20%; width: 66%; height: 96%;
-  background: radial-gradient(closest-side, rgba(143,184,201,.20), rgba(143,184,201,.06) 55%, transparent 78%);
-  animation: drift-cool 53s ease-in-out infinite;
+  bottom: -28%; left: -22%; width: 72%; height: 104%;
+  /* the teal sampled off the barrel's rim light, not the old dusty blue */
+  background: radial-gradient(closest-side, rgba(20,140,146,.30), rgba(81,215,223,.08) 55%, transparent 80%);
+  animation: drift-cool 47s ease-in-out infinite;
 }
+/* Periods that do not divide into one another, and travel large enough to read
+   as weather rather than a wobble. */
 @keyframes drift-warm {
   0%,100% { transform: translate3d(0,0,0) scale(1); }
-  33%     { transform: translate3d(-5%,4%,0) scale(1.12); }
-  66%     { transform: translate3d(3%,-3%,0) scale(.94); }
+  33%     { transform: translate3d(-9%,7%,0) scale(1.18); }
+  66%     { transform: translate3d(6%,-5%,0) scale(.90); }
 }
 @keyframes drift-cool {
   0%,100% { transform: translate3d(0,0,0) scale(1); }
-  40%     { transform: translate3d(6%,-5%,0) scale(1.15); }
-  75%     { transform: translate3d(-4%,3%,0) scale(.96); }
+  40%     { transform: translate3d(11%,-8%,0) scale(1.22); }
+  75%     { transform: translate3d(-7%,5%,0) scale(.93); }
 }
 
 .hero-well {
