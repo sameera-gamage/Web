@@ -56,6 +56,40 @@
   .ulink:hover::after { transform: scaleX(1); transform-origin: left; }
 }
 
+/* ---- hero footage ----
+   Landscape: the clip simply covers the viewport.
+
+   Portrait is the awkward case. Covering a 9:19.5 phone with a 16:9 frame
+   would crop away everything but a strip of barrel; letterboxing the whole
+   frame leaves a 219px band adrift in the middle of the screen. So the stage
+   takes a fixed slice of the height and the footage covers THAT — a moderate
+   side crop that loses only background haze — and its top and bottom edges are
+   masked off so the band bleeds into the ink instead of ending on a seam. */
+.hero-vid {
+  object-fit: cover;
+  will-change: transform;
+  background: #12100E;
+}
+/* the copy sits left of the camera on a wide screen and above it on a phone,
+   so the scrim that keeps it readable has to turn with the layout */
+.hero-scrim {
+  background: linear-gradient(105deg, rgba(18,16,14,.86) 0%, rgba(18,16,14,.42) 48%, transparent 78%);
+}
+
+@media (max-aspect-ratio: 3/4) {
+  .hero-scrim {
+    background: linear-gradient(to bottom, rgba(18,16,14,.92) 0%, rgba(18,16,14,.55) 42%, transparent 70%);
+  }
+  .hero-stage {
+    top: 46%;
+    bottom: auto;
+    height: 54vh;
+    transform: translateY(-50%);
+    -webkit-mask-image: linear-gradient(to bottom, transparent, #000 13%, #000 87%, transparent);
+            mask-image: linear-gradient(to bottom, transparent, #000 13%, #000 87%, transparent);
+  }
+}
+
 /* reveal: set by GSAP, but safe if JS never runs */
 .rv { opacity: 0; transform: translateY(18px); }
 .no-js .rv, .rv.shown { opacity: 1; transform: none; }
@@ -63,4 +97,6 @@
 @media (prefers-reduced-motion: reduce) {
   * { animation-duration: .001ms !important; transition-duration: .001ms !important; }
   .rv { opacity: 1 !important; transform: none !important; }
+  /* nothing is being scrubbed, so don't make anyone scroll past 260vh of it */
+  #top { height: 100vh !important; }
 }

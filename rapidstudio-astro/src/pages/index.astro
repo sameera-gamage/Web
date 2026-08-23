@@ -60,7 +60,32 @@ const faqs = [
     <!-- ══ the rig ══ -->
     <section id="top" class="relative" style="height:260vh">
       <div class="sticky top-0 h-screen overflow-hidden bg-ink">
-        <canvas id="cam" class="absolute inset-0 h-full w-full"></canvas>
+        <!--
+          Real footage, not a drawing. Scroll scrubs it: the camera turns to
+          face you, then the iris opens. preload="none" keeps the megabyte off
+          the critical path — the rig asks for it once it knows the viewport.
+        -->
+        <div class="hero-stage absolute inset-0">
+        <video
+          id="cam"
+          class="hero-vid h-full w-full"
+          poster="/hero-poster.jpg"
+          preload="none"
+          muted
+          playsinline
+          disablepictureinpicture
+          aria-hidden="true"
+        >
+          {/* VP9 first: smaller, and it covers the Chromium builds that ship
+              without the H.264 decoder. H.264 carries Safari and the rest. */}
+          <source src="/hero-camera-720.webm" type="video/webm" />
+          <source src="/hero-camera-720.mp4" type="video/mp4" />
+        </video>
+        </div>
+
+        <!-- corners pulled down so the copy always has something to sit on -->
+        <div class="pointer-events-none absolute inset-0 bg-[radial-gradient(115%_85%_at_50%_45%,transparent_35%,rgba(18,16,14,.72)_100%)]"></div>
+        <div id="hero-scrim" class="hero-scrim pointer-events-none absolute inset-0"></div>
 
         <!-- opening frame: top-aligned on phones so the rig sits clear below it -->
         <div id="hero-a" class="pointer-events-none absolute inset-0 flex items-start pt-[19vh] md:items-center md:pt-0">
@@ -76,6 +101,20 @@ const faqs = [
                 people, in the same building, on the same plan.
               </p>
             </div>
+          </div>
+        </div>
+
+        <!-- middle frame: the turn is long and the footage is dark there, so the
+             six trades tick past while the camera comes round -->
+        <div id="hero-m" class="pointer-events-none absolute inset-x-0 bottom-[13vh] opacity-0">
+          <div class="edge w-full max-w-edge">
+            <ul class="flex flex-wrap gap-x-7 gap-y-2 font-mono text-[11px] uppercase tracking-[0.22em] text-bone/70">
+              {services.map((s) => (
+                <li class="flex items-center gap-2.5">
+                  <span class="text-rust">{s.n}</span>{s.t}
+                </li>
+              ))}
+            </ul>
           </div>
         </div>
 
@@ -309,7 +348,7 @@ const faqs = [
     import Lenis from 'lenis';
     import { gsap } from 'gsap';
     import { ScrollTrigger } from 'gsap/ScrollTrigger';
-    import { createCamera } from '../scripts/camera.js';
+    import { createHeroVideo } from '../scripts/heroVideo.js';
 
     gsap.registerPlugin(ScrollTrigger);
 
@@ -332,63 +371,61 @@ const faqs = [
     }
 
     /* ---- the camera rig ---- */
-    const canvas = document.getElementById('cam');
-    if (canvas) {
-      const photo = new Image();
-      photo.src = '/work/w1.webp';
-
-      // the two halves of the same studio frame; the rig cross-dissolves them
-      // so the push into the glass stays sharp at full zoom
-      const wide = new Image();
-      wide.src = '/cam-wide.webp';
-      const lens = new Image();
-      lens.src = '/cam-lens.webp';
-
-      const cam = createCamera(canvas, { photo, wide, lens });
-      let p = 0;
-      let raf = null;
-
-      const paint = (t) => { cam.render(p, t); raf = null; };
-      const request = () => { if (raf === null) raf = requestAnimationFrame(paint); };
-
-      photo.onload = request;
-      wide.onload = request;
-      lens.onload = request;
-      addEventListener('resize', () => { cam.resize(); request(); });
-
-      // one source of truth: the rig's progress drives the canvas AND the copy,
-      // so the beats can never drift apart from percentage maths
+    const video = document.getElementById('cam');
+    if (video) {
       const heroA = document.getElementById('hero-a');
+      const heroM = document.getElementById('hero-m');
       const heroB = document.getElementById('hero-b');
+      const scrim = document.getElementById('hero-scrim');
       const cue = document.getElementById('scroll-cue');
       const span = (a, b, x) => Math.min(1, Math.max(0, (x - a) / (b - a)));
+      const ease = (a, b, x) => { const u = span(a, b, x); return u * u * (3 - 2 * u); };
 
-      let lastA = -1, lastB = -1, lastC = -1;
+      // One source of truth. The scroll progress drives the footage AND every
+      // overlay, so the copy can never drift out of step with the picture.
+      //
+      // Where the beats fall in the clip:
+      //   0.00 - 0.50  the body turns, bringing the lens round to face us
+      //   0.50 - 0.62  square on, the iris still closed
+      //   0.62 - 1.00  the blades retract and the aperture opens
+      let lastA = -1, lastM = -1, lastB = -1, lastC = -1, lastS = -1, lastK = -1;
       function paintCopy(v) {
-        const a = 1 - span(0.14, 0.42, v);          // gone before the push begins
-        const b = span(0.78, 0.94, v);              // lands as the aperture clears
-        const c = 1 - span(0.0, 0.10, v);
-        if (a !== lastA) { heroA.style.opacity = a; heroA.style.transform = `translateY(${(1 - a) * -36}px)`; lastA = a; }
-        if (b !== lastB) { heroB.style.opacity = b; heroB.style.transform = `translateY(${(1 - b) * 28}px)`; lastB = b; }
+        const a = 1 - ease(0.06, 0.30, v);   // opening copy leaves as the turn starts
+        const m = ease(0.32, 0.44, v) * (1 - ease(0.58, 0.68, v));  // trades, over the turn
+        const b = ease(0.72, 0.92, v);       // closing copy lands on the open iris
+        const c = 1 - span(0, 0.08, v);      // scroll cue
+        const s = 1 - 0.75 * ease(0.10, 0.45, v);  // scrim lifts off the footage
+        const k = 1 + 0.34 * ease(0.86, 1, v);     // final push toward the glass
+
+        if (a !== lastA) { heroA.style.opacity = a; heroA.style.transform = `translateY(${(1 - a) * -40}px)`; lastA = a; }
+        if (m !== lastM) { heroM.style.opacity = m; heroM.style.transform = `translateY(${(1 - m) * 18}px)`; lastM = m; }
+        if (b !== lastB) { heroB.style.opacity = b; heroB.style.transform = `translateY(${(1 - b) * 30}px)`; lastB = b; }
         if (c !== lastC) { cue.style.opacity = c; lastC = c; }
+        if (s !== lastS) { scrim.style.opacity = s; lastS = s; }
+        if (k !== lastK) { rig.push(k); lastK = k; }
       }
 
-      ScrollTrigger.create({
-        trigger: '#top',
-        start: 'top top',
-        end: 'bottom bottom',
-        scrub: true,
-        onUpdate: (self) => { p = self.progress; paintCopy(p); request(); },
-      });
-      paintCopy(0);
+      const rig = createHeroVideo(video);
 
-      // idle breathing while the rig is parked at the top
-      if (!reduced) gsap.ticker.add(() => { if (p < 0.22) request(); });
+      if (reduced) {
+        // no pin, no scrub: the poster frame is the hero and the copy simply sits
+        heroA.style.opacity = 1;
+        heroB.style.opacity = 0;
+        scrim.style.opacity = 1;
+      } else {
+        rig.start();
+        ScrollTrigger.create({
+          trigger: '#top',
+          start: 'top top',
+          end: 'bottom bottom',
+          scrub: true,
+          onUpdate: (self) => { rig.seek(self.progress); paintCopy(self.progress); },
+        });
+        paintCopy(0);
 
-      request();
-
-      // headline lines lift in on load
-      if (!reduced) gsap.from('.ln', { yPercent: 115, duration: 1.15, ease: 'expo.out', stagger: 0.09 });
+        // headline lines lift in on load
+        gsap.from('.ln', { yPercent: 115, duration: 1.15, ease: 'expo.out', stagger: 0.09 });
+      }
     }
 
     /* ---- reveals ---- */
