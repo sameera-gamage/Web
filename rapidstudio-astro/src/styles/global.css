@@ -113,6 +113,26 @@
    it; the hero card is z-41 and covers it until the hole is punched */
 .work-under { margin-top: -100vh; }
 
+/* The mat the card sits in.
+   Pulling the roll up under the hero means it paints over everything in #top
+   except the card itself — including the twelve-pixel gutter round the card,
+   where you could suddenly read the next section's sprocket holes. This is an
+   opaque paper frame over that gutter: fixed, above the roll, and retired as
+   the card goes full bleed and the gutter stops existing.
+
+   Opaque rather than blurred on purpose — a backdrop blur still shows the
+   section underneath, just softer, and it costs a compositing pass per frame
+   on the one element that is on screen the whole time. */
+.hero-mat {
+  position: fixed;
+  inset: 0;
+  z-index: 42;
+  pointer-events: none;
+  border: var(--hero-inset) solid #F2EDE4;
+  border-radius: calc(var(--hero-radius) + var(--hero-inset));
+  will-change: opacity;
+}
+
 /* Sticky, so it tracks the viewport for the whole hero, and z-auto so the work
    section — which comes later in the document — paints over it. It only has to
    cover the sliver above the work section while that is still sliding up. */
@@ -325,6 +345,192 @@
   .frame-rebate { height: 18px; }
 }
 
+/* ---- case study ---- */
+.case {
+  position: fixed; inset: 0; z-index: 80;
+  display: flex; align-items: center; justify-content: center;
+  padding: clamp(10px, 2vw, 28px);
+}
+.case[hidden] { display: none; }
+
+.case-scrim {
+  position: absolute; inset: 0;
+  background: rgba(8,7,6,.86);
+  opacity: 0; transition: opacity .4s ease;
+}
+.case.is-open .case-scrim { opacity: 1; }
+
+.case-panel {
+  position: relative;
+  width: min(1180px, 100%);
+  max-height: 100%;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  background: #12100E;
+  color: #F2EDE4;
+  border: 1px solid rgba(242,237,228,.12);
+  border-radius: clamp(16px, 2vw, 26px);
+  padding: clamp(1.4rem, 3.4vw, 3rem);
+  opacity: 0;
+  transform: translateY(26px) scale(.985);
+  transition: opacity .45s ease, transform .55s cubic-bezier(.22,.8,.28,1);
+}
+.case.is-open .case-panel { opacity: 1; transform: none; }
+
+.case-x {
+  position: absolute; top: clamp(.9rem,2vw,1.5rem); right: clamp(.9rem,2vw,1.5rem);
+  z-index: 2;
+  width: 40px; height: 40px; border-radius: 999px;
+  border: 1px solid rgba(242,237,228,.22);
+  background: rgba(18,16,14,.6);
+  -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+}
+.case-x span {
+  position: absolute; left: 11px; top: 19px; width: 16px; height: 1.5px;
+  background: #F2EDE4; border-radius: 2px;
+}
+.case-x span:first-child { transform: rotate(45deg); }
+.case-x span + span { transform: rotate(-45deg); }
+.case-x:hover { background: #D6461F; border-color: #D6461F; }
+
+.case-eyebrow {
+  display: flex; flex-wrap: wrap; gap: .9rem; align-items: baseline;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 11px; letter-spacing: .2em; text-transform: uppercase;
+  color: rgba(242,237,228,.5);
+}
+.case-eyebrow em { font-style: normal; color: #E9A227; }
+.case-title {
+  margin-top: .7rem;
+  font-size: clamp(1.9rem, 5vw, 3.4rem);
+  color: #F2EDE4;
+  max-width: 22ch;
+}
+.case-client {
+  margin-top: .7rem; max-width: 46ch;
+  font-size: 15px; color: rgba(242,237,228,.62);
+}
+
+/* the gallery: native scroll-snap, so touch and trackpad behave without JS */
+.case-stage { margin-top: clamp(1.4rem, 3vw, 2.2rem); }
+.case-gallery {
+  display: flex; gap: 10px;
+  overflow-x: auto; overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  border-radius: 10px;
+  cursor: grab;
+}
+.case-gallery::-webkit-scrollbar { display: none; }
+.case-gallery.is-dragging { cursor: grabbing; scroll-snap-type: none; }
+.case-shot {
+  flex: 0 0 100%;
+  scroll-snap-align: center;
+  aspect-ratio: 16 / 10;
+  overflow: hidden; border-radius: 10px;
+  background: #0A0908;
+}
+.case-shot img {
+  width: 100%; height: 100%; object-fit: cover;
+  filter: contrast(1.1) saturate(.95) brightness(.96);
+  -webkit-user-drag: none; user-select: none;
+}
+@media (min-width: 900px) { .case-shot { flex-basis: 62%; } }
+
+.case-rail {
+  display: flex; align-items: center; gap: 1rem;
+  margin-top: .9rem;
+}
+.case-arrow {
+  width: 38px; height: 38px; border-radius: 999px;
+  border: 1px solid rgba(242,237,228,.22);
+  color: #F2EDE4; font-size: 15px; line-height: 1;
+  transition: background-color .25s ease, border-color .25s ease, color .25s ease;
+}
+.case-arrow:hover { background: #F2EDE4; color: #12100E; border-color: #F2EDE4; }
+.case-arrow[disabled] { opacity: .3; pointer-events: none; }
+.case-dots { display: flex; gap: 7px; }
+.case-dots i {
+  display: block; width: 22px; height: 2px; border-radius: 2px;
+  background: rgba(242,237,228,.22);
+  transition: background-color .3s ease;
+}
+.case-dots i.on { background: #D6461F; }
+
+.case-body {
+  display: grid; gap: clamp(1.4rem, 3vw, 2.4rem);
+  margin-top: clamp(1.6rem, 3.4vw, 2.6rem);
+  padding-top: clamp(1.4rem, 3vw, 2rem);
+  border-top: 1px solid rgba(242,237,228,.12);
+}
+@media (min-width: 820px) { .case-body { grid-template-columns: 1.2fr 1fr 1fr; } }
+.case-h {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 11px; letter-spacing: .2em; text-transform: uppercase;
+  color: rgba(242,237,228,.42); margin-bottom: .8rem;
+}
+.case-p { font-size: 15px; line-height: 1.65; color: rgba(242,237,228,.8); }
+.case-list { display: grid; gap: .55rem; }
+.case-list li {
+  position: relative; padding-left: 1.1rem;
+  font-size: 14px; line-height: 1.5; color: rgba(242,237,228,.8);
+}
+.case-list li::before {
+  content: ''; position: absolute; left: 0; top: .55em;
+  width: 5px; height: 5px; border-radius: 50%; background: #D6461F;
+}
+.case-result { display: grid; gap: 1rem; }
+.case-result div { display: flex; align-items: baseline; gap: .8rem; }
+.case-result dt {
+  font-family: 'Syne', ui-sans-serif, sans-serif; font-weight: 800;
+  font-size: clamp(1.3rem, 2.4vw, 1.9rem); color: #E9A227;
+  letter-spacing: -.02em; min-width: 4.5ch;
+}
+.case-result dd {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 11px; letter-spacing: .14em; text-transform: uppercase;
+  color: rgba(242,237,228,.5);
+}
+
+.case-foot {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 1rem;
+  margin-top: clamp(1.6rem, 3.4vw, 2.4rem);
+  padding-top: clamp(1.2rem, 2.6vw, 1.8rem);
+  border-top: 1px solid rgba(242,237,228,.12);
+}
+.case-step { text-align: left; max-width: 15rem; }
+.case-step-next { margin-left: auto; text-align: right; }
+.case-step-k {
+  display: block;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 10px; letter-spacing: .2em; text-transform: uppercase;
+  color: rgba(242,237,228,.42);
+}
+.case-step-t {
+  display: block; margin-top: .25rem;
+  font-family: 'Syne', ui-sans-serif, sans-serif; font-weight: 700; font-size: 15px;
+  color: rgba(242,237,228,.85);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.case-step:hover .case-step-t { color: #E9A227; }
+.case-cta {
+  order: 3; width: 100%;
+  display: inline-flex; justify-content: center;
+  padding: .85rem 1.4rem; border-radius: 999px;
+  background: #D6461F; color: #F2EDE4;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 11px; letter-spacing: .16em; text-transform: uppercase;
+}
+.case-cta:hover { background: #E9A227; color: #12100E; }
+@media (min-width: 640px) { .case-cta { order: 0; width: auto; } }
+
+/* the whole frame on the contact sheet is the hit target */
+.frame-open {
+  position: absolute; inset: 0; z-index: 2;
+  cursor: pointer; background: transparent; border: 0;
+}
+.frame-open:focus-visible { outline-offset: -4px; }
+
 /* ---- nav ----
    Two floating pieces set in on the same margin as the hero card. Colour is a
    single pair of custom properties so the whole rig inverts in one place when
@@ -452,6 +658,10 @@
   opacity: 0; transition: opacity .45s ease;
   display: flex; align-items: center;
 }
+/* display:flex above outranks the UA's [hidden]{display:none}, so without this
+   the closed sheet stays laid out — invisible at opacity 0, full-screen at
+   z-49, and swallowing every click on the page underneath it. */
+.nav-sheet[hidden] { display: none; }
 .nav-sheet.is-open { opacity: 1; }
 .nav-sheet-in { padding-inline: calc(var(--hero-inset) + 22px); width: 100%; }
 .nav-sheet-link {
@@ -485,6 +695,8 @@
   /* nothing is being scrubbed, so don't make anyone scroll past the pins */
   #top { height: 100vh !important; }
   #work { height: auto !important; margin-top: 0 !important; }
+  /* no overlap without the pin, so the gutter shows paper on its own */
+  .hero-mat { display: none; }
   #work-stage { position: static; height: auto; padding-block: 12vh; overflow: visible; }
   /* the reel is never going to travel, so lay the roll out as a sheet */
   .sheet { flex-wrap: wrap; justify-content: center; width: 100%; gap: 22px 3px; padding-inline: var(--edge); }

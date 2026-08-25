@@ -10,13 +10,59 @@ const services = [
   { n: '06', t: 'Photography',  d: 'Product frames people trust enough to put a card number in.',     k: 'Studio, location' },
 ];
 
+// Each frame on the contact sheet opens as a case study. `shots` is the gallery
+// inside it — currently drawn from the same six library frames, because six is
+// all the photography there is. Point each one at the real project's pictures
+// and nothing else here has to change.
 const work = [
-  { id: '001', img: '/work/w1.webp', t: 'Launch, start to finish', tag: 'Brand · Social', yr: '25' },
-  { id: '002', img: '/work/w2.webp', t: 'A film for a founder',    tag: 'Film',           yr: '25' },
-  { id: '003', img: '/work/w3.webp', t: 'Spend that paid back',    tag: 'Paid media',     yr: '24' },
-  { id: '004', img: '/work/w4.webp', t: 'Ranking for the hard one',tag: 'Search',         yr: '24' },
-  { id: '005', img: '/work/w5.webp', t: 'Shelf to screen',         tag: 'Photography',    yr: '24' },
-  { id: '006', img: '/work/w6.webp', t: 'A year of always-on',     tag: 'Social',         yr: '23' },
+  {
+    id: '001', img: '/work/w1.webp', t: 'Launch, start to finish', tag: 'Brand · Social', yr: '25',
+    client: 'Marrow & Co, a paper mill going direct',
+    brief: 'A hundred-year-old mill had been selling through three wholesalers and wanted its own front door. No brand to speak of, no photography, no list.',
+    did: ['Identity, palette and the type system', 'A stills library, shot over two days', 'Launch campaign across paid social and search'],
+    result: [['9 wks', 'brief to launch'], ['1,240', 'first-month orders'], ['£0', 'spent on wholesale margin']],
+    shots: ['/work/w1.webp', '/work/w5.webp', '/work/w3.webp'],
+  },
+  {
+    id: '002', img: '/work/w2.webp', t: 'A film for a founder', tag: 'Film', yr: '25',
+    client: 'Ridgeway Tools',
+    brief: 'The founder could hold a room and could not hold a camera. Everything on the site was written by someone who had never used the product.',
+    did: ['Two days on location in the workshop', 'A ninety-second cut and six verticals', 'Grade matched to the existing brand'],
+    result: [['92s', 'the main cut'], ['6', 'verticals from the same shoot'], ['3.1×', 'time on the product page']],
+    shots: ['/work/w2.webp', '/work/w6.webp', '/work/w4.webp'],
+  },
+  {
+    id: '003', img: '/work/w3.webp', t: 'Spend that paid back', tag: 'Paid media', yr: '24',
+    client: 'Halden Home',
+    brief: 'Eleven thousand a month going out across four platforms, and nobody in the building could say which of them was earning.',
+    did: ['Rebuilt tracking so the numbers could be trusted', 'Cut two platforms in the first fortnight', 'Rewrote the creative around what survived'],
+    result: [['-38%', 'spend'], ['+21%', 'revenue'], ['2 of 4', 'platforms kept']],
+    shots: ['/work/w3.webp', '/work/w1.webp', '/work/w6.webp'],
+  },
+  {
+    id: '004', img: '/work/w4.webp', t: 'Ranking for the hard one', tag: 'Search', yr: '24',
+    client: 'Peel & Stone',
+    brief: 'One search term the whole business depended on, and page four for two years running.',
+    did: ['Technical audit and a rebuild of the templates', 'Eleven pages written properly, not spun', 'Cleared a decade of redirect debt'],
+    result: [['#3', 'from page four'], ['7 mo', 'to get there'], ['+64%', 'non-brand traffic']],
+    shots: ['/work/w4.webp', '/work/w2.webp', '/work/w5.webp'],
+  },
+  {
+    id: '005', img: '/work/w5.webp', t: 'Shelf to screen', tag: 'Photography', yr: '24',
+    client: 'Ambit Skincare',
+    brief: 'Product frames shot on a phone against a bedsheet. The listing was fine. Nobody was buying.',
+    did: ['Studio days for forty-two SKUs', 'One lighting setup, held across the range', 'Retouch spec the client can hand to anyone'],
+    result: [['42', 'SKUs'], ['+28%', 'conversion'], ['1', 'lighting setup, reused since']],
+    shots: ['/work/w5.webp', '/work/w4.webp', '/work/w1.webp'],
+  },
+  {
+    id: '006', img: '/work/w6.webp', t: 'A year of always-on', tag: 'Social', yr: '23',
+    client: 'The Fold Bakery',
+    brief: 'Three sites, one oven, and a feed that went quiet every time it got busy.',
+    did: ['A weekly shoot rhythm the kitchen could actually keep', 'Twelve months planned a quarter ahead', 'Community handled by us, not a bot'],
+    result: [['52 wks', 'without a gap'], ['×4.6', 'followers'], ['18%', 'of covers booked from the feed']],
+    shots: ['/work/w6.webp', '/work/w3.webp', '/work/w2.webp'],
+  },
 ];
 
 const steps = [
@@ -104,6 +150,65 @@ const faqs = [
     </nav>
   </div>
 
+  <!--
+    ══ case study ══
+    The contact sheet is the index; this is the job itself. One panel, populated
+    from the work data — a gallery you can drag or arrow through, the brief, what
+    was actually done, and the numbers. Prev/next moves along the roll without
+    closing, so it reads as a portfolio rather than six separate popups.
+  -->
+  <div id="case" class="case" role="dialog" aria-modal="true" aria-labelledby="case-title" hidden>
+    <div class="case-scrim" data-case-close></div>
+
+    <article class="case-panel">
+      <button type="button" class="case-x" data-case-close aria-label="Close the case study">
+        <span aria-hidden="true"></span><span aria-hidden="true"></span>
+      </button>
+
+      <header class="case-head">
+        <p class="case-eyebrow">
+          <em id="case-id"></em><span id="case-tag"></span><span id="case-yr"></span>
+        </p>
+        <h2 id="case-title" class="case-title"></h2>
+        <p id="case-client" class="case-client"></p>
+      </header>
+
+      <div class="case-stage">
+        <div id="case-gallery" class="case-gallery" tabindex="0" aria-label="Project gallery, use the arrow keys"></div>
+        <div class="case-rail">
+          <button type="button" class="case-arrow" data-slide="-1" aria-label="Previous picture">←</button>
+          <span id="case-dots" class="case-dots" aria-hidden="true"></span>
+          <button type="button" class="case-arrow" data-slide="1" aria-label="Next picture">→</button>
+        </div>
+      </div>
+
+      <div class="case-body">
+        <div class="case-col">
+          <p class="case-h">The brief</p>
+          <p id="case-brief" class="case-p"></p>
+        </div>
+        <div class="case-col">
+          <p class="case-h">What we did</p>
+          <ul id="case-did" class="case-list"></ul>
+        </div>
+        <div class="case-col">
+          <p class="case-h">Where it landed</p>
+          <dl id="case-result" class="case-result"></dl>
+        </div>
+      </div>
+
+      <footer class="case-foot">
+        <button type="button" class="case-step" data-case-step="-1">
+          <span class="case-step-k">Previous</span><span id="case-prev" class="case-step-t"></span>
+        </button>
+        <a href="#contact" class="case-cta" data-case-close>Start a brief</a>
+        <button type="button" class="case-step case-step-next" data-case-step="1">
+          <span class="case-step-k">Next</span><span id="case-next" class="case-step-t"></span>
+        </button>
+      </footer>
+    </article>
+  </div>
+
   <main id="main">
 
     <!-- ══ the rig ══ -->
@@ -115,6 +220,7 @@ const faqs = [
         aperture opens, so the hole never lets the paper through.
       -->
       <div id="hero-bed" class="hero-bed" aria-hidden="true"></div>
+      <div id="hero-mat" class="hero-mat" aria-hidden="true"></div>
       <div id="hero-frame" class="hero-frame bg-ink">
         <!--
           Real footage, not a drawing. Scroll scrubs it: the camera turns to
@@ -233,7 +339,7 @@ const faqs = [
         <div class="edge w-full max-w-edge shrink-0">
           <div class="flex flex-wrap items-end justify-between gap-4 border-t border-bone/15 pt-6">
             <h2 class="text-bone text-[clamp(2.2rem,6vw,5rem)]">Selected work</h2>
-            <p class="label mb-2 text-bone/50">Roll 04 · 2023–25 · six keepers of thirty-one</p>
+            <p class="label mb-2 text-bone/50">Roll 04 · 2023–25 · pick a frame to see the job</p>
           </div>
         </div>
 
@@ -245,6 +351,8 @@ const faqs = [
                 <span class="frame-rebate frame-rebate-t" aria-hidden="true"></span>
                 <div class="frame-img">
                   <img src={w.img} alt={`${w.t}, ${w.tag}`} loading="lazy" decoding="async" />
+                  <button type="button" class="frame-open" data-case={i}
+                          aria-label={`Open the case study: ${w.t}`}></button>
                   {/* the grease-pencil ring a picture editor draws round a keeper */}
                   <svg class="frame-ring" viewBox="0 0 200 150" fill="none" aria-hidden="true">
                     <ellipse cx="100" cy="75" rx="86" ry="62" stroke="currentColor" stroke-width="2.6"
@@ -467,6 +575,12 @@ const faqs = [
     </footer>
   </main>
 
+  <script is:inline define:vars={{ WORK: work }}>
+    // the case-study copy, handed to the client as data rather than scraped
+    // back out of the DOM
+    window.__WORK = WORK;
+  </script>
+
   <script>
     import Lenis from 'lenis';
     import { gsap } from 'gsap';
@@ -480,6 +594,7 @@ const faqs = [
     /* ---- Lenis, wired into ScrollTrigger's clock ---- */
     if (!reduced) {
       const lenis = new Lenis({ duration: 1.05, smoothWheel: true });
+      window.__lenis = lenis;   // so the case study can pause the page behind it
       lenis.on('scroll', ScrollTrigger.update);
       gsap.ticker.add((t) => lenis.raf(t * 1000));
       gsap.ticker.lagSmoothing(0);
@@ -574,6 +689,7 @@ const faqs = [
       //   0.62 - 1.00  the blades retract and the aperture opens
       const smoke = document.getElementById('hero-smoke');
       const bedEl = document.getElementById('hero-bed');
+      const matEl = document.getElementById('hero-mat');
       const well = document.getElementById('hero-well');
       const frame = document.getElementById('hero-frame');
 
@@ -609,6 +725,7 @@ const faqs = [
         set(smoke, 'opacity', sm, 'sm');
         set(well, 'opacity', w, 'w');
         set(bedEl, 'opacity', bed, 'bed');
+        set(matEl, 'opacity', 1 - open, 'mat');
 
         if (state.k !== k) { rig.push(k); state.k = k; }
         if (state.sm2 !== sm) { rig.setFloat(sm); state.sm2 = sm; }
@@ -665,6 +782,7 @@ const faqs = [
         scrim.style.opacity = 1;
         smoke.style.opacity = 0;
         bedEl.style.opacity = 0;
+        matEl.style.opacity = 0;
         runBoot(null, null)();    // nothing to wait for, so do not make anyone wait
       } else {
         let progress = 0;
@@ -718,6 +836,165 @@ const faqs = [
             String(Math.min(frames, Math.floor(p * frames) + 1)).padStart(2, '0') + '/' + String(frames).padStart(2, '0');
         },
       });
+    }
+
+    /* ---- case study ----
+       A portfolio, not six popups: prev/next walks the roll without closing, and
+       the gallery inside each one drags, arrows and snaps. */
+    const caseEl = document.getElementById('case');
+    if (caseEl && window.__WORK) {
+      const WORK = window.__WORK;
+      const gallery = document.getElementById('case-gallery');
+      const dots = document.getElementById('case-dots');
+      const arrows = [...caseEl.querySelectorAll('[data-slide]')];
+      const fields = {
+        id: document.getElementById('case-id'),
+        tag: document.getElementById('case-tag'),
+        yr: document.getElementById('case-yr'),
+        title: document.getElementById('case-title'),
+        client: document.getElementById('case-client'),
+        brief: document.getElementById('case-brief'),
+        did: document.getElementById('case-did'),
+        result: document.getElementById('case-result'),
+        prev: document.getElementById('case-prev'),
+        next: document.getElementById('case-next'),
+      };
+
+      let index = 0, opened = false, lastFocus = null;
+
+      function render(i) {
+        index = (i + WORK.length) % WORK.length;
+        const w = WORK[index];
+        fields.id.textContent = w.id;
+        fields.tag.textContent = w.tag;
+        fields.yr.textContent = `’${w.yr}`;
+        fields.title.textContent = w.t;
+        fields.client.textContent = w.client;
+        fields.brief.textContent = w.brief;
+
+        fields.did.replaceChildren(...w.did.map((d) => {
+          const li = document.createElement('li'); li.textContent = d; return li;
+        }));
+        fields.result.replaceChildren(...w.result.map(([n, l]) => {
+          const div = document.createElement('div');
+          const dt = document.createElement('dt'); dt.textContent = n;
+          const dd = document.createElement('dd'); dd.textContent = l;
+          div.append(dt, dd); return div;
+        }));
+
+        gallery.replaceChildren(...w.shots.map((src, k) => {
+          const fig = document.createElement('div'); fig.className = 'case-shot';
+          const img = document.createElement('img');
+          img.src = src; img.alt = `${w.t}, picture ${k + 1} of ${w.shots.length}`;
+          img.loading = k ? 'lazy' : 'eager'; img.decoding = 'async'; img.draggable = false;
+          fig.append(img); return fig;
+        }));
+        dots.replaceChildren(...w.shots.map(() => document.createElement('i')));
+        gallery.scrollLeft = 0;
+        syncDots();
+
+        fields.prev.textContent = WORK[(index - 1 + WORK.length) % WORK.length].t;
+        fields.next.textContent = WORK[(index + 1) % WORK.length].t;
+      }
+
+      // which slide is nearest the middle, measured rather than counted, so a
+      // drag that lands between two of them still reports the right one
+      function current() {
+        const mid = gallery.scrollLeft + gallery.clientWidth / 2;
+        const kids = [...gallery.children];
+        let best = 0, bestD = Infinity;
+        kids.forEach((k, i) => {
+          const c = k.offsetLeft + k.offsetWidth / 2;
+          const d = Math.abs(c - mid);
+          if (d < bestD) { bestD = d; best = i; }
+        });
+        return best;
+      }
+      function syncDots() {
+        const c = current();
+        [...dots.children].forEach((d, i) => d.classList.toggle('on', i === c));
+        arrows[0].disabled = c === 0;
+        arrows[1].disabled = c === gallery.children.length - 1;
+      }
+      function slide(dir) {
+        const k = gallery.children[Math.min(gallery.children.length - 1, Math.max(0, current() + dir))];
+        if (k) gallery.scrollTo({ left: k.offsetLeft - (gallery.clientWidth - k.offsetWidth) / 2, behavior: reduced ? 'auto' : 'smooth' });
+      }
+      arrows.forEach((b) => b.addEventListener('click', () => slide(+b.dataset.slide)));
+      gallery.addEventListener('scroll', syncDots, { passive: true });
+
+      // drag to scrub the gallery on a trackpad-less desktop
+      let dragging = false, startX = 0, startL = 0, moved = 0;
+      gallery.addEventListener('pointerdown', (e) => {
+        if (e.pointerType === 'touch') return;   // native touch scrolling is better
+        dragging = true; moved = 0;
+        startX = e.clientX; startL = gallery.scrollLeft;
+        gallery.classList.add('is-dragging');
+        gallery.setPointerCapture(e.pointerId);
+      });
+      gallery.addEventListener('pointermove', (e) => {
+        if (!dragging) return;
+        const dx = e.clientX - startX;
+        moved = Math.max(moved, Math.abs(dx));
+        gallery.scrollLeft = startL - dx;
+      });
+      const endDrag = (e) => {
+        if (!dragging) return;
+        dragging = false;
+        gallery.classList.remove('is-dragging');
+        try { gallery.releasePointerCapture(e.pointerId); } catch {}
+        if (moved > 6) slide(0);   // settle onto the nearest slide
+      };
+      gallery.addEventListener('pointerup', endDrag);
+      gallery.addEventListener('pointercancel', endDrag);
+
+      function open(i, from) {
+        lastFocus = from || document.activeElement;
+        render(i);
+        caseEl.hidden = false;
+        document.body.style.overflow = 'hidden';
+        if (window.__lenis) window.__lenis.stop();
+        requestAnimationFrame(() => {
+          caseEl.classList.add('is-open');
+          opened = true;
+          caseEl.querySelector('.case-x').focus({ preventScroll: true });
+        });
+      }
+      function close() {
+        if (!opened) return;
+        opened = false;
+        caseEl.classList.remove('is-open');
+        document.body.style.overflow = '';
+        if (window.__lenis) window.__lenis.start();
+        setTimeout(() => { if (!opened) caseEl.hidden = true; }, 460);
+        if (lastFocus && lastFocus.focus) lastFocus.focus({ preventScroll: true });
+      }
+      function step(dir) { render(index + dir); }
+
+      document.querySelectorAll('[data-case]').forEach((b) => {
+        b.addEventListener('click', () => open(+b.dataset.case, b));
+      });
+      caseEl.querySelectorAll('[data-case-close]').forEach((b) => b.addEventListener('click', close));
+      caseEl.querySelectorAll('[data-case-step]').forEach((b) => {
+        b.addEventListener('click', () => step(+b.dataset.caseStep));
+      });
+
+      addEventListener('keydown', (e) => {
+        if (!opened) return;
+        if (e.key === 'Escape') { close(); return; }
+        if (e.key === 'ArrowRight') { e.preventDefault(); slide(1); }
+        if (e.key === 'ArrowLeft') { e.preventDefault(); slide(-1); }
+        // keep the tab ring inside the panel while it is modal
+        if (e.key === 'Tab') {
+          const f = [...caseEl.querySelectorAll('button, a[href], [tabindex]:not([tabindex="-1"])')]
+            .filter((el) => !el.disabled && el.offsetParent !== null);
+          if (!f.length) return;
+          const first = f[0], last = f[f.length - 1];
+          if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+          else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+        }
+      });
+      addEventListener('resize', () => { if (opened) syncDots(); });
     }
 
     /* ---- nav ----

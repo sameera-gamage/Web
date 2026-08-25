@@ -153,16 +153,20 @@ export function createHeroVideo(video, opts = {}) {
 
   function push(k) { scale = k; applyTransform(); }
 
-  // A locked-off plate is a photograph, not a shot. Two slow periods that do not
-  // divide into each other, so the drift never visibly repeats, and enough
-  // amplitude to actually read at desk distance — the old seven pixels on a
-  // 1440-wide screen was motion you had to be told about.
+  // A locked-off plate is a photograph, not a shot.
+  //
+  // Sliding the plate moves everything in it — the table edge, the haze at the
+  // frame's sides — and that reads as the whole room drifting rather than the
+  // camera breathing. So the motion is mostly a slow scale ABOUT THE LENS, which
+  // the transform-origin already sits on: the subject swells and settles while
+  // the dark, defocused surroundings barely register it. The translation that is
+  // left is small, and only there to stop the breath looking mechanical.
   let floatAmp = 1, floating = false;
   function floatTick(now) {
     if (!floating) return;
-    fx = Math.sin(now / 4300) * 19 * floatAmp;
-    fy = Math.cos(now / 5900) * 13 * floatAmp;
-    fs = 1 + 0.011 * (1 + Math.sin(now / 7300)) * floatAmp;
+    fx = Math.sin(now / 4300) * 6 * floatAmp;
+    fy = Math.cos(now / 5900) * 4 * floatAmp;
+    fs = 1 + 0.013 * (1 + Math.sin(now / 6100)) * floatAmp;
     applyTransform();
     requestAnimationFrame(floatTick);
   }
