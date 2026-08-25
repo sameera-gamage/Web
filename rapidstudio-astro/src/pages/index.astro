@@ -1,91 +1,17 @@
 ---
 import Base from '../layouts/Base.astro';
+import Nav from '../components/Nav.astro';
+import { projects } from '../data/projects.js';
+const first = projects[0];
 
-const services = [
-  { n: '01', t: 'Search',       d: 'You show up when someone is already typing the thing you sell.', k: 'SEO, technical, local' },
-  { n: '02', t: 'Paid media',   d: 'Budget goes where it comes back. The rest gets cut, early.',      k: 'Google, Meta, TikTok' },
-  { n: '03', t: 'Social',       d: 'Posts that survive the thumb. Made weekly, not quarterly.',       k: 'Content, community' },
-  { n: '04', t: 'Brand',        d: 'A name, a face, and a voice nobody confuses with the shop next door.', k: 'Identity, systems' },
-  { n: '05', t: 'Film',         d: 'Thirty seconds that does what a page of copy could not.',         k: 'Direction, edit, grade' },
-  { n: '06', t: 'Photography',  d: 'Product frames people trust enough to put a card number in.',     k: 'Studio, location' },
-];
-
-// Each frame on the contact sheet opens as a case study. `shots` is the gallery
-// inside it — currently drawn from the same six library frames, because six is
-// all the photography there is. Point each one at the real project's pictures
-// and nothing else here has to change.
-const work = [
-  {
-    id: '001', img: '/work/w1.webp', t: 'Launch, start to finish', tag: 'Brand · Social', yr: '25',
-    client: 'Marrow & Co, a paper mill going direct',
-    brief: 'A hundred-year-old mill had been selling through three wholesalers and wanted its own front door. No brand to speak of, no photography, no list.',
-    did: ['Identity, palette and the type system', 'A stills library, shot over two days', 'Launch campaign across paid social and search'],
-    result: [['9 wks', 'brief to launch'], ['1,240', 'first-month orders'], ['£0', 'spent on wholesale margin']],
-    shots: ['/work/w1.webp', '/work/w5.webp', '/work/w3.webp'],
-  },
-  {
-    id: '002', img: '/work/w2.webp', t: 'A film for a founder', tag: 'Film', yr: '25',
-    client: 'Ridgeway Tools',
-    brief: 'The founder could hold a room and could not hold a camera. Everything on the site was written by someone who had never used the product.',
-    did: ['Two days on location in the workshop', 'A ninety-second cut and six verticals', 'Grade matched to the existing brand'],
-    result: [['92s', 'the main cut'], ['6', 'verticals from the same shoot'], ['3.1×', 'time on the product page']],
-    shots: ['/work/w2.webp', '/work/w6.webp', '/work/w4.webp'],
-  },
-  {
-    id: '003', img: '/work/w3.webp', t: 'Spend that paid back', tag: 'Paid media', yr: '24',
-    client: 'Halden Home',
-    brief: 'Eleven thousand a month going out across four platforms, and nobody in the building could say which of them was earning.',
-    did: ['Rebuilt tracking so the numbers could be trusted', 'Cut two platforms in the first fortnight', 'Rewrote the creative around what survived'],
-    result: [['-38%', 'spend'], ['+21%', 'revenue'], ['2 of 4', 'platforms kept']],
-    shots: ['/work/w3.webp', '/work/w1.webp', '/work/w6.webp'],
-  },
-  {
-    id: '004', img: '/work/w4.webp', t: 'Ranking for the hard one', tag: 'Search', yr: '24',
-    client: 'Peel & Stone',
-    brief: 'One search term the whole business depended on, and page four for two years running.',
-    did: ['Technical audit and a rebuild of the templates', 'Eleven pages written properly, not spun', 'Cleared a decade of redirect debt'],
-    result: [['#3', 'from page four'], ['7 mo', 'to get there'], ['+64%', 'non-brand traffic']],
-    shots: ['/work/w4.webp', '/work/w2.webp', '/work/w5.webp'],
-  },
-  {
-    id: '005', img: '/work/w5.webp', t: 'Shelf to screen', tag: 'Photography', yr: '24',
-    client: 'Ambit Skincare',
-    brief: 'Product frames shot on a phone against a bedsheet. The listing was fine. Nobody was buying.',
-    did: ['Studio days for forty-two SKUs', 'One lighting setup, held across the range', 'Retouch spec the client can hand to anyone'],
-    result: [['42', 'SKUs'], ['+28%', 'conversion'], ['1', 'lighting setup, reused since']],
-    shots: ['/work/w5.webp', '/work/w4.webp', '/work/w1.webp'],
-  },
-  {
-    id: '006', img: '/work/w6.webp', t: 'A year of always-on', tag: 'Social', yr: '23',
-    client: 'The Fold Bakery',
-    brief: 'Three sites, one oven, and a feed that went quiet every time it got busy.',
-    did: ['A weekly shoot rhythm the kitchen could actually keep', 'Twelve months planned a quarter ahead', 'Community handled by us, not a bot'],
-    result: [['52 wks', 'without a gap'], ['×4.6', 'followers'], ['18%', 'of covers booked from the feed']],
-    shots: ['/work/w6.webp', '/work/w3.webp', '/work/w2.webp'],
-  },
-];
-
-const steps = [
-  { n: 'i',   t: 'We look first',      d: 'Your accounts, your site, your competitors. You get the honest read, including the parts you will not enjoy.' },
-  { n: 'ii',  t: 'You see the plan',   d: 'Written in plain language, with the numbers attached, before a single pound moves.' },
-  { n: 'iii', t: 'We run it',          d: 'Weekly notes on what worked and what did not. You can check every figure yourself.' },
-  { n: 'iv',  t: 'We cut what fails',  d: 'No twelve-month lock-in. A channel that is not earning gets stopped, not defended.' },
-];
-
-const faqs = [
-  ['How long before this actually works?', 'Paid gives you real data inside a fortnight. Search is slower, three to six months before it moves properly. We tell you which one you are buying before you buy it.'],
-  ['Do we get the same plan everyone gets?', 'No. The plan comes out of your audit. If it could be pasted onto another client we have not done our job.'],
-  ['What happens if it does not work?', 'You are month to month. We say so plainly, change it, or stop it. You are not held in place by paperwork.'],
-  ['Who does the work?', 'Us. Nothing is quietly passed to a studio you have never heard of.'],
-  ['Do we have to take all six?', 'No. Start with the one that matters this quarter. Add later, or never.'],
-];
+// the six trades, ticked past during the hero's turn
+const trades = ['Search', 'Paid media', 'Social', 'Brand', 'Film', 'Photography'];
 ---
 
 <Base
   title="RapidStudio, an independent studio for search, media, film and stills"
   description="An independent studio running search, paid media, social, brand, film and photography for businesses that would rather hire one team than five."
 >
-
   <!--
     ══ loader ══
     The hero is a megabyte and a half of film; without this the page shows a
@@ -96,121 +22,13 @@ const faqs = [
   -->
   <div id="boot" class="boot">
     <div class="boot-in">
-      <span class="boot-mark">Rapid<span class="text-rust">•</span>Studio</span>
+      <span class="boot-mark">Rapid<span class="text-flame">•</span>Studio</span>
       <span class="boot-iris" aria-hidden="true"><i id="boot-fill"></i></span>
       <span class="boot-read"><em id="boot-pct">0</em>%<span class="boot-what" id="boot-what">loading the film</span></span>
     </div>
   </div>
 
-  <!--
-    ══ nav ══
-    A floating rig rather than a bar: a wordmark plate on the left and a glass
-    capsule of links on the right, both set in by the same margin as the hero
-    card so they read as parts of one frame.
-
-    It inverts on its own. Over the hero the page is ink and the nav is bone;
-    from the work section down the page is bone and the nav flips to ink. That
-    used to be mix-blend-difference, which is free but rules out the blur — so
-    the state is now driven off the hero's own scroll trigger instead.
-  -->
-  <header id="nav" class="nav pointer-events-none fixed inset-x-0 top-0 z-50">
-    <div class="nav-in flex items-center justify-between gap-4">
-      <a href="#top" class="nav-mark pointer-events-auto">
-        <span class="nav-dot" aria-hidden="true"></span>
-        <span>Rapid<span class="nav-sep">•</span>Studio</span>
-      </a>
-
-      <nav class="nav-pill pointer-events-auto hidden md:flex" aria-label="Primary">
-        {['Work','Studio','Process'].map((l, i) => (
-          <a href={`#${l.toLowerCase()}`} class="nav-link">
-            <span class="nav-num">{String(i + 1).padStart(2, '0')}</span>
-            <span>{l}</span>
-          </a>
-        ))}
-        <a href="#contact" class="nav-cta">Start a brief</a>
-      </nav>
-
-      <button id="nav-toggle" class="nav-burger pointer-events-auto md:hidden"
-              aria-expanded="false" aria-controls="nav-sheet">
-        <span class="nav-burger-lines" aria-hidden="true"><i></i><i></i></span>
-        <span class="nav-burger-label">Menu</span>
-      </button>
-    </div>
-  </header>
-
-  <!-- full-screen menu for phones -->
-  <div id="nav-sheet" class="nav-sheet" hidden>
-    <nav class="nav-sheet-in" aria-label="Primary, mobile">
-      {['Work','Studio','Process','Contact'].map((l, i) => (
-        <a href={`#${l.toLowerCase()}`} class="nav-sheet-link">
-          <span class="nav-num">{String(i + 1).padStart(2, '0')}</span>{l}
-        </a>
-      ))}
-      <a href="mailto:info@rapidsolutions.live" class="nav-sheet-mail">info@rapidsolutions.live</a>
-    </nav>
-  </div>
-
-  <!--
-    ══ case study ══
-    The contact sheet is the index; this is the job itself. One panel, populated
-    from the work data — a gallery you can drag or arrow through, the brief, what
-    was actually done, and the numbers. Prev/next moves along the roll without
-    closing, so it reads as a portfolio rather than six separate popups.
-  -->
-  <div id="case" class="case" role="dialog" aria-modal="true" aria-labelledby="case-title" hidden>
-    <div class="case-scrim" data-case-close></div>
-
-    <article class="case-panel">
-      <button type="button" class="case-x" data-case-close aria-label="Close the case study">
-        <span aria-hidden="true"></span><span aria-hidden="true"></span>
-      </button>
-
-      <header class="case-head">
-        <p class="case-eyebrow">
-          <em id="case-id"></em><span id="case-tag"></span><span id="case-yr"></span>
-        </p>
-        <h2 id="case-title" class="case-title"></h2>
-        <p id="case-client" class="case-client"></p>
-      </header>
-
-      <div class="case-stage">
-        <div id="case-gallery" class="case-gallery" tabindex="0" aria-label="Project gallery, use the arrow keys"></div>
-        <div class="case-rail">
-          <button type="button" class="case-arrow" data-slide="-1" aria-label="Previous picture">←</button>
-          <span id="case-dots" class="case-dots" aria-hidden="true"></span>
-          <button type="button" class="case-arrow" data-slide="1" aria-label="Next picture">→</button>
-        </div>
-      </div>
-
-      <div class="case-body">
-        <div class="case-col">
-          <p class="case-h">The brief</p>
-          <p id="case-brief" class="case-p"></p>
-        </div>
-        <div class="case-col">
-          <p class="case-h">What we did</p>
-          <ul id="case-did" class="case-list"></ul>
-        </div>
-        <div class="case-col">
-          <p class="case-h">Where it landed</p>
-          <dl id="case-result" class="case-result"></dl>
-        </div>
-      </div>
-
-      <footer class="case-foot">
-        <button type="button" class="case-step" data-case-step="-1">
-          <span class="case-step-k">Previous</span><span id="case-prev" class="case-step-t"></span>
-        </button>
-        <a href="#contact" class="case-cta" data-case-close>Start a brief</a>
-        <button type="button" class="case-step case-step-next" data-case-step="1">
-          <span class="case-step-k">Next</span><span id="case-next" class="case-step-t"></span>
-        </button>
-      </footer>
-    </article>
-  </div>
-
-  <!-- registration marks, like the corners of a proof sheet -->
-  <div class="marks" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+  <Nav here="index" />
 
   <main id="main">
 
@@ -266,7 +84,7 @@ const faqs = [
         </div>
 
         <!-- corners pulled down so the copy always has something to sit on -->
-        <div class="pointer-events-none absolute inset-0 bg-[radial-gradient(115%_85%_at_50%_45%,transparent_35%,rgba(18,16,14,.72)_100%)]"></div>
+        <div class="pointer-events-none absolute inset-0 bg-[radial-gradient(115%_85%_at_50%_45%,transparent_35%,rgba(10,10,10,.72)_100%)]"></div>
         <div id="hero-scrim" class="hero-scrim pointer-events-none absolute inset-0"></div>
 
         <!-- Inside the barrel. Not flat black: a little of the key light still
@@ -278,12 +96,12 @@ const faqs = [
         <div id="hero-a" class="pointer-events-none absolute inset-0 flex items-start pt-[19vh] md:items-center md:pt-0">
           <div class="edge w-full max-w-edge md:pt-16">
             <div class="max-w-[min(92vw,42rem)]">
-              <p class="label mb-6 text-bone/60">Est. 2019 · Independent</p>
-              <h1 class="whitespace-nowrap text-bone text-[clamp(2.6rem,7.6vw,6.6rem)]">
+              <p class="label mb-6 text-chalk/60">Est. 2019 · Independent</p>
+              <h1 class="whitespace-nowrap text-chalk text-[clamp(2.6rem,7.6vw,6.6rem)]">
                 <span class="block overflow-hidden pb-[0.06em]"><span class="ln inline-block">Six trades.</span></span>
-                <span class="block overflow-hidden pb-[0.06em]"><span class="ln inline-block text-rust">One room.</span></span>
+                <span class="block overflow-hidden pb-[0.06em]"><span class="ln inline-block text-flame">One room.</span></span>
               </h1>
-              <p class="mt-7 max-w-[32ch] text-[16px] leading-relaxed text-bone/70">
+              <p class="mt-7 max-w-[32ch] text-[16px] leading-relaxed text-chalk/70">
                 Search, paid media, social, brand, film and stills. Run by the same
                 people, in the same building, on the same plan.
               </p>
@@ -295,10 +113,10 @@ const faqs = [
              six trades tick past while the camera comes round -->
         <div id="hero-m" class="pointer-events-none absolute inset-x-0 bottom-[13vh] opacity-0">
           <div class="edge w-full max-w-edge">
-            <ul class="flex flex-wrap gap-x-7 gap-y-2 font-mono text-[11px] uppercase tracking-[0.22em] text-bone/70">
-              {services.map((s) => (
+            <ul class="flex flex-wrap gap-x-7 gap-y-2 font-mono text-[11px] uppercase tracking-[0.22em] text-chalk/70">
+              {trades.map((t, i) => (
                 <li class="flex items-center gap-2.5">
-                  <span class="text-rust">{s.n}</span>{s.t}
+                  <span class="text-flame">{String(i + 1).padStart(2, '0')}</span>{t}
                 </li>
               ))}
             </ul>
@@ -308,262 +126,71 @@ const faqs = [
         <!-- landing frame, arrives as the aperture clears -->
         <div id="hero-b" class="pointer-events-none absolute inset-0 flex items-end opacity-0">
           <div class="edge w-full max-w-edge pb-[12vh]">
-            <p class="label mb-5 text-bone/70">Now look properly</p>
-            <p class="max-w-[18ch] font-display text-[clamp(2rem,5.5vw,4.5rem)] font-extrabold leading-[0.95] text-bone">
+            <p class="label mb-5 text-chalk/70">Now look properly</p>
+            <p class="max-w-[18ch] font-display text-[clamp(2rem,5.5vw,4.5rem)] font-extrabold leading-[0.95] text-chalk">
               This is what we&nbsp;made.
             </p>
           </div>
         </div>
 
         <div id="scroll-cue" class="absolute bottom-8 right-[var(--edge)] flex items-center gap-3">
-          <span class="label text-bone/50">Scroll</span>
-          <span class="block h-10 w-px bg-bone/30"></span>
+          <span class="label text-chalk/50">Scroll</span>
+          <span class="block h-10 w-px bg-chalk/30"></span>
         </div>
       </div>
     </section>
 
-    <!-- ══ work ══ -->
     <!--
-      ══ work, as a contact sheet ══
-      A grid of pictures is what every studio site does. This is the thing a
-      photographer actually reviews work on: a strip of exposed frames, numbered
-      along the rebate, with the keepers ringed in grease pencil. It travels
-      sideways as the page scrolls down, so the whole reel passes the loupe.
+      ══ the way in ══
+      The aperture opens onto this, not onto a list. It is one link: the first
+      project's picture, already carrying the view-transition name it will keep
+      on the other side, so clicking it grows THAT picture into the project page
+      rather than cutting between two screens.
     -->
     <!--
-      ══ projects ══
-      A stack of pinned slides rather than a grid. Scroll drives the whole rig
-      up, and the trick that makes it read is that the picture and the name
-      travel at DIFFERENT rates: the picture leaves faster than the name, so an
-      outgoing name is still mid-screen when the next one arrives and the two
-      cross over each other. Everything else is decoration on top of that.
-
-      It is still pulled up a screen under the hero (.work-under) so the
-      aperture opens onto the first slide.
+      ══ the way in ══
+      Two beats, and the split is structural rather than decorative. The first
+      screen is what the hero's aperture opens onto, so it is pulled up under the
+      hero (.gate-under) and the hero card covers it until the hole is punched —
+      which means nothing in it can be clicked. So the link lives in the second
+      screen, below the card's reach.
     -->
-    <section id="work" class="work-under relative bg-ink text-bone" style="height:700vh">
-      <div id="work-stage" class="sticky top-0 h-screen overflow-hidden">
-
-        <!-- the standing furniture: index, rules, counter -->
-        <div class="pj-chrome" aria-hidden="true">
-          <span class="pj-rule pj-rule-l"></span>
-          <span class="pj-kicker">Selected work</span>
-          <span class="pj-count"><em id="pj-n">01</em> / 06</span>
-          <span class="pj-ticks" id="pj-ticks"></span>
-        </div>
-
-        <div id="pj-stack" class="pj-stack">
-          {work.map((w, i) => (
-            <article class="pj" data-pj={i}>
-              <div class="pj-shot">
-                <img src={w.img} alt={`${w.t}, ${w.tag}`} loading={i < 2 ? 'eager' : 'lazy'} decoding="async" />
-              </div>
-              <div class="pj-name">
-                <span class="pj-idx">{w.id}</span>
-                <h3 class="pj-title">{w.t}</h3>
-                <div class="pj-meta">
-                  <span>{w.client}</span>
-                  <span>{w.tag} — ’{w.yr}</span>
-                </div>
-                <button type="button" class="pj-open" data-case={i}
-                        aria-label={`Open the case study: ${w.t}`}>
-                  <span>View project</span>
-                </button>
-              </div>
-            </article>
-          ))}
-        </div>
+    <section id="gate" class="gate gate-under">
+      <div class="gate-say">
+        <p class="gate-k">Six trades, one room</p>
+        <h2 class="gate-h">
+          <span>Everything we</span>
+          <span>have made.</span>
+        </h2>
       </div>
-    </section>
 
-    <!-- ══ ticker ══ -->
-    <div class="relative mt-[14vh] overflow-hidden border-y border-ink/15 bg-ochre py-5" data-nav="paper">
-      <div class="marquee flex w-max gap-10 whitespace-nowrap font-display text-[clamp(1.4rem,3.4vw,2.6rem)] font-extrabold">
-        {Array.from({ length: 6 }).map(() => (
-          <>
-            <span>Search</span><span class="text-rust">✳</span>
-            <span>Paid media</span><span class="text-rust">✳</span>
-            <span>Social</span><span class="text-rust">✳</span>
-            <span>Brand</span><span class="text-rust">✳</span>
-            <span>Film</span><span class="text-rust">✳</span>
-            <span>Photography</span><span class="text-rust">✳</span>
-          </>
-        ))}
-      </div>
-    </div>
-
-    <!-- ══ studio / services as an index, not cards ══ -->
-    <section id="studio" class="bg-bone py-[14vh]" data-nav="paper">
-      <div class="edge max-w-edge">
-        <div class="grid grid-cols-12 gap-x-6">
-          <div class="col-span-12 md:col-span-4">
-            <h2 class="rv sticky top-28 text-[clamp(2.2rem,6vw,5rem)]">
-              What we<br /><span class="text-rust">do all day</span>
-            </h2>
-          </div>
-          <div class="col-span-12 md:col-span-7 md:col-start-6">
-            <p class="rv mb-14 max-w-[40ch] text-[19px] leading-relaxed">
-              Most places sell you one of these and subcontract the rest. We kept all six
-              in the building, which is the whole reason the work matches.
-            </p>
-            <ul>
-              {services.map((s) => (
-                <li class="rv group border-t border-ink/15 py-7 transition-colors duration-500 hover:bg-clay/40">
-                  <div class="flex items-start gap-6">
-                    <span class="label pt-2">{s.n}</span>
-                    <div class="flex-1">
-                      <h3 class="font-display text-[clamp(1.5rem,3vw,2.2rem)] font-bold">{s.t}</h3>
-                      <p class="mt-2 max-w-[42ch] text-[16px] leading-relaxed text-ink/70">{s.d}</p>
-                    </div>
-                    <span class="label hidden shrink-0 pt-2 text-right sm:block">{s.k}</span>
-                  </div>
-                </li>
-              ))}
-              <li class="border-t border-ink/15"></li>
-            </ul>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ══ process, dark slab ══ -->
-    <section id="process" class="bg-ink py-[14vh] text-bone">
-      <div class="edge max-w-edge">
-        <div class="flex flex-wrap items-end justify-between gap-6 border-b border-bone/20 pb-8">
-          <h2 class="rv text-[clamp(2.2rem,6vw,5rem)]">How it goes</h2>
-          <p class="rv label max-w-[26ch] text-bone/60">The bit most studios keep vague on purpose.</p>
-        </div>
-        <ol class="mt-16 grid grid-cols-12 gap-x-6 gap-y-14">
-          {steps.map((s, i) => (
-            <li class={`rv col-span-12 sm:col-span-6 lg:col-span-3 ${i % 2 ? 'lg:mt-14' : ''}`}>
-              <span class="font-display text-[clamp(3rem,7vw,5.5rem)] font-extrabold leading-none text-rust">{s.n}</span>
-              <h3 class="mt-5 font-display text-[22px] font-bold">{s.t}</h3>
-              <p class="mt-3 text-[15px] leading-relaxed text-bone/65">{s.d}</p>
-            </li>
-          ))}
-        </ol>
-
-        <div class="mt-24 grid grid-cols-12 gap-6 border-t border-bone/20 pt-10">
-          {[['No lock-in','Month to month, always'],['Your accounts','In your name from day one'],['Weekly numbers','Spend in, revenue out'],['One team','Same people, start to end']].map(([a,b]) => (
-            <div class="rv col-span-6 lg:col-span-3">
-              <p class="font-display text-[19px] font-bold text-ochre">{a}</p>
-              <p class="mt-1 text-[14px] text-bone/55">{b}</p>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-
-    <!-- ══ the pull quote ══
-         Was moss green, which appears nowhere in the film and so read as a
-         different website. Now the cool shadow sampled out of the hero. -->
-    <section class="bg-deep py-[16vh] text-bone">
-      <div class="edge max-w-edge">
-        <p class="rv max-w-[20ch] font-display text-[clamp(2rem,6.5vw,5.5rem)] font-extrabold leading-[0.98]">
-          Beautiful is the entry&nbsp;fee. <span class="text-ochre">Working is the job.</span>
+      <div class="gate-do">
+        <p class="gate-p">
+          Search, paid media, social, brand, film and stills. Run by the same
+          people, in the same building, on the same plan. Six jobs below, start
+          to finish, with the numbers attached.
         </p>
-        <div class="rv mt-12 flex items-center gap-5">
-          <span class="h-px w-16 bg-bone/40"></span>
-          <p class="label text-bone/70">The house rule, written on the wall</p>
-        </div>
+
+        <a href="/projects" class="gate-go">
+          <span class="gate-go-plate">
+            <img src={first.cover} alt="" aria-hidden="true"
+                 transition:name={`shot-${first.slug}`} loading="lazy" decoding="async" />
+          </span>
+          <span class="gate-go-t">
+            <em>Open the work</em>
+            <b>{String(projects.length).padStart(2, '0')} projects</b>
+          </span>
+          <span class="gate-go-x" aria-hidden="true">→</span>
+        </a>
       </div>
     </section>
 
-    <!-- ══ faq ══ -->
-    <section id="faq" class="bg-bone py-[14vh]" data-nav="paper">
-      <div class="edge max-w-edge">
-        <div class="grid grid-cols-12 gap-x-6">
-          <div class="col-span-12 md:col-span-4">
-            <h2 class="rv text-[clamp(2.2rem,6vw,5rem)]">Straight<br />answers</h2>
-          </div>
-          <div class="col-span-12 md:col-span-7 md:col-start-6">
-            {faqs.map(([q, a]) => (
-              <details class="rv group border-t border-ink/15 py-6">
-                <summary class="flex cursor-pointer list-none items-baseline justify-between gap-6">
-                  <span class="font-display text-[clamp(1.1rem,2.2vw,1.5rem)] font-bold">{q}</span>
-                  <span class="font-mono text-rust transition-transform duration-300 group-open:rotate-45">+</span>
-                </summary>
-                <p class="mt-4 max-w-[52ch] text-[16px] leading-relaxed text-ink/70">{a}</p>
-              </details>
-            ))}
-            <div class="border-t border-ink/15"></div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ══ contact ══ -->
-    <!-- the outro card: it arrives small and grows into the page, as in the ref -->
-    <section id="contact" class="contact-wrap bg-ink py-[10vh]" data-nav="dark">
-      <div id="contact-card" class="contact-card">
-      <div class="edge max-w-edge">
-        <div class="grid grid-cols-12 gap-x-6 gap-y-14">
-          <div class="col-span-12 lg:col-span-6">
-            <h2 class="rv text-[clamp(2.4rem,7vw,5.5rem)]">Tell us what<br />is stuck.</h2>
-            <p class="rv mt-8 max-w-[34ch] text-[18px] leading-relaxed text-bone/80">
-              You get a real read on it, not a deck. If we are the wrong shop for the job
-              we will say so and point you somewhere better.
-            </p>
-            <a href="mailto:info@rapidsolutions.live"
-               class="rv ulink mt-10 inline-block font-display text-[clamp(1.2rem,2.6vw,1.9rem)] font-bold">
-              info@rapidsolutions.live
-            </a>
-          </div>
-
-          <div class="col-span-12 lg:col-span-5 lg:col-start-8">
-            <div id="sent" class="hidden border border-bone/40 p-7">
-              <p class="font-display text-[20px] font-bold">Your mail app is opening.</p>
-              <p class="mt-2 text-[15px] text-bone/75">If it did not, write to info@rapidsolutions.live and we will pick it up.</p>
-            </div>
-            <form id="brief" class="rv space-y-7">
-              {[['name','Name','text'],['email','Email','email'],['site','Website (if you have one)','text']].map(([n,l,t]) => (
-                <p>
-                  <label for={n} class="label mb-2 block text-bone/70">{l}</label>
-                  <input id={n} name={n} type={t} required={n!=='site'}
-                         class="w-full border-0 border-b border-bone/40 bg-transparent pb-2 text-[17px] text-bone outline-none transition-colors focus:border-bone" />
-                </p>
-              ))}
-              <p>
-                <label for="msg" class="label mb-2 block text-bone/70">What is going wrong</label>
-                <textarea id="msg" name="msg" rows="3" required
-                          class="w-full resize-y border-0 border-b border-bone/40 bg-transparent pb-2 text-[17px] text-bone outline-none transition-colors focus:border-bone"></textarea>
-              </p>
-              <button type="submit" class="btn bg-ink text-bone">
-                Send it
-                <span aria-hidden="true">→</span>
-              </button>
-            </form>
-          </div>
-        </div>
-      </div>
-      </div>
-    </section>
-
-    <footer class="bg-ink py-14 text-bone">
-      <div class="edge max-w-edge">
-        <div class="flex flex-wrap items-end justify-between gap-8 border-b border-bone/15 pb-10">
-          <p class="font-display text-[clamp(2rem,7vw,5rem)] font-extrabold leading-none">
-            Rapid<span class="text-rust">•</span>Studio
-          </p>
-          <div class="flex gap-8">
-            {['Work','Studio','Process','FAQ'].map((l) => (
-              <a href={`#${l.toLowerCase()}`} class="ulink label text-bone/70">{l}</a>
-            ))}
-          </div>
-        </div>
-        <div class="mt-8 flex flex-wrap justify-between gap-4">
-          <p class="label text-bone/45">© 2026 RapidStudio</p>
-          <p class="label text-bone/45">Built in-house</p>
-        </div>
-      </div>
+    <footer class="foot">
+      <p class="foot-k">Got something stuck?</p>
+      <a href="mailto:info@rapidsolutions.live" class="foot-mail">info@rapidsolutions.live</a>
+      <p class="foot-c">© 2026 RapidStudio · Built in-house</p>
     </footer>
   </main>
-
-  <script is:inline define:vars={{ WORK: work }}>
-    // the case-study copy, handed to the client as data rather than scraped
-    // back out of the DOM
-    window.__WORK = WORK;
-  </script>
 
   <script>
     import Lenis from 'lenis';
@@ -790,338 +417,5 @@ const faqs = [
         addEventListener('resize', () => { measureFrame(); state.o = -1; paintCopy(progress); });
       }
     }
-
-    /* ---- projects ----
-       One scroll progress drives everything. Each slide gets a signed distance
-       from centre, and picture and name are moved by different multiples of it:
-       the picture travels 118vh per slide, the name 88vh. That gap is the whole
-       effect — the outgoing name is still crossing the middle when the incoming
-       one arrives, and for a moment you read both. */
-    const stack = document.getElementById('pj-stack');
-    if (stack && !reduced) {
-      const slides = [...stack.children].map((el) => ({
-        el,
-        shot: el.querySelector('.pj-shot'),
-        name: el.querySelector('.pj-name'),
-      }));
-      const N = slides.length;
-      const ticksEl = document.getElementById('pj-ticks');
-      const nEl = document.getElementById('pj-n');
-      ticksEl.replaceChildren(...slides.map(() => document.createElement('i')));
-      const ticks = [...ticksEl.children];
-
-      // Measured off the reference rather than guessed: the pictures travel a
-      // whole screen and clearly leave, while the names barely move — which is
-      // why consecutive names sit a few centimetres apart and cross over each
-      // other instead of chasing from off-screen. The gap between these two
-      // numbers IS the effect.
-      const SHOT_TRAVEL = 118;   // vh per slide
-      const NAME_TRAVEL = 16;
-      let lastOn = -1;
-
-      function paint(p) {
-        const pos = p * (N - 1);
-        for (let i = 0; i < N; i++) {
-          const s = slides[i];
-          const d = pos - i;                       // 0 centred, >0 leaving, <0 waiting
-          const near = Math.abs(d) < 1.35;         // only two are ever really on screen
-          s.el.style.visibility = near ? 'visible' : 'hidden';
-          if (!near) continue;
-
-          s.shot.style.transform = `translate3d(0, ${(-d * SHOT_TRAVEL).toFixed(2)}vh, 0) scale(${(1 - Math.min(0.08, Math.abs(d) * 0.08)).toFixed(4)})`;
-          s.name.style.transform = `translate3d(0, ${(-d * NAME_TRAVEL).toFixed(2)}vh, 0)`;
-
-          // the picture is gone before the name is; the name lingers to cross
-          const shotA = 1 - Math.min(1, Math.max(0, (Math.abs(d) - 0.34) / 0.42));
-          const nameA = 1 - Math.min(1, Math.max(0, (Math.abs(d) - 0.30) / 0.58));
-          s.shot.style.opacity = shotA.toFixed(3);
-          s.name.style.opacity = nameA.toFixed(3);
-          s.el.style.zIndex = String(10 - Math.round(Math.abs(d) * 10));
-          // only the slide at rest can be clicked
-          s.name.style.pointerEvents = Math.abs(d) < 0.4 ? 'auto' : 'none';
-        }
-        const on = Math.min(N - 1, Math.round(pos));
-        if (on !== lastOn) {
-          ticks.forEach((t, i) => t.classList.toggle('on', i === on));
-          if (nEl) nEl.textContent = String(on + 1).padStart(2, '0');
-          lastOn = on;
-        }
-      }
-
-      let pjP = 0;
-      ScrollTrigger.create({
-        trigger: '#work',
-        // a screen late: the hero opens onto the first slide, and it should be
-        // sitting still when the aperture clears rather than already moving
-        start: () => 'top+=' + innerHeight + ' top',
-        end: 'bottom bottom',
-        scrub: 0.5,
-        onUpdate: (self) => { pjP = self.progress; paint(pjP); },
-      });
-      paint(0);
-      // repaint where we stand, not back at the first slide
-      addEventListener('resize', () => paint(pjP), { passive: true });
-    }
-
-    /* ---- case study ----
-       A portfolio, not six popups: prev/next walks the roll without closing, and
-       the gallery inside each one drags, arrows and snaps. */
-    const caseEl = document.getElementById('case');
-    if (caseEl && window.__WORK) {
-      const WORK = window.__WORK;
-      const gallery = document.getElementById('case-gallery');
-      const dots = document.getElementById('case-dots');
-      const arrows = [...caseEl.querySelectorAll('[data-slide]')];
-      const fields = {
-        id: document.getElementById('case-id'),
-        tag: document.getElementById('case-tag'),
-        yr: document.getElementById('case-yr'),
-        title: document.getElementById('case-title'),
-        client: document.getElementById('case-client'),
-        brief: document.getElementById('case-brief'),
-        did: document.getElementById('case-did'),
-        result: document.getElementById('case-result'),
-        prev: document.getElementById('case-prev'),
-        next: document.getElementById('case-next'),
-      };
-
-      let index = 0, opened = false, lastFocus = null;
-
-      function render(i) {
-        index = (i + WORK.length) % WORK.length;
-        const w = WORK[index];
-        fields.id.textContent = w.id;
-        fields.tag.textContent = w.tag;
-        fields.yr.textContent = `’${w.yr}`;
-        fields.title.textContent = w.t;
-        fields.client.textContent = w.client;
-        fields.brief.textContent = w.brief;
-
-        fields.did.replaceChildren(...w.did.map((d) => {
-          const li = document.createElement('li'); li.textContent = d; return li;
-        }));
-        fields.result.replaceChildren(...w.result.map(([n, l]) => {
-          const div = document.createElement('div');
-          const dt = document.createElement('dt'); dt.textContent = n;
-          const dd = document.createElement('dd'); dd.textContent = l;
-          div.append(dt, dd); return div;
-        }));
-
-        gallery.replaceChildren(...w.shots.map((src, k) => {
-          const fig = document.createElement('div'); fig.className = 'case-shot';
-          const img = document.createElement('img');
-          img.src = src; img.alt = `${w.t}, picture ${k + 1} of ${w.shots.length}`;
-          img.loading = k ? 'lazy' : 'eager'; img.decoding = 'async'; img.draggable = false;
-          fig.append(img); return fig;
-        }));
-        dots.replaceChildren(...w.shots.map(() => document.createElement('i')));
-        gallery.scrollLeft = 0;
-        syncDots();
-
-        fields.prev.textContent = WORK[(index - 1 + WORK.length) % WORK.length].t;
-        fields.next.textContent = WORK[(index + 1) % WORK.length].t;
-      }
-
-      // which slide is nearest the middle, measured rather than counted, so a
-      // drag that lands between two of them still reports the right one
-      function current() {
-        const mid = gallery.scrollLeft + gallery.clientWidth / 2;
-        const kids = [...gallery.children];
-        let best = 0, bestD = Infinity;
-        kids.forEach((k, i) => {
-          const c = k.offsetLeft + k.offsetWidth / 2;
-          const d = Math.abs(c - mid);
-          if (d < bestD) { bestD = d; best = i; }
-        });
-        return best;
-      }
-      function syncDots() {
-        const c = current();
-        [...dots.children].forEach((d, i) => d.classList.toggle('on', i === c));
-        arrows[0].disabled = c === 0;
-        arrows[1].disabled = c === gallery.children.length - 1;
-      }
-      function slide(dir) {
-        const k = gallery.children[Math.min(gallery.children.length - 1, Math.max(0, current() + dir))];
-        if (k) gallery.scrollTo({ left: k.offsetLeft - (gallery.clientWidth - k.offsetWidth) / 2, behavior: reduced ? 'auto' : 'smooth' });
-      }
-      arrows.forEach((b) => b.addEventListener('click', () => slide(+b.dataset.slide)));
-      gallery.addEventListener('scroll', syncDots, { passive: true });
-
-      // drag to scrub the gallery on a trackpad-less desktop
-      let dragging = false, startX = 0, startL = 0, moved = 0;
-      gallery.addEventListener('pointerdown', (e) => {
-        if (e.pointerType === 'touch') return;   // native touch scrolling is better
-        dragging = true; moved = 0;
-        startX = e.clientX; startL = gallery.scrollLeft;
-        gallery.classList.add('is-dragging');
-        gallery.setPointerCapture(e.pointerId);
-      });
-      gallery.addEventListener('pointermove', (e) => {
-        if (!dragging) return;
-        const dx = e.clientX - startX;
-        moved = Math.max(moved, Math.abs(dx));
-        gallery.scrollLeft = startL - dx;
-      });
-      const endDrag = (e) => {
-        if (!dragging) return;
-        dragging = false;
-        gallery.classList.remove('is-dragging');
-        try { gallery.releasePointerCapture(e.pointerId); } catch {}
-        if (moved > 6) slide(0);   // settle onto the nearest slide
-      };
-      gallery.addEventListener('pointerup', endDrag);
-      gallery.addEventListener('pointercancel', endDrag);
-
-      function openCase(i, from) {
-        lastFocus = from || document.activeElement;
-        render(i);
-        caseEl.hidden = false;
-        document.body.style.overflow = 'hidden';
-        if (window.__lenis) window.__lenis.stop();
-        requestAnimationFrame(() => {
-          caseEl.classList.add('is-open');
-          opened = true;
-          caseEl.querySelector('.case-x').focus({ preventScroll: true });
-        });
-      }
-      function closeCase() {
-        if (!opened) return;
-        opened = false;
-        caseEl.classList.remove('is-open');
-        document.body.style.overflow = '';
-        if (window.__lenis) window.__lenis.start();
-        setTimeout(() => { if (!opened) caseEl.hidden = true; }, 460);
-        if (lastFocus && lastFocus.focus) lastFocus.focus({ preventScroll: true });
-      }
-
-      document.querySelectorAll('[data-case]').forEach((b) => {
-        b.addEventListener('click', () => openCase(+b.dataset.case, b));
-      });
-      caseEl.querySelectorAll('[data-case-close]').forEach((b) => b.addEventListener('click', closeCase));
-      caseEl.querySelectorAll('[data-case-step]').forEach((b) => {
-        b.addEventListener('click', () => render(index + (+b.dataset.caseStep)));
-      });
-
-      addEventListener('keydown', (e) => {
-        if (!opened) return;
-        if (e.key === 'Escape') { closeCase(); return; }
-        if (e.key === 'ArrowRight') { e.preventDefault(); slide(1); }
-        if (e.key === 'ArrowLeft') { e.preventDefault(); slide(-1); }
-        // keep the tab ring inside the panel while it is modal
-        if (e.key === 'Tab') {
-          const f = [...caseEl.querySelectorAll('button, a[href], [tabindex]:not([tabindex="-1"])')]
-            .filter((el) => !el.disabled && el.offsetParent !== null);
-          if (!f.length) return;
-          const first = f[0], last = f[f.length - 1];
-          if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
-          else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
-        }
-      });
-      addEventListener('resize', () => { if (opened) syncDots(); });
-    }
-
-    /* ---- the outro card ----
-       It comes in a little small and settles into the page, the way the panel
-       does in the reference. Transform only, so it costs nothing. */
-    const contactCard = document.getElementById('contact-card');
-    if (contactCard && !reduced) {
-      ScrollTrigger.create({
-        trigger: '#contact',
-        start: 'top bottom',
-        end: 'top center',
-        scrub: 0.5,
-        onUpdate: (self) => {
-          const k = 0.9 + 0.1 * self.progress;
-          contactCard.style.transform = `scale(${k.toFixed(4)})`;
-        },
-      });
-    }
-
-    /* ---- nav ----
-       It carries two colourways and swaps at the moment the page under it turns
-       from the ink hero to the bone work section. */
-    const nav = document.getElementById('nav');
-    const navToggle = document.getElementById('nav-toggle');
-    const navSheet = document.getElementById('nav-sheet');
-
-    if (nav) {
-      // The page runs ink, ink, bone, ink, deep, bone, rust, ink. Rather than
-      // hard-code where it turns, the light sections declare themselves and the
-      // nav asks which one is under it. Rust needs its own state: bone type
-      // still reads, but the rust button would vanish into the background.
-      const zones = [...document.querySelectorAll('[data-nav]')];
-      const PROBE = 46;   // the vertical middle of the nav rig
-      let lastMode = '';
-      const onZone = () => {
-        let mode = '';
-        for (const z of zones) {
-          const r = z.getBoundingClientRect();
-          if (r.top <= PROBE && r.bottom >= PROBE) { mode = z.dataset.nav; break; }
-        }
-        if (mode === lastMode) return;
-        nav.classList.toggle('is-paper', mode === 'paper');
-        nav.classList.toggle('is-hot', mode === 'hot');
-        lastMode = mode;
-      };
-      onZone();
-      addEventListener('scroll', onZone, { passive: true });
-      addEventListener('resize', onZone);
-    }
-
-    if (navToggle && navSheet) {
-      let open = false;
-      const setOpen = (v) => {
-        open = v;
-        navToggle.setAttribute('aria-expanded', String(v));
-        if (v) {
-          navSheet.hidden = false;
-          // one frame with the element laid out, so the transition has a start
-          requestAnimationFrame(() => navSheet.classList.add('is-open'));
-          document.body.style.overflow = 'hidden';
-        } else {
-          navSheet.classList.remove('is-open');
-          document.body.style.overflow = '';
-          setTimeout(() => { if (!open) navSheet.hidden = true; }, 450);
-        }
-      };
-      navToggle.addEventListener('click', () => setOpen(!open));
-      navSheet.addEventListener('click', (e) => {
-        if (e.target.closest('a')) setOpen(false);
-      });
-      addEventListener('keydown', (e) => { if (e.key === 'Escape' && open) setOpen(false); });
-    }
-
-    /* ---- reveals ---- */
-    if (reduced) {
-      document.querySelectorAll('.rv').forEach((el) => el.classList.add('shown'));
-    } else {
-      gsap.utils.toArray('.rv').forEach((el) => {
-        gsap.to(el, {
-          opacity: 1, y: 0, duration: 0.9, ease: 'power3.out',
-          scrollTrigger: { trigger: el, start: 'top 88%', once: true },
-        });
-      });
-    }
-
-    /* ---- ticker ---- */
-    const track = document.querySelector('.marquee');
-    if (track && !reduced) {
-      gsap.to(track, { xPercent: -50, duration: 26, ease: 'none', repeat: -1 });
-    }
-
-    /* ---- brief -> mail ---- */
-    const form = document.getElementById('brief');
-    form?.addEventListener('submit', (e) => {
-      e.preventDefault();
-      const v = (n) => (form.elements[n]?.value || '').trim();
-      const subject = encodeURIComponent(`Brief from ${v('name') || 'the website'}`);
-      const body = encodeURIComponent(
-        `Name: ${v('name')}\nEmail: ${v('email')}\nSite: ${v('site')}\n\n${v('msg')}`
-      );
-      location.href = `mailto:info@rapidsolutions.live?subject=${subject}&body=${body}`;
-      document.getElementById('sent')?.classList.remove('hidden');
-      form.classList.add('hidden');
-    });
   </script>
 </Base>

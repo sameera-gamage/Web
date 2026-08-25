@@ -5,67 +5,54 @@
 @layer base {
   :root { --edge: clamp(20px, 5vw, 72px); }
 
-  html { -webkit-text-size-adjust: 100%; }
+  html { -webkit-text-size-adjust: 100%; color-scheme: dark; }
   body {
-    @apply bg-bone text-ink font-sans antialiased;
+    @apply bg-ink text-chalk font-sans antialiased;
     overflow-x: hidden;
     overflow-x: clip;
   }
 
-  ::selection { background: #D6461F; color: #F2EDE4; }
+  ::selection { background: #FF5A1F; color: #EDEAE6; }
 
-  h1, h2, h3 { @apply font-display; letter-spacing: -0.03em; line-height: 0.94; }
+  h1, h2, h3 { @apply font-display; letter-spacing: -0.035em; line-height: 0.94; }
 
-  /* Film grain over the paper sections. It sits BELOW the hero card (z-41) on
-     purpose: multiplying noise onto near-black footage reads as compression
-     dirt rather than paper, and the hero has its own grain in the negative. */
+  /* Grain. No blend mode — multiply on a fixed full-screen layer forced a
+     compositing pass every frame and halved the frame rate. Plain alpha at this
+     opacity reads the same, and on a black page it only ever lifts. */
   body::after {
     content: '';
     position: fixed; inset: 0; z-index: 40; pointer-events: none;
-    /* No blend mode. multiply on a fixed full-screen layer forced a compositing
-       pass on every frame — it halved the frame rate on its own — and plain
-       alpha over the paper reads the same at this opacity. */
-    opacity: .05;
+    opacity: .04;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.82' numOctaves='3'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
   }
 
-  :focus-visible { outline: 2px solid #D6461F; outline-offset: 3px; }
+  :focus-visible { outline: 2px solid #FF5A1F; outline-offset: 3px; }
+
+  img, video { display: block; max-width: 100%; }
 }
 
 @layer components {
   .edge { padding-inline: var(--edge); }
 
-  /* rule that reads as a printed hairline, not a CSS border */
-  .rule { @apply border-t border-ink/15; }
-
   .label {
-    @apply font-mono text-[11px] uppercase tracking-[0.22em] text-ink/55;
+    @apply font-mono text-[11px] uppercase tracking-[0.22em];
+    color: rgba(237,234,230,.5);
   }
 
-  .btn {
-    @apply inline-flex items-center gap-3 rounded-full px-7 py-3.5 text-[15px] font-semibold
-           transition-transform duration-300 will-change-transform;
+  .skip {
+    position: absolute; left: -9999px;
   }
-  .btn:hover { transform: translateY(-2px); }
-  .btn-solid { @apply bg-ink text-bone; }
-  .btn-rust  { @apply bg-rust text-bone; }
-  .btn-line  { @apply border border-ink/30 text-ink; }
-
-  /* link with a rule that wipes in, an old print trick */
-  .ulink { @apply relative inline-block; }
-  .ulink::after {
-    content: ''; position: absolute; left: 0; bottom: -2px; height: 1px; width: 100%;
-    background: currentColor; transform: scaleX(0); transform-origin: right;
-    transition: transform .45s cubic-bezier(.22,.8,.28,1);
+  .skip:focus {
+    left: 1rem; top: 1rem; z-index: 100;
+    background: #FF5A1F; color: #EDEAE6; padding: .75rem 1.25rem;
   }
-  .ulink:hover::after { transform: scaleX(1); transform-origin: left; }
 }
 
 /* ---- loader ---- */
 .boot {
   position: fixed; inset: 0; z-index: 90;
   display: flex; align-items: center; justify-content: center;
-  background: #12100E;
+  background: #0A0A0A;
   transition: opacity .7s ease, visibility .7s ease;
 }
 .boot.is-done { opacity: 0; visibility: hidden; }
@@ -73,17 +60,17 @@
 .boot-mark {
   font-family: 'Syne', ui-sans-serif, system-ui, sans-serif;
   font-weight: 800; letter-spacing: -.03em;
-  font-size: clamp(1.6rem, 5vw, 2.6rem); color: #F2EDE4;
+  font-size: clamp(1.6rem, 5vw, 2.6rem); color: #EDEAE6;
 }
 /* the aperture: a ring that fills round as the bytes land */
 .boot-iris {
   position: relative; display: block;
   width: 46px; height: 46px; border-radius: 50%;
-  border: 1.5px solid rgba(242,237,228,.22);
+  border: 1.5px solid rgba(237,234,230,.22);
 }
 .boot-iris i {
   position: absolute; inset: -1.5px; border-radius: 50%;
-  background: conic-gradient(#D6461F var(--fill, 0%), transparent 0);
+  background: conic-gradient(#FF5A1F var(--fill, 0%), transparent 0);
   -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 3px));
           mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 3px));
 }
@@ -91,9 +78,9 @@
   display: flex; align-items: baseline; gap: .6rem;
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   font-size: 11px; letter-spacing: .2em; text-transform: uppercase;
-  color: rgba(242,237,228,.45);
+  color: rgba(237,234,230,.45);
 }
-.boot-read em { font-style: normal; color: #F2EDE4; }
+.boot-read em { font-style: normal; color: #EDEAE6; }
 .boot-what { margin-left: .6rem; }
 /* no JS, no wait: never trap anyone behind a loader that cannot clear */
 .no-js .boot { display: none; }
@@ -111,7 +98,7 @@
 
 /* the roll is pulled up under the hero's last screen so the aperture opens onto
    it; the hero card is z-41 and covers it until the hole is punched */
-.work-under { margin-top: -100vh; }
+.gate-under { margin-top: -100vh; }
 
 /* The mat the card sits in.
    Pulling the roll up under the hero means it paints over everything in #top
@@ -128,7 +115,7 @@
   inset: 0;
   z-index: 42;
   pointer-events: none;
-  border: var(--hero-inset) solid #F2EDE4;
+  border: var(--hero-inset) solid #0A0A0A;
   border-radius: calc(var(--hero-radius) + var(--hero-inset));
   will-change: opacity;
 }
@@ -141,7 +128,7 @@
   top: 0;
   height: 100vh;
   margin-bottom: -100vh;
-  background: #12100E;
+  background: #0A0A0A;
   opacity: 0;
   pointer-events: none;
 }
@@ -182,8 +169,8 @@
 .smoke-warm {
   top: -24%; right: -26%; width: 86%; height: 126%;
   background: radial-gradient(closest-side,
-    rgba(214,90,31,.34) 0%, rgba(214,90,31,.24) 24%,
-    rgba(233,162,39,.11) 52%, rgba(233,162,39,.03) 74%, transparent 88%);
+    rgba(255,90,31,.34) 0%, rgba(255,90,31,.24) 24%,
+    rgba(255,145,66,.11) 52%, rgba(255,145,66,.03) 74%, transparent 88%);
   animation: drift-warm 37s ease-in-out infinite;
 }
 .smoke-cool {
@@ -209,8 +196,8 @@
 
 .hero-well {
   background:
-    radial-gradient(58% 46% at 50% 52%, rgba(233,162,39,.13), rgba(214,70,31,.06) 42%, transparent 72%),
-    #12100E;
+    radial-gradient(58% 46% at 50% 52%, rgba(255,145,66,.13), rgba(255,90,31,.06) 42%, transparent 72%),
+    #0A0A0A;
 }
 
 /* ---- hero footage ----
@@ -225,17 +212,17 @@
 .hero-vid {
   object-fit: cover;
   will-change: transform;
-  background: #12100E;
+  background: #0A0A0A;
 }
 /* the copy sits left of the camera on a wide screen and above it on a phone,
    so the scrim that keeps it readable has to turn with the layout */
 .hero-scrim {
-  background: linear-gradient(105deg, rgba(18,16,14,.86) 0%, rgba(18,16,14,.42) 48%, transparent 78%);
+  background: linear-gradient(105deg, rgba(10,10,10,.86) 0%, rgba(10,10,10,.42) 48%, transparent 78%);
 }
 
 @media (max-aspect-ratio: 3/4) {
   .hero-scrim {
-    background: linear-gradient(to bottom, rgba(18,16,14,.92) 0%, rgba(18,16,14,.55) 42%, transparent 70%);
+    background: linear-gradient(to bottom, rgba(10,10,10,.92) 0%, rgba(10,10,10,.55) 42%, transparent 70%);
   }
   .hero-stage {
     top: 46%;
@@ -269,7 +256,7 @@
   aspect-ratio: 3 / 2;
   border-radius: 14px;
   overflow: hidden;
-  background: #0A0908;
+  background: #000000;
   will-change: transform, opacity;
 }
 .pj-shot img {
@@ -288,13 +275,13 @@
 .pj-idx {
   position: absolute; left: 0; top: .2em;
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 10px; letter-spacing: .2em; color: rgba(242,237,228,.45);
+  font-size: 10px; letter-spacing: .2em; color: rgba(237,234,230,.45);
 }
 .pj-title {
   font-size: clamp(2.6rem, 8.2vw, 7rem);
   line-height: .92;
   letter-spacing: -.035em;
-  color: #F2EDE4;
+  color: #EDEAE6;
   max-width: 16ch;
   text-wrap: balance;
 }
@@ -303,38 +290,41 @@
   margin-top: 1.1rem;
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   font-size: 10.5px; letter-spacing: .18em; text-transform: uppercase;
-  color: rgba(242,237,228,.5);
+  color: rgba(237,234,230,.5);
 }
 .pj-open {
   display: inline-flex; align-items: center; gap: .6rem;
   margin-top: 1.6rem; padding: .75rem 1.4rem;
-  border-radius: 999px; border: 1px solid rgba(242,237,228,.28);
-  color: #F2EDE4;
+  border-radius: 999px; border: 1px solid rgba(237,234,230,.28);
+  color: #EDEAE6;
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   font-size: 10.5px; letter-spacing: .2em; text-transform: uppercase;
   transition: background-color .3s ease, color .3s ease, border-color .3s ease;
 }
 .pj-open::after { content: '→'; }
-.pj-open:hover { background: #D6461F; border-color: #D6461F; color: #F2EDE4; }
+.pj-open:hover { background: #FF5A1F; border-color: #FF5A1F; color: #EDEAE6; }
 
 /* standing furniture: it does not move with the slides */
-.pj-chrome { position: absolute; inset: 0; pointer-events: none; z-index: 3; }
+/* Above the slides, not below them. The slides take a z-index of up to 10 as
+   they cross, and at 3 this was painting under them — which meant the ladder
+   never got the pointer and hovering a rung did nothing. */
+.pj-chrome { position: absolute; inset: 0; pointer-events: none; z-index: 20; }
 .pj-rule-l {
   position: absolute; left: 0; top: 50%; width: calc(var(--edge) * .7); height: 1px;
-  background: rgba(242,237,228,.22);
+  background: rgba(237,234,230,.22);
 }
 .pj-kicker {
   position: absolute; left: var(--edge); top: calc(var(--hero-inset) + 78px);
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   font-size: 10px; letter-spacing: .24em; text-transform: uppercase;
-  color: rgba(242,237,228,.4);
+  color: rgba(237,234,230,.4);
 }
 .pj-count {
   position: absolute; right: var(--edge); bottom: calc(var(--hero-inset) + 34px);
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 10px; letter-spacing: .2em; color: rgba(242,237,228,.4);
+  font-size: 10px; letter-spacing: .2em; color: rgba(237,234,230,.4);
 }
-.pj-count em { font-style: normal; color: #E9A227; }
+.pj-count em { font-style: normal; color: #FF9142; }
 /* the tick ladder down the right edge */
 .pj-ticks {
   position: absolute; right: calc(var(--edge) * .42); top: 50%;
@@ -342,10 +332,10 @@
   display: flex; flex-direction: column; gap: 7px;
 }
 .pj-ticks i {
-  display: block; width: 14px; height: 1px; background: rgba(242,237,228,.2);
+  display: block; width: 14px; height: 1px; background: rgba(237,234,230,.2);
   transition: width .35s ease, background-color .35s ease;
 }
-.pj-ticks i.on { width: 26px; background: #D6461F; }
+.pj-ticks i.on { width: 26px; background: #FF5A1F; }
 
 @media (max-width: 767px) {
   .pj-shot { width: 86vw; aspect-ratio: 4 / 3; }
@@ -373,271 +363,46 @@
 .marks i:nth-child(4) { right: 14px; bottom: 14px; }
 @media (max-width: 640px) { .marks { display: none; } }
 
-/* ---- the outro card ---- */
-.contact-wrap { padding-inline: clamp(10px, 2vw, 22px); }
-.contact-card {
-  background: #D6461F;
-  color: #F2EDE4;
-  border-radius: clamp(18px, 2.4vw, 30px);
-  padding-block: clamp(3rem, 9vw, 8rem);
-  transform-origin: 50% 60%;
-  will-change: transform;
-}
-.contact-card .label { color: rgba(242,237,228,.7); }
-
-/* ---- case study ---- */
-.case {
-  position: fixed; inset: 0; z-index: 80;
-  display: flex; align-items: center; justify-content: center;
-  padding: clamp(10px, 2vw, 28px);
-}
-.case[hidden] { display: none; }
-
-.case-scrim {
-  position: absolute; inset: 0;
-  background: rgba(8,7,6,.86);
-  opacity: 0; transition: opacity .4s ease;
-}
-.case.is-open .case-scrim { opacity: 1; }
-
-.case-panel {
-  position: relative;
-  width: min(1180px, 100%);
-  max-height: 100%;
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  background: #12100E;
-  color: #F2EDE4;
-  border: 1px solid rgba(242,237,228,.12);
-  border-radius: clamp(16px, 2vw, 26px);
-  padding: clamp(1.4rem, 3.4vw, 3rem);
-  opacity: 0;
-  transform: translateY(26px) scale(.985);
-  transition: opacity .45s ease, transform .55s cubic-bezier(.22,.8,.28,1);
-}
-.case.is-open .case-panel { opacity: 1; transform: none; }
-
-.case-x {
-  position: absolute; top: clamp(.9rem,2vw,1.5rem); right: clamp(.9rem,2vw,1.5rem);
-  z-index: 2;
-  width: 40px; height: 40px; border-radius: 999px;
-  border: 1px solid rgba(242,237,228,.22);
-  background: rgba(18,16,14,.6);
-  -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
-}
-.case-x span {
-  position: absolute; left: 11px; top: 19px; width: 16px; height: 1.5px;
-  background: #F2EDE4; border-radius: 2px;
-}
-.case-x span:first-child { transform: rotate(45deg); }
-.case-x span + span { transform: rotate(-45deg); }
-.case-x:hover { background: #D6461F; border-color: #D6461F; }
-
-.case-eyebrow {
-  display: flex; flex-wrap: wrap; gap: .9rem; align-items: baseline;
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 11px; letter-spacing: .2em; text-transform: uppercase;
-  color: rgba(242,237,228,.5);
-}
-.case-eyebrow em { font-style: normal; color: #E9A227; }
-.case-title {
-  margin-top: .7rem;
-  font-size: clamp(1.9rem, 5vw, 3.4rem);
-  color: #F2EDE4;
-  max-width: 22ch;
-}
-.case-client {
-  margin-top: .7rem; max-width: 46ch;
-  font-size: 15px; color: rgba(242,237,228,.62);
-}
-
-/* the gallery: native scroll-snap, so touch and trackpad behave without JS */
-.case-stage { margin-top: clamp(1.4rem, 3vw, 2.2rem); }
-.case-gallery {
-  display: flex; gap: 10px;
-  overflow-x: auto; overscroll-behavior-x: contain;
-  scroll-snap-type: x mandatory;
-  scrollbar-width: none;
-  border-radius: 10px;
-  cursor: grab;
-}
-.case-gallery::-webkit-scrollbar { display: none; }
-.case-gallery.is-dragging { cursor: grabbing; scroll-snap-type: none; }
-.case-shot {
-  flex: 0 0 100%;
-  scroll-snap-align: center;
-  aspect-ratio: 16 / 10;
-  overflow: hidden; border-radius: 10px;
-  background: #0A0908;
-}
-.case-shot img {
-  width: 100%; height: 100%; object-fit: cover;
-  filter: contrast(1.1) saturate(.95) brightness(.96);
-  -webkit-user-drag: none; user-select: none;
-}
-@media (min-width: 900px) { .case-shot { flex-basis: 62%; } }
-
-.case-rail {
-  display: flex; align-items: center; gap: 1rem;
-  margin-top: .9rem;
-}
-.case-arrow {
-  width: 38px; height: 38px; border-radius: 999px;
-  border: 1px solid rgba(242,237,228,.22);
-  color: #F2EDE4; font-size: 15px; line-height: 1;
-  transition: background-color .25s ease, border-color .25s ease, color .25s ease;
-}
-.case-arrow:hover { background: #F2EDE4; color: #12100E; border-color: #F2EDE4; }
-.case-arrow[disabled] { opacity: .3; pointer-events: none; }
-.case-dots { display: flex; gap: 7px; }
-.case-dots i {
-  display: block; width: 22px; height: 2px; border-radius: 2px;
-  background: rgba(242,237,228,.22);
-  transition: background-color .3s ease;
-}
-.case-dots i.on { background: #D6461F; }
-
-.case-body {
-  display: grid; gap: clamp(1.4rem, 3vw, 2.4rem);
-  margin-top: clamp(1.6rem, 3.4vw, 2.6rem);
-  padding-top: clamp(1.4rem, 3vw, 2rem);
-  border-top: 1px solid rgba(242,237,228,.12);
-}
-@media (min-width: 820px) { .case-body { grid-template-columns: 1.2fr 1fr 1fr; } }
-.case-h {
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 11px; letter-spacing: .2em; text-transform: uppercase;
-  color: rgba(242,237,228,.42); margin-bottom: .8rem;
-}
-.case-p { font-size: 15px; line-height: 1.65; color: rgba(242,237,228,.8); }
-.case-list { display: grid; gap: .55rem; }
-.case-list li {
-  position: relative; padding-left: 1.1rem;
-  font-size: 14px; line-height: 1.5; color: rgba(242,237,228,.8);
-}
-.case-list li::before {
-  content: ''; position: absolute; left: 0; top: .55em;
-  width: 5px; height: 5px; border-radius: 50%; background: #D6461F;
-}
-.case-result { display: grid; gap: 1rem; }
-.case-result div { display: flex; align-items: baseline; gap: .8rem; }
-.case-result dt {
-  font-family: 'Syne', ui-sans-serif, sans-serif; font-weight: 800;
-  font-size: clamp(1.3rem, 2.4vw, 1.9rem); color: #E9A227;
-  letter-spacing: -.02em; min-width: 4.5ch;
-}
-.case-result dd {
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 11px; letter-spacing: .14em; text-transform: uppercase;
-  color: rgba(242,237,228,.5);
-}
-
-.case-foot {
-  display: flex; flex-wrap: wrap; align-items: center; gap: 1rem;
-  margin-top: clamp(1.6rem, 3.4vw, 2.4rem);
-  padding-top: clamp(1.2rem, 2.6vw, 1.8rem);
-  border-top: 1px solid rgba(242,237,228,.12);
-}
-.case-step { text-align: left; max-width: 15rem; }
-.case-step-next { margin-left: auto; text-align: right; }
-.case-step-k {
-  display: block;
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 10px; letter-spacing: .2em; text-transform: uppercase;
-  color: rgba(242,237,228,.42);
-}
-.case-step-t {
-  display: block; margin-top: .25rem;
-  font-family: 'Syne', ui-sans-serif, sans-serif; font-weight: 700; font-size: 15px;
-  color: rgba(242,237,228,.85);
-  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-}
-.case-step:hover .case-step-t { color: #E9A227; }
-.case-cta {
-  order: 3; width: 100%;
-  display: inline-flex; justify-content: center;
-  padding: .85rem 1.4rem; border-radius: 999px;
-  background: #D6461F; color: #F2EDE4;
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 11px; letter-spacing: .16em; text-transform: uppercase;
-}
-.case-cta:hover { background: #E9A227; color: #12100E; }
-@media (min-width: 640px) { .case-cta { order: 0; width: auto; } }
-
-/* the whole frame on the contact sheet is the hit target */
-.frame-open {
-  position: absolute; inset: 0; z-index: 2;
-  cursor: pointer; background: transparent; border: 0;
-}
-.frame-open:focus-visible { outline-offset: -4px; }
-
 /* ---- nav ----
-   Two floating pieces set in on the same margin as the hero card. Colour is a
-   single pair of custom properties so the whole rig inverts in one place when
-   the page turns from ink to bone under it. */
+   Two floating pieces on the same margin as the hero card. It is persisted
+   across page transitions (transition:persist), so it does not flash out and
+   back on every navigation — it simply stays put while the pages move under it. */
 .nav {
-  --nav-ink: #F2EDE4;
-  --nav-line: rgba(242,237,228,.22);
-  --nav-glass: rgba(18,16,14,.34);
+  position: fixed; inset-inline: 0; top: 0; z-index: 50;
   padding: calc(var(--hero-inset) + 10px) calc(var(--hero-inset) + 10px) 0;
-  transition: color .4s ease;
+  pointer-events: none;
 }
-.nav-in { max-width: 1560px; margin-inline: auto; }
-
-.nav.is-paper {
-  --nav-ink: #12100E;
-  --nav-line: rgba(18,16,14,.18);
-  --nav-glass: rgba(242,237,228,.62);
-}
-
-/* over the rust contact block: bone type still reads, but a rust button on a
-   rust field is invisible, so the call to action goes ink */
-.nav.is-hot {
-  --nav-ink: #F2EDE4;
-  --nav-line: rgba(242,237,228,.34);
-  --nav-glass: rgba(18,16,14,.16);
-}
-.nav.is-hot .nav-cta { background: #12100E; color: #F2EDE4; }
-.nav.is-hot .nav-cta:hover { background: #F2EDE4; color: #12100E; }
-/* the contact headline is bone and starts at the top of the block, so bone type
-   on rust would land straight on top of it — the mark gets its own plate */
-.nav.is-hot .nav-mark {
-  background: rgba(18,16,14,.32);
-  border-color: rgba(242,237,228,.24);
-  -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+.nav-in {
+  max-width: 1680px; margin-inline: auto;
+  display: flex; align-items: center; justify-content: space-between; gap: 1rem;
 }
 
 .nav-mark {
+  pointer-events: auto;
   display: inline-flex; align-items: center; gap: .55rem;
   font-family: 'Syne', ui-sans-serif, system-ui, sans-serif;
   font-weight: 800; font-size: 17px; letter-spacing: -.02em;
-  color: var(--nav-ink);
+  color: #EDEAE6;
   padding: .5rem .95rem .5rem .7rem;
   border-radius: 999px;
-  border: 1px solid transparent;
-  transition: color .4s ease, border-color .4s ease, background-color .4s ease;
 }
-.nav.is-paper .nav-mark { border-color: var(--nav-line); background: rgba(242,237,228,.5); }
-.nav-sep { color: #D6461F; }
-
-/* the aperture, closed — a small nod to what the hero is doing */
+.nav-sep { color: #FF5A1F; }
 .nav-dot {
   width: 9px; height: 9px; border-radius: 50%;
-  background: #D6461F;
-  box-shadow: 0 0 0 3px rgba(214,70,31,.18);
+  background: #FF5A1F; box-shadow: 0 0 0 3px rgba(255,90,31,.18);
   transition: transform .5s cubic-bezier(.22,.8,.28,1), box-shadow .5s ease;
 }
-.nav-mark:hover .nav-dot { transform: scale(1.5); box-shadow: 0 0 0 6px rgba(214,70,31,.14); }
+.nav-mark:hover .nav-dot { transform: scale(1.5); box-shadow: 0 0 0 6px rgba(255,90,31,.14); }
 
 .nav-pill {
-  align-items: center; gap: .25rem;
+  pointer-events: auto;
+  display: flex; align-items: center; gap: .25rem;
   padding: .4rem .4rem .4rem .75rem;
   border-radius: 999px;
-  border: 1px solid var(--nav-line);
-  background: var(--nav-glass);
+  border: 1px solid #2A2A2A;
+  background: rgba(18,18,18,.72);
   -webkit-backdrop-filter: blur(14px) saturate(1.3);
           backdrop-filter: blur(14px) saturate(1.3);
-  transition: background-color .4s ease, border-color .4s ease;
 }
 
 .nav-link {
@@ -647,9 +412,10 @@
   border-radius: 999px;
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   font-size: 11px; letter-spacing: .2em; text-transform: uppercase;
-  color: var(--nav-ink);
+  color: rgba(237,234,230,.62);
   transition: color .3s ease;
 }
+.nav-link:hover, .nav-link.is-here { color: #EDEAE6; }
 .nav-num { font-size: 9px; opacity: .5; }
 /* the fill grows from the baseline rather than fading, so it reads as a
    printed block dropping in behind the word */
@@ -659,92 +425,339 @@
   transform: scaleY(.2); transform-origin: bottom;
   transition: transform .4s cubic-bezier(.22,.8,.28,1), opacity .3s ease;
 }
-.nav-link:hover::before { opacity: .12; transform: scaleY(1); }
+.nav-link:hover::before { opacity: .1; transform: scaleY(1); }
+.nav-link.is-here::before { opacity: .08; transform: scaleY(1); }
 .nav-link > span { position: relative; }
 
 .nav-cta {
   display: inline-flex; align-items: center;
   margin-left: .35rem; padding: .6rem 1.15rem;
-  border-radius: 999px; background: #D6461F; color: #F2EDE4;
+  border-radius: 999px; background: #FF5A1F; color: #EDEAE6;
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   font-size: 11px; letter-spacing: .16em; text-transform: uppercase;
-  transition: transform .35s cubic-bezier(.22,.8,.28,1), background-color .3s ease;
+  transition: transform .35s cubic-bezier(.22,.8,.28,1), background-color .3s ease, color .3s ease;
 }
-.nav-cta:hover { transform: translateY(-1px); background: #E9A227; color: #12100E; }
+.nav-cta:hover { transform: translateY(-1px); background: #FF9142; color: #0A0A0A; }
 
-/* phone: a labelled control, not a bare glyph */
-.nav-burger {
-  display: inline-flex; align-items: center; gap: .6rem;
-  padding: .55rem 1rem; border-radius: 999px;
-  border: 1px solid var(--nav-line); background: var(--nav-glass);
-  -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px);
-  color: var(--nav-ink);
+@media (max-width: 600px) {
+  .nav-mark span:last-child { display: none; }
+  .nav-link { padding: .5rem .6rem; }
+  .nav-num { display: none; }
+  .nav-cta { padding: .6rem .9rem; }
+}
+
+/* ---- the way in ----
+   Two screens. The first is the hero's reveal target, so it is pulled up under
+   the hero (.gate-under) and is covered by the hero card until the aperture
+   punches through — nothing in it can take a click, which is why the link is in
+   the second screen instead. */
+.gate {
+  position: relative;
+  background: #0A0A0A;
+}
+.gate-say, .gate-do {
+  min-height: 100vh;
+  display: grid; align-content: center;
+  padding-inline: var(--edge);
+  max-width: 1680px; margin-inline: auto;
+  width: 100%;
+}
+.gate-k {
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 11px; letter-spacing: .2em; text-transform: uppercase;
+  font-size: 11px; letter-spacing: .24em; text-transform: uppercase;
+  color: rgba(237,234,230,.45);
 }
-.nav-burger-lines { display: block; width: 16px; }
-.nav-burger-lines i {
-  display: block; height: 1.5px; background: currentColor; border-radius: 2px;
-  transition: transform .35s cubic-bezier(.22,.8,.28,1);
+.gate-h {
+  margin-top: 1.4rem;
+  font-size: clamp(2.6rem, 9vw, 7.5rem);
+  line-height: .92;
 }
-.nav-burger-lines i + i { margin-top: 4px; }
-.nav-burger[aria-expanded='true'] .nav-burger-lines i:first-child { transform: translateY(2.75px) rotate(45deg); }
-.nav-burger[aria-expanded='true'] .nav-burger-lines i + i { transform: translateY(-2.75px) rotate(-45deg); }
+.gate-h span { display: block; }
+.gate-h span + span { color: #FF5A1F; }
+.gate-p {
+  max-width: 44ch;
+  font-size: clamp(15px, 1.4vw, 19px); line-height: 1.6;
+  color: rgba(237,234,230,.62);
+}
 
-.nav-sheet {
-  position: fixed; inset: 0; z-index: 49;
-  overflow: hidden;
-  background: #12100E;
-  opacity: 0; transition: opacity .45s ease;
-  display: flex; align-items: center;
+/* one link, and the picture inside it is the one that grows into the next page */
+.gate-go {
+  display: inline-flex; align-items: center; gap: 1.4rem;
+  width: fit-content;
+  margin-top: clamp(2.6rem, 6vw, 4.5rem);
+  padding: .8rem 1.6rem .8rem .8rem;
+  border: 1px solid #2A2A2A; border-radius: 999px;
+  background: #121212;
+  transition: border-color .35s ease, background-color .35s ease, transform .45s cubic-bezier(.22,.8,.28,1);
 }
-/* display:flex above outranks the UA's [hidden]{display:none}, so without this
-   the closed sheet stays laid out — invisible at opacity 0, full-screen at
-   z-49, and swallowing every click on the page underneath it. */
-.nav-sheet[hidden] { display: none; }
-.nav-sheet.is-open { opacity: 1; }
-.nav-sheet-in { padding-inline: calc(var(--hero-inset) + 22px); width: 100%; }
-.nav-sheet-link {
-  display: flex; align-items: baseline; gap: 1rem;
-  padding: .5rem 0;
-  font-family: 'Syne', ui-sans-serif, system-ui, sans-serif;
-  font-weight: 800; letter-spacing: -.03em; line-height: 1;
-  font-size: clamp(1.9rem, 10.2vw, 3.4rem); color: #F2EDE4;
-  opacity: 0; transform: translateY(18px);
-  transition: opacity .5s ease, transform .5s cubic-bezier(.22,.8,.28,1);
+.gate-go:hover { border-color: #FF5A1F; background: #1C1C1C; transform: translateX(6px); }
+.gate-go-plate {
+  width: clamp(64px, 8vw, 96px); aspect-ratio: 1;
+  border-radius: 999px; overflow: hidden; flex: none;
 }
-.nav-sheet.is-open .nav-sheet-link { opacity: 1; transform: none; }
-.nav-sheet-link:nth-child(1) { transition-delay: .06s; }
-.nav-sheet-link:nth-child(2) { transition-delay: .12s; }
-.nav-sheet-link:nth-child(3) { transition-delay: .18s; }
-.nav-sheet-link:nth-child(4) { transition-delay: .24s; }
-.nav-sheet-link .nav-num { font-size: 12px; color: #D6461F; opacity: 1; }
-.nav-sheet-mail {
-  display: inline-block; margin-top: 2.2rem;
+.gate-go-plate img { width: 100%; height: 100%; object-fit: cover; }
+.gate-go-t { display: grid; gap: .3rem; }
+.gate-go-t em {
+  font-style: normal;
+  font-family: 'Syne', ui-sans-serif, sans-serif; font-weight: 800;
+  font-size: clamp(1.05rem, 2vw, 1.5rem); letter-spacing: -.02em;
+}
+.gate-go-t b {
+  font-weight: 400;
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 12px; letter-spacing: .18em; color: rgba(242,237,228,.6);
+  font-size: 10.5px; letter-spacing: .2em; text-transform: uppercase;
+  color: rgba(237,234,230,.45);
+}
+.gate-go-x { font-size: 20px; color: #FF5A1F; }
+
+/* ---- footer ---- */
+.foot {
+  padding: 14vh var(--edge) 8vh;
+  border-top: 1px solid #1C1C1C;
+  background: #0A0A0A;
+}
+.foot-k {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 11px; letter-spacing: .22em; text-transform: uppercase;
+  color: rgba(237,234,230,.45);
+}
+.foot-mail {
+  display: inline-block; margin-top: 1rem;
+  font-family: 'Syne', ui-sans-serif, sans-serif; font-weight: 800;
+  font-size: clamp(1.6rem, 5vw, 3.4rem); letter-spacing: -.03em;
+  color: #EDEAE6;
+}
+.foot-mail:hover { color: #FF5A1F; }
+.foot-c {
+  margin-top: 4rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 10.5px; letter-spacing: .18em; color: rgba(237,234,230,.32);
 }
 
-/* reveal: set by GSAP, but safe if JS never runs */
-.rv { opacity: 0; transform: translateY(18px); }
-.no-js .rv, .rv.shown { opacity: 1; transform: none; }
+/* ---- the ladder ----
+   Not decoration: hovering a rung drives the page's scroll to that project, so
+   there is never a second idea of "which one is showing" to keep in step. */
+.stage { position: sticky; top: 0; height: 100vh; overflow: hidden; }
+
+.ladder {
+  position: absolute; right: calc(var(--edge) * .38); top: 50%;
+  transform: translateY(-50%);
+  display: flex; flex-direction: column; gap: 10px;
+  pointer-events: auto;
+}
+.rung {
+  position: relative;
+  display: flex; align-items: center; justify-content: flex-end;
+  width: 40px; padding: 5px 0;
+  background: none; border: 0; cursor: pointer;
+}
+.rung-bar {
+  display: block; width: 16px; height: 1px; background: rgba(237,234,230,.28);
+  transition: width .35s cubic-bezier(.22,.8,.28,1), background-color .35s ease;
+}
+.rung-tip {
+  /* out of flow, so a long client name cannot shove its own rung out of line */
+  position: absolute; right: 100%; margin-right: .9rem; top: 50%;
+  translate: 0 -50%;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 10px; letter-spacing: .18em; text-transform: uppercase;
+  color: rgba(237,234,230,.55);
+  opacity: 0; transform: translateX(8px);
+  transition: opacity .3s ease, transform .35s cubic-bezier(.22,.8,.28,1);
+  white-space: nowrap; pointer-events: none;
+}
+.rung:hover .rung-bar, .rung:focus-visible .rung-bar { width: 34px; background: #FF9142; }
+.rung:hover .rung-tip, .rung:focus-visible .rung-tip { opacity: 1; transform: none; }
+.rung.on .rung-bar { width: 30px; background: #FF5A1F; }
+.rung.on .rung-tip { opacity: .8; transform: none; color: #EDEAE6; }
+@media (max-width: 767px) { .ladder { display: none; } }
+
+/* the picture is a link now, with its own affordance */
+.pj-shot { display: block; cursor: pointer; }
+.pj-go {
+  position: absolute; left: 50%; top: 50%;
+  transform: translate(-50%, -50%) scale(.9);
+  display: grid; place-items: center;
+  width: clamp(96px, 11vw, 132px); aspect-ratio: 1; border-radius: 999px;
+  background: rgba(10,10,10,.55);
+  -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+  border: 1px solid rgba(237,234,230,.3);
+  opacity: 0; transition: opacity .35s ease, transform .45s cubic-bezier(.22,.8,.28,1);
+}
+.pj-go em {
+  font-style: normal;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 9.5px; letter-spacing: .18em; text-transform: uppercase;
+  text-align: center; color: #EDEAE6;
+}
+.pj-shot:hover .pj-go { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+.pj-line {
+  margin-top: .9rem; max-width: 34ch;
+  font-size: clamp(14px, 1.3vw, 17px); color: rgba(237,234,230,.6);
+}
+
+/* ---- a project ----
+   The picture arrives from the list carrying the same view-transition-name, so
+   the browser grows the one you clicked into the plate on the left rather than
+   cross-fading two documents. Everything else fades in around it. */
+.case { padding-top: clamp(6rem, 12vh, 9rem); }
+
+.case-grid {
+  display: grid; gap: clamp(2rem, 5vw, 4.5rem);
+  padding: 0 var(--edge) clamp(4rem, 10vh, 8rem);
+  max-width: 1680px; margin-inline: auto;
+}
+@media (min-width: 900px) {
+  .case-grid { grid-template-columns: 1.05fr .95fr; align-items: start; }
+  .case-media { position: sticky; top: clamp(6rem, 12vh, 8rem); }
+}
+
+.case-plate {
+  border-radius: 16px; overflow: hidden; background: #121212;
+  aspect-ratio: 4 / 3;
+}
+.case-plate img { width: 100%; height: 100%; object-fit: cover; }
+
+.case-eyebrow {
+  display: flex; flex-wrap: wrap; gap: .5rem 1.4rem; align-items: baseline;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 10.5px; letter-spacing: .2em; text-transform: uppercase;
+  color: rgba(237,234,230,.45);
+}
+.case-eyebrow em { font-style: normal; color: #FF9142; }
+.case-h1 { margin-top: 1rem; font-size: clamp(2.4rem, 6.5vw, 5rem); }
+.case-line {
+  margin-top: 1rem; max-width: 38ch;
+  font-size: clamp(15px, 1.5vw, 19px); line-height: 1.55;
+  color: rgba(237,234,230,.68);
+}
+.case-block { margin-top: clamp(2rem, 4vw, 3rem); }
+.case-k {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 10.5px; letter-spacing: .2em; text-transform: uppercase;
+  color: rgba(237,234,230,.4); margin-bottom: .9rem;
+}
+.case-p { font-size: 15.5px; line-height: 1.7; color: rgba(237,234,230,.78); max-width: 46ch; }
+.case-list { display: grid; gap: .6rem; }
+.case-list li {
+  position: relative; padding-left: 1.15rem;
+  font-size: 15px; line-height: 1.55; color: rgba(237,234,230,.78);
+}
+.case-list li::before {
+  content: ''; position: absolute; left: 0; top: .6em;
+  width: 5px; height: 5px; border-radius: 50%; background: #FF5A1F;
+}
+.case-result { display: grid; gap: 1.1rem; }
+.case-result div { display: flex; align-items: baseline; gap: 1rem; }
+.case-result dt {
+  font-family: 'Syne', ui-sans-serif, sans-serif; font-weight: 800;
+  font-size: clamp(1.5rem, 3vw, 2.3rem); letter-spacing: -.03em;
+  color: #FF9142; min-width: 5ch;
+}
+.case-result dd {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 10.5px; letter-spacing: .16em; text-transform: uppercase;
+  color: rgba(237,234,230,.5);
+}
+.case-cta {
+  display: inline-flex; align-items: center; gap: .7rem;
+  margin-top: clamp(2.4rem, 5vw, 3.4rem);
+  padding: .95rem 1.7rem; border-radius: 999px;
+  background: #FF5A1F; color: #EDEAE6;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 11px; letter-spacing: .18em; text-transform: uppercase;
+  transition: background-color .3s ease, color .3s ease, transform .35s cubic-bezier(.22,.8,.28,1);
+}
+.case-cta::after { content: '→'; }
+.case-cta:hover { background: #FF9142; color: #0A0A0A; transform: translateY(-2px); }
+
+/* the rest of the shoot */
+.case-roll {
+  display: grid; gap: clamp(1rem, 2.4vw, 2rem);
+  padding: 0 var(--edge) clamp(4rem, 10vh, 8rem);
+  max-width: 1680px; margin-inline: auto;
+}
+@media (min-width: 900px) { .case-roll { grid-template-columns: 1fr 1fr; } }
+.case-frame {
+  border-radius: 14px; overflow: hidden; background: #121212;
+  opacity: 0; transform: translateY(26px);
+  transition: opacity .7s ease, transform .8s cubic-bezier(.22,.8,.28,1);
+}
+.case-frame.shown { opacity: 1; transform: none; }
+.no-js .case-frame { opacity: 1; transform: none; }
+.case-frame img, .case-frame video { width: 100%; aspect-ratio: 4/3; object-fit: cover; }
+.case-frame figcaption {
+  display: flex; gap: .9rem; padding: .9rem 1.1rem 1.1rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 10px; letter-spacing: .16em; text-transform: uppercase;
+  color: rgba(237,234,230,.45);
+}
+.case-frame figcaption em { font-style: normal; color: #FF9142; }
+
+.case-step {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 1.4rem;
+  padding: clamp(2rem, 5vh, 3.5rem) var(--edge) clamp(5rem, 12vh, 8rem);
+  border-top: 1px solid #1C1C1C;
+  max-width: 1680px; margin-inline: auto;
+}
+.step-next { margin-left: auto; text-align: right; }
+.step-k {
+  display: block;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 10px; letter-spacing: .2em; text-transform: uppercase;
+  color: rgba(237,234,230,.4);
+}
+.step-t {
+  display: block; margin-top: .3rem;
+  font-family: 'Syne', ui-sans-serif, sans-serif; font-weight: 800;
+  font-size: clamp(1.05rem, 2.4vw, 1.7rem); letter-spacing: -.02em;
+}
+.step:hover .step-t { color: #FF9142; }
+.step-all {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 10.5px; letter-spacing: .2em; text-transform: uppercase;
+  color: rgba(237,234,230,.5);
+  padding: .7rem 1.2rem; border: 1px solid #2A2A2A; border-radius: 999px;
+}
+.step-all:hover { border-color: #FF5A1F; color: #EDEAE6; }
+
+/* ---- page transitions ----
+   The morph carries the picture. Everything that is NOT the picture should get
+   out of its way rather than cross-fade over it, so the rest of the document
+   shrinks back a touch on the way out and rises on the way in. */
+@keyframes page-out {
+  to { opacity: 0; transform: scale(.97) translateY(-8px); }
+}
+@keyframes page-in {
+  from { opacity: 0; transform: scale(1.03) translateY(14px); }
+}
+::view-transition-old(root) {
+  animation: page-out .38s cubic-bezier(.5,0,.75,0) both;
+}
+::view-transition-new(root) {
+  animation: page-in .52s cubic-bezier(.25,1,.5,1) both;
+}
+/* the morphing picture rides its own curve, slower than the page around it */
+::view-transition-group(*) { animation-duration: .62s; }
 
 @media (prefers-reduced-motion: reduce) {
-  * { animation-duration: .001ms !important; transition-duration: .001ms !important; }
-  .rv { opacity: 1 !important; transform: none !important; }
-  /* nothing is being scrubbed, so don't make anyone scroll past the pins */
-  #top { height: 100vh !important; }
-  #work { height: auto !important; margin-top: 0 !important; }
-  /* nothing is driving the stack, so lay the projects out as an ordinary list */
-  #work-stage { position: static; height: auto; overflow: visible; padding-block: 12vh; }
+  ::view-transition-old(root), ::view-transition-new(root) { animation: none; }
+  ::view-transition-group(*) { animation-duration: .01ms; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* Nothing is driving the stack, so it must not stay a pile of absolutely
+     positioned slides on top of each other. Lay the roll out as a plain list. */
+  #stack { height: auto !important; }
+  .stage { position: static; height: auto; overflow: visible; padding-block: 12vh; }
   .pj-stack { position: static; display: grid; gap: 14vh; }
-  .pj { position: static; visibility: visible !important; padding-block: 0; }
-  .pj-shot, .pj-name { transform: none !important; opacity: 1 !important; }
-  .pj-name { pointer-events: auto !important; }
+  .pj { position: static; visibility: visible !important; }
+  .pj-shot, .pj-name {
+    transform: none !important; opacity: 1 !important; pointer-events: auto !important;
+  }
   .pj-chrome { display: none; }
-  /* no overlap without the pin, so the gutter shows paper on its own */
+  .gate-under { margin-top: 0 !important; }
+  #top { height: 100vh !important; }
   .hero-mat { display: none; }
-  #work-stage { position: static; height: auto; padding-block: 12vh; overflow: visible; }
-  /* the reel is never going to travel, so lay the roll out as a sheet */
-  .sheet { flex-wrap: wrap; justify-content: center; width: 100%; gap: 22px 3px; padding-inline: var(--edge); }
+  .case-frame { opacity: 1 !important; transform: none !important; }
 }

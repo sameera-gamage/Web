@@ -1,0 +1,89 @@
+---
+import Base from '../../layouts/Base.astro';
+import Nav from '../../components/Nav.astro';
+import { projects } from '../../data/projects.js';
+---
+<Base
+  title="Work — RapidStudio"
+  description="Six jobs, start to finish. Search, paid media, social, brand, film and photography for businesses that would rather hire one team than five."
+>
+  <Nav here="projects" />
+
+  <main id="main">
+    <!--
+      ══ the stack ══
+      Pinned slides. Scroll drives the whole rig, and picture and name travel at
+      different rates so an outgoing name is still mid-screen when the next one
+      arrives — that crossover is the effect. The ladder on the right is not
+      decoration: hovering a rung drives the scroll to that project.
+    -->
+    <section id="stack" class="relative" style={`height:${projects.length * 100 + 40}vh`}>
+      <div class="stage">
+
+        <div class="pj-chrome">
+          <span class="pj-rule-l" aria-hidden="true"></span>
+          <span class="pj-kicker">Selected work</span>
+          <span class="pj-count"><em id="pj-n">01</em> / {String(projects.length).padStart(2, '0')}</span>
+
+          <div class="ladder" id="ladder" aria-label="Jump to a project">
+            {projects.map((p, i) => (
+              <button type="button" class="rung" data-rung={i}
+                      aria-label={`Go to ${p.client}, ${p.title}`}>
+                <span class="rung-bar" aria-hidden="true"></span>
+                <span class="rung-tip">{p.client}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div id="pj-stack" class="pj-stack">
+          {projects.map((p, i) => (
+            <article class="pj" data-pj={i}>
+              <a class="pj-shot" href={`/projects/${p.slug}`} aria-label={`Open ${p.client}, ${p.title}`}>
+                {/* the name the browser morphs into the project page */}
+                <img src={p.cover} alt={`${p.client}, ${p.title}`}
+                     transition:name={`shot-${p.slug}`}
+                     loading={i < 2 ? 'eager' : 'lazy'} decoding="async" />
+                <span class="pj-go"><em>View project</em></span>
+              </a>
+              <div class="pj-name">
+                <span class="pj-idx">{p.n}</span>
+                <h2 class="pj-title" transition:name={`title-${p.slug}`}>{p.client}</h2>
+                <p class="pj-line">{p.line}</p>
+                <div class="pj-meta">
+                  <span>{p.disciplines.join(' · ')}</span>
+                  <span>{p.year}</span>
+                </div>
+              </div>
+            </article>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <footer class="foot">
+      <p class="foot-k">Got something stuck?</p>
+      <a href="mailto:info@rapidsolutions.live" class="foot-mail">info@rapidsolutions.live</a>
+      <p class="foot-c">© 2026 RapidStudio · Built in-house</p>
+    </footer>
+  </main>
+
+  <script>
+    import { gsap } from 'gsap';
+    import { ScrollTrigger } from 'gsap/ScrollTrigger';
+    import Lenis from 'lenis';
+    import { mountStack } from '../../scripts/stack.js';
+
+    gsap.registerPlugin(ScrollTrigger);
+    const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    let lenis = null;
+    if (!reduced) {
+      lenis = new Lenis({ duration: 1.05, smoothWheel: true });
+      lenis.on('scroll', ScrollTrigger.update);
+      gsap.ticker.add((t) => lenis.raf(t * 1000));
+      gsap.ticker.lagSmoothing(0);
+    }
+    mountStack({ gsap, ScrollTrigger, lenis, reduced });
+  </script>
+</Base>

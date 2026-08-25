@@ -1,6 +1,7 @@
 ---
 import '../styles/global.css';
-const { title, description } = Astro.props;
+import { ViewTransitions } from 'astro:transitions';
+const { title, description, nav = 'dark' } = Astro.props;
 ---
 <!doctype html>
 <html lang="en" class="no-js">
@@ -9,26 +10,34 @@ const { title, description } = Astro.props;
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>{title}</title>
   <meta name="description" content={description} />
-  <meta name="theme-color" content="#12100E" />
+  <meta name="theme-color" content="#0A0A0A" />
+  <meta name="color-scheme" content="dark" />
 
   <meta property="og:title" content={title} />
   <meta property="og:description" content={description} />
   <meta property="og:type" content="website" />
   {/* DEPLOY STEP: absolute og:image and og:url once the domain exists */}
 
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%2312100E'/%3E%3Ccircle cx='16' cy='16' r='9' fill='none' stroke='%23D6461F' stroke-width='2.6'/%3E%3Ccircle cx='16' cy='16' r='3' fill='%23E9A227'/%3E%3C/svg%3E" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230A0A0A'/%3E%3Ccircle cx='16' cy='16' r='9' fill='none' stroke='%23FF5A1F' stroke-width='2.6'/%3E%3Ccircle cx='16' cy='16' r='3' fill='%23FF9142'/%3E%3C/svg%3E" />
 
-  {/* the hero's first frame is the LCP element, so it goes out with the HTML */}
   <link rel="preload" as="image" href="/hero-poster.jpg" />
-
-  {/* self-hosted: no third-party request, works offline and from file:// */}
   <link rel="stylesheet" href="/fonts/fonts.css" />
   <link rel="preload" as="font" type="font/woff2" href="/fonts/8vIH7w4qzmVxm2BL9A.woff2" crossorigin />
   <link rel="preload" as="font" type="font/woff2" href="/fonts/rP2Hp2ywxg089UriCZOIHQ.woff2" crossorigin />
+
+  {/*
+    Real cross-document transitions. The browser morphs any pair of elements
+    that share a view-transition-name across the two documents, which is what
+    carries a project's picture out of the list and into its page. Browsers
+    without the API just navigate, and nothing here depends on it.
+  */}
+  <ViewTransitions />
+
   <script is:inline>document.documentElement.classList.remove('no-js');</script>
 </head>
-<body>
-  <a href="#main" class="sr-only focus:not-sr-only focus:absolute focus:z-[100] focus:bg-rust focus:text-bone focus:px-5 focus:py-3">Skip to content</a>
+<body class="bg-ink text-chalk">
+  <a href="#main" class="skip">Skip to content</a>
+  <div class="marks" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
   <slot />
 </body>
 </html>
