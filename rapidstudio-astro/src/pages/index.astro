@@ -209,6 +209,9 @@ const faqs = [
     </article>
   </div>
 
+  <!-- registration marks, like the corners of a proof sheet -->
+  <div class="marks" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+
   <main id="main">
 
     <!-- ══ the rig ══ -->
@@ -328,69 +331,47 @@ const faqs = [
       sideways as the page scrolls down, so the whole reel passes the loupe.
     -->
     <!--
-      The roll is pulled up under the hero's last screen (see .work-under) so the
-      aperture can open ONTO it: the hero card punches a hole from the lens
-      centre and this is what is behind. The extra 100vh of height gives the reel
-      back the scrub distance that overlap costs it.
+      ══ projects ══
+      A stack of pinned slides rather than a grid. Scroll drives the whole rig
+      up, and the trick that makes it read is that the picture and the name
+      travel at DIFFERENT rates: the picture leaves faster than the name, so an
+      outgoing name is still mid-screen when the next one arrives and the two
+      cross over each other. Everything else is decoration on top of that.
+
+      It is still pulled up a screen under the hero (.work-under) so the
+      aperture opens onto the first slide.
     -->
-    <section id="work" class="work-under relative bg-ink text-bone" style="height:440vh">
-      <div id="work-stage" class="sticky top-0 flex h-screen flex-col justify-center overflow-hidden">
+    <section id="work" class="work-under relative bg-ink text-bone" style="height:700vh">
+      <div id="work-stage" class="sticky top-0 h-screen overflow-hidden">
 
-        <div class="edge w-full max-w-edge shrink-0">
-          <div class="flex flex-wrap items-end justify-between gap-4 border-t border-bone/15 pt-6">
-            <h2 class="text-bone text-[clamp(2.2rem,6vw,5rem)]">Selected work</h2>
-            <p class="label mb-2 text-bone/50">Roll 04 · 2023–25 · pick a frame to see the job</p>
-          </div>
+        <!-- the standing furniture: index, rules, counter -->
+        <div class="pj-chrome" aria-hidden="true">
+          <span class="pj-rule pj-rule-l"></span>
+          <span class="pj-kicker">Selected work</span>
+          <span class="pj-count"><em id="pj-n">01</em> / 06</span>
+          <span class="pj-ticks" id="pj-ticks"></span>
         </div>
 
-        <!-- the reel -->
-        <div class="mt-[6vh] shrink-0">
-          <div id="reel" class="sheet flex w-max items-stretch gap-[3px] will-change-transform">
-            {work.map((w, i) => (
-              <figure class="frame group" data-frame={i}>
-                <span class="frame-rebate frame-rebate-t" aria-hidden="true"></span>
-                <div class="frame-img">
-                  <img src={w.img} alt={`${w.t}, ${w.tag}`} loading="lazy" decoding="async" />
-                  <button type="button" class="frame-open" data-case={i}
-                          aria-label={`Open the case study: ${w.t}`}></button>
-                  {/* the grease-pencil ring a picture editor draws round a keeper */}
-                  <svg class="frame-ring" viewBox="0 0 200 150" fill="none" aria-hidden="true">
-                    <ellipse cx="100" cy="75" rx="86" ry="62" stroke="currentColor" stroke-width="2.6"
-                             stroke-linecap="round" pathLength="100" />
-                  </svg>
-                  <figcaption class="frame-cap">
-                    <span class="frame-title">{w.t}</span>
-                    <span class="frame-tag">{w.tag} · ’{w.yr}</span>
-                  </figcaption>
-                </div>
-                <span class="frame-rebate frame-rebate-b" aria-hidden="true">
-                  <em>{w.id}</em><em>{w.id}A</em>
-                </span>
-              </figure>
-            ))}
-
-            <!-- the tail of the roll: where the strip runs out, so does the work -->
-            <figure class="frame frame-end">
-              <span class="frame-rebate frame-rebate-t" aria-hidden="true"></span>
-              <div class="frame-img frame-blank">
-                <p class="font-display text-[clamp(1.3rem,2.4vw,2rem)] font-extrabold leading-[1.05]">
-                  Yours is<br />the next<br /><span class="text-rust">frame.</span>
-                </p>
-                <a href="#contact" class="mt-5 inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.2em] text-bone/70 hover:text-bone">
-                  Start a brief <span aria-hidden="true">→</span>
-                </a>
+        <div id="pj-stack" class="pj-stack">
+          {work.map((w, i) => (
+            <article class="pj" data-pj={i}>
+              <div class="pj-shot">
+                <img src={w.img} alt={`${w.t}, ${w.tag}`} loading={i < 2 ? 'eager' : 'lazy'} decoding="async" />
               </div>
-              <span class="frame-rebate frame-rebate-b" aria-hidden="true"><em>007</em><em>007A</em></span>
-            </figure>
-          </div>
-        </div>
-
-        <div class="edge mt-[6vh] w-full max-w-edge shrink-0">
-          <div class="flex items-center gap-4">
-            <span class="label text-bone/40">Scrub the roll</span>
-            <span class="h-px flex-1 bg-bone/15"><span id="reel-bar" class="block h-px w-0 bg-rust"></span></span>
-            <span id="reel-count" class="label text-bone/40">01/07</span>
-          </div>
+              <div class="pj-name">
+                <span class="pj-idx">{w.id}</span>
+                <h3 class="pj-title">{w.t}</h3>
+                <div class="pj-meta">
+                  <span>{w.client}</span>
+                  <span>{w.tag} — ’{w.yr}</span>
+                </div>
+                <button type="button" class="pj-open" data-case={i}
+                        aria-label={`Open the case study: ${w.t}`}>
+                  <span>View project</span>
+                </button>
+              </div>
+            </article>
+          ))}
         </div>
       </div>
     </section>
@@ -512,7 +493,9 @@ const faqs = [
     </section>
 
     <!-- ══ contact ══ -->
-    <section id="contact" class="bg-rust py-[14vh] text-bone" data-nav="hot">
+    <!-- the outro card: it arrives small and grows into the page, as in the ref -->
+    <section id="contact" class="contact-wrap bg-ink py-[10vh]" data-nav="dark">
+      <div id="contact-card" class="contact-card">
       <div class="edge max-w-edge">
         <div class="grid grid-cols-12 gap-x-6 gap-y-14">
           <div class="col-span-12 lg:col-span-6">
@@ -552,6 +535,7 @@ const faqs = [
             </form>
           </div>
         </div>
+      </div>
       </div>
     </section>
 
@@ -807,35 +791,76 @@ const faqs = [
       }
     }
 
-    /* ---- the contact sheet ----
-       Vertical scroll drives the reel sideways. The distance is measured from
-       the strip itself rather than assumed, so adding or removing a frame needs
-       no maths here. */
-    const reel = document.getElementById('reel');
-    if (reel && !reduced) {
-      const bar = document.getElementById('reel-bar');
-      const count = document.getElementById('reel-count');
-      const frames = reel.querySelectorAll('.frame').length;
-      let travel = 0;
-      const measure = () => { travel = Math.max(0, reel.scrollWidth - innerWidth); };
-      measure();
-      addEventListener('resize', () => { measure(); ScrollTrigger.refresh(); });
+    /* ---- projects ----
+       One scroll progress drives everything. Each slide gets a signed distance
+       from centre, and picture and name are moved by different multiples of it:
+       the picture travels 118vh per slide, the name 88vh. That gap is the whole
+       effect — the outgoing name is still crossing the middle when the incoming
+       one arrives, and for a moment you read both. */
+    const stack = document.getElementById('pj-stack');
+    if (stack && !reduced) {
+      const slides = [...stack.children].map((el) => ({
+        el,
+        shot: el.querySelector('.pj-shot'),
+        name: el.querySelector('.pj-name'),
+      }));
+      const N = slides.length;
+      const ticksEl = document.getElementById('pj-ticks');
+      const nEl = document.getElementById('pj-n');
+      ticksEl.replaceChildren(...slides.map(() => document.createElement('i')));
+      const ticks = [...ticksEl.children];
 
+      // Measured off the reference rather than guessed: the pictures travel a
+      // whole screen and clearly leave, while the names barely move — which is
+      // why consecutive names sit a few centimetres apart and cross over each
+      // other instead of chasing from off-screen. The gap between these two
+      // numbers IS the effect.
+      const SHOT_TRAVEL = 118;   // vh per slide
+      const NAME_TRAVEL = 16;
+      let lastOn = -1;
+
+      function paint(p) {
+        const pos = p * (N - 1);
+        for (let i = 0; i < N; i++) {
+          const s = slides[i];
+          const d = pos - i;                       // 0 centred, >0 leaving, <0 waiting
+          const near = Math.abs(d) < 1.35;         // only two are ever really on screen
+          s.el.style.visibility = near ? 'visible' : 'hidden';
+          if (!near) continue;
+
+          s.shot.style.transform = `translate3d(0, ${(-d * SHOT_TRAVEL).toFixed(2)}vh, 0) scale(${(1 - Math.min(0.08, Math.abs(d) * 0.08)).toFixed(4)})`;
+          s.name.style.transform = `translate3d(0, ${(-d * NAME_TRAVEL).toFixed(2)}vh, 0)`;
+
+          // the picture is gone before the name is; the name lingers to cross
+          const shotA = 1 - Math.min(1, Math.max(0, (Math.abs(d) - 0.34) / 0.42));
+          const nameA = 1 - Math.min(1, Math.max(0, (Math.abs(d) - 0.30) / 0.58));
+          s.shot.style.opacity = shotA.toFixed(3);
+          s.name.style.opacity = nameA.toFixed(3);
+          s.el.style.zIndex = String(10 - Math.round(Math.abs(d) * 10));
+          // only the slide at rest can be clicked
+          s.name.style.pointerEvents = Math.abs(d) < 0.4 ? 'auto' : 'none';
+        }
+        const on = Math.min(N - 1, Math.round(pos));
+        if (on !== lastOn) {
+          ticks.forEach((t, i) => t.classList.toggle('on', i === on));
+          if (nEl) nEl.textContent = String(on + 1).padStart(2, '0');
+          lastOn = on;
+        }
+      }
+
+      let pjP = 0;
       ScrollTrigger.create({
         trigger: '#work',
-        // the section starts a screen early so the hero can open onto it; the
-        // roll should be sitting on frame one when it appears, not part-scrubbed
+        // a screen late: the hero opens onto the first slide, and it should be
+        // sitting still when the aperture clears rather than already moving
         start: () => 'top+=' + innerHeight + ' top',
         end: 'bottom bottom',
-        scrub: 0.6,
-        onUpdate: (self) => {
-          const p = self.progress;
-          reel.style.transform = `translate3d(${(-travel * p).toFixed(1)}px,0,0)`;
-          if (bar) bar.style.width = `${(p * 100).toFixed(1)}%`;
-          if (count) count.textContent =
-            String(Math.min(frames, Math.floor(p * frames) + 1)).padStart(2, '0') + '/' + String(frames).padStart(2, '0');
-        },
+        scrub: 0.5,
+        onUpdate: (self) => { pjP = self.progress; paint(pjP); },
       });
+      paint(0);
+      // repaint where we stand, not back at the first slide
+      addEventListener('resize', () => paint(pjP), { passive: true });
     }
 
     /* ---- case study ----
@@ -948,7 +973,7 @@ const faqs = [
       gallery.addEventListener('pointerup', endDrag);
       gallery.addEventListener('pointercancel', endDrag);
 
-      function open(i, from) {
+      function openCase(i, from) {
         lastFocus = from || document.activeElement;
         render(i);
         caseEl.hidden = false;
@@ -960,7 +985,7 @@ const faqs = [
           caseEl.querySelector('.case-x').focus({ preventScroll: true });
         });
       }
-      function close() {
+      function closeCase() {
         if (!opened) return;
         opened = false;
         caseEl.classList.remove('is-open');
@@ -969,19 +994,18 @@ const faqs = [
         setTimeout(() => { if (!opened) caseEl.hidden = true; }, 460);
         if (lastFocus && lastFocus.focus) lastFocus.focus({ preventScroll: true });
       }
-      function step(dir) { render(index + dir); }
 
       document.querySelectorAll('[data-case]').forEach((b) => {
-        b.addEventListener('click', () => open(+b.dataset.case, b));
+        b.addEventListener('click', () => openCase(+b.dataset.case, b));
       });
-      caseEl.querySelectorAll('[data-case-close]').forEach((b) => b.addEventListener('click', close));
+      caseEl.querySelectorAll('[data-case-close]').forEach((b) => b.addEventListener('click', closeCase));
       caseEl.querySelectorAll('[data-case-step]').forEach((b) => {
-        b.addEventListener('click', () => step(+b.dataset.caseStep));
+        b.addEventListener('click', () => render(index + (+b.dataset.caseStep)));
       });
 
       addEventListener('keydown', (e) => {
         if (!opened) return;
-        if (e.key === 'Escape') { close(); return; }
+        if (e.key === 'Escape') { closeCase(); return; }
         if (e.key === 'ArrowRight') { e.preventDefault(); slide(1); }
         if (e.key === 'ArrowLeft') { e.preventDefault(); slide(-1); }
         // keep the tab ring inside the panel while it is modal
@@ -995,6 +1019,23 @@ const faqs = [
         }
       });
       addEventListener('resize', () => { if (opened) syncDots(); });
+    }
+
+    /* ---- the outro card ----
+       It comes in a little small and settles into the page, the way the panel
+       does in the reference. Transform only, so it costs nothing. */
+    const contactCard = document.getElementById('contact-card');
+    if (contactCard && !reduced) {
+      ScrollTrigger.create({
+        trigger: '#contact',
+        start: 'top bottom',
+        end: 'top center',
+        scrub: 0.5,
+        onUpdate: (self) => {
+          const k = 0.9 + 0.1 * self.progress;
+          contactCard.style.transform = `scale(${k.toFixed(4)})`;
+        },
+      });
     }
 
     /* ---- nav ----

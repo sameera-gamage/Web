@@ -247,103 +247,143 @@
   }
 }
 
-/* ---- the contact sheet ----
-   Frames butted up with a 3px gap, each carrying a rebate strip top and bottom
-   with sprocket holes punched through it and the frame number printed along
-   the bottom, the way 35mm film is edge-marked. */
-.sheet { padding-inline: max(var(--edge), 6vw); }
+/* ---- projects ----
+   A stack of pinned slides. The whole rig is driven from one scroll progress:
+   picture and name each get their own travel rate, and because the picture
+   leaves faster than the name, an outgoing name is still mid-screen when the
+   next one arrives. That crossover is the whole effect — the rest is chrome. */
+.pj-stack { position: absolute; inset: 0; }
 
-.frame { display: flex; flex-direction: column; }
+.pj {
+  position: absolute; inset: 0;
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  padding-inline: var(--edge);
+  will-change: transform;
+}
 
-.frame-rebate {
+.pj-shot {
   position: relative;
-  display: block;
-  height: 26px;
-  background: #0A0908;
-  /* sprocket holes: a repeating rounded punch, not an image */
-  background-image: repeating-linear-gradient(
-    to right,
-    transparent 0 9px,
-    rgba(242,237,228,.82) 9px 25px,
-    transparent 25px 34px
-  );
-  background-size: 100% 11px;
-  background-repeat: repeat-x;
-  background-position: center;
-}
-.frame-rebate-b {
-  display: flex; align-items: center; gap: .8rem;
-  padding-inline: 12px;
-  background-image: none;
-}
-.frame-rebate-b em {
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-style: normal; font-size: 9px; letter-spacing: .18em;
-  color: #E9A227;
-}
-.frame-rebate-b::after {
-  content: ''; flex: 1; height: 11px;
-  background-image: repeating-linear-gradient(
-    to right, transparent 0 9px, rgba(242,237,228,.82) 9px 25px, transparent 25px 34px);
-}
-
-.frame-img {
-  position: relative;
-  width: clamp(240px, 34vw, 460px);
-  aspect-ratio: 4 / 3;
+  width: min(58vw, 720px);
+  aspect-ratio: 3 / 2;
+  border-radius: 14px;
   overflow: hidden;
   background: #0A0908;
-  color: #D6461F;
+  will-change: transform, opacity;
 }
-.frame-img img {
+.pj-shot img {
   width: 100%; height: 100%; object-fit: cover;
-  /* the library frames were shot flat and warm; a touch of contrast and a cool
-     lift in the shadows puts them in the same room as the hero footage */
-  filter: contrast(1.12) saturate(.92) brightness(.94);
-  transition: transform 1s cubic-bezier(.22,.8,.28,1), filter .6s ease;
+  filter: contrast(1.1) saturate(.95) brightness(.94);
 }
-.frame:hover .frame-img img { transform: scale(1.05); filter: contrast(1.05) saturate(1.05) brightness(1); }
 
-/* grease pencil: the ring draws itself on when the frame is chosen */
-.frame-ring {
-  position: absolute; inset: 6% 4%;
-  width: 92%; height: 88%;
-  opacity: 0;
-  transition: opacity .35s ease;
+/* the name overlaps the bottom of the picture, as in a title card */
+.pj-name {
+  position: relative;
+  width: 100%;
+  max-width: 1440px;
+  margin-top: -3.2vw;
+  will-change: transform, opacity;
 }
-.frame-ring ellipse {
-  stroke-dasharray: 100; stroke-dashoffset: 100;
-  transition: stroke-dashoffset .85s cubic-bezier(.3,.9,.3,1);
-}
-.frame:hover .frame-ring { opacity: 1; }
-.frame:hover .frame-ring ellipse { stroke-dashoffset: 0; }
-
-.frame-cap {
-  position: absolute; inset-inline: 0; bottom: 0;
-  display: flex; flex-direction: column; gap: .2rem;
-  padding: 2.6rem 1rem .9rem;
-  background: linear-gradient(to top, rgba(10,9,8,.92), transparent);
-  color: #F2EDE4;
-}
-.frame-title { font-family: 'Syne', ui-sans-serif, sans-serif; font-weight: 700; font-size: 17px; }
-.frame-tag {
+.pj-idx {
+  position: absolute; left: 0; top: .2em;
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 10px; letter-spacing: .18em; text-transform: uppercase; color: rgba(242,237,228,.6);
+  font-size: 10px; letter-spacing: .2em; color: rgba(242,237,228,.45);
 }
-
-.frame-blank {
-  display: flex; flex-direction: column; justify-content: center;
-  padding-inline: 1.4rem;
-  background:
-    repeating-linear-gradient(135deg, rgba(242,237,228,.045) 0 8px, transparent 8px 16px),
-    #0A0908;
+.pj-title {
+  font-size: clamp(2.6rem, 8.2vw, 7rem);
+  line-height: .92;
+  letter-spacing: -.035em;
   color: #F2EDE4;
+  max-width: 16ch;
+  text-wrap: balance;
 }
+.pj-meta {
+  display: flex; flex-wrap: wrap; gap: .4rem 2.4rem;
+  margin-top: 1.1rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 10.5px; letter-spacing: .18em; text-transform: uppercase;
+  color: rgba(242,237,228,.5);
+}
+.pj-open {
+  display: inline-flex; align-items: center; gap: .6rem;
+  margin-top: 1.6rem; padding: .75rem 1.4rem;
+  border-radius: 999px; border: 1px solid rgba(242,237,228,.28);
+  color: #F2EDE4;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 10.5px; letter-spacing: .2em; text-transform: uppercase;
+  transition: background-color .3s ease, color .3s ease, border-color .3s ease;
+}
+.pj-open::after { content: '→'; }
+.pj-open:hover { background: #D6461F; border-color: #D6461F; color: #F2EDE4; }
+
+/* standing furniture: it does not move with the slides */
+.pj-chrome { position: absolute; inset: 0; pointer-events: none; z-index: 3; }
+.pj-rule-l {
+  position: absolute; left: 0; top: 50%; width: calc(var(--edge) * .7); height: 1px;
+  background: rgba(242,237,228,.22);
+}
+.pj-kicker {
+  position: absolute; left: var(--edge); top: calc(var(--hero-inset) + 78px);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 10px; letter-spacing: .24em; text-transform: uppercase;
+  color: rgba(242,237,228,.4);
+}
+.pj-count {
+  position: absolute; right: var(--edge); bottom: calc(var(--hero-inset) + 34px);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 10px; letter-spacing: .2em; color: rgba(242,237,228,.4);
+}
+.pj-count em { font-style: normal; color: #E9A227; }
+/* the tick ladder down the right edge */
+.pj-ticks {
+  position: absolute; right: calc(var(--edge) * .42); top: 50%;
+  transform: translateY(-50%);
+  display: flex; flex-direction: column; gap: 7px;
+}
+.pj-ticks i {
+  display: block; width: 14px; height: 1px; background: rgba(242,237,228,.2);
+  transition: width .35s ease, background-color .35s ease;
+}
+.pj-ticks i.on { width: 26px; background: #D6461F; }
 
 @media (max-width: 767px) {
-  .frame-img { width: clamp(200px, 68vw, 300px); }
-  .frame-rebate { height: 18px; }
+  .pj-shot { width: 86vw; aspect-ratio: 4 / 3; }
+  .pj-name { margin-top: -7vw; }
+  .pj-idx { position: static; display: block; margin-bottom: .7rem; }
+  .pj-kicker, .pj-rule-l { display: none; }
 }
+
+/* registration marks — the corner crosshairs off a proof sheet. A single mid
+   tone that reads on both the paper and the ink sections, so it needs no blend
+   mode and no state. */
+.marks { position: fixed; inset: 0; z-index: 43; pointer-events: none; }
+.marks i {
+  position: absolute; width: 9px; height: 9px;
+  opacity: .5;
+}
+.marks i::before, .marks i::after {
+  content: ''; position: absolute; background: #8A8177;
+}
+.marks i::before { left: 4px; top: 0; width: 1px; height: 9px; }
+.marks i::after { top: 4px; left: 0; height: 1px; width: 9px; }
+.marks i:nth-child(1) { left: 14px;  top: 14px; }
+.marks i:nth-child(2) { right: 14px; top: 14px; }
+.marks i:nth-child(3) { left: 14px;  bottom: 14px; }
+.marks i:nth-child(4) { right: 14px; bottom: 14px; }
+@media (max-width: 640px) { .marks { display: none; } }
+
+/* ---- the outro card ---- */
+.contact-wrap { padding-inline: clamp(10px, 2vw, 22px); }
+.contact-card {
+  background: #D6461F;
+  color: #F2EDE4;
+  border-radius: clamp(18px, 2.4vw, 30px);
+  padding-block: clamp(3rem, 9vw, 8rem);
+  transform-origin: 50% 60%;
+  will-change: transform;
+}
+.contact-card .label { color: rgba(242,237,228,.7); }
 
 /* ---- case study ---- */
 .case {
@@ -695,6 +735,13 @@
   /* nothing is being scrubbed, so don't make anyone scroll past the pins */
   #top { height: 100vh !important; }
   #work { height: auto !important; margin-top: 0 !important; }
+  /* nothing is driving the stack, so lay the projects out as an ordinary list */
+  #work-stage { position: static; height: auto; overflow: visible; padding-block: 12vh; }
+  .pj-stack { position: static; display: grid; gap: 14vh; }
+  .pj { position: static; visibility: visible !important; padding-block: 0; }
+  .pj-shot, .pj-name { transform: none !important; opacity: 1 !important; }
+  .pj-name { pointer-events: auto !important; }
+  .pj-chrome { display: none; }
   /* no overlap without the pin, so the gutter shows paper on its own */
   .hero-mat { display: none; }
   #work-stage { position: static; height: auto; padding-block: 12vh; overflow: visible; }
