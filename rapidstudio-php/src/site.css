@@ -1,0 +1,822 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root { --edge: clamp(20px, 5vw, 72px); }
+
+  html { -webkit-text-size-adjust: 100%; color-scheme: dark; }
+  body {
+    @apply bg-ink text-chalk font-sans antialiased;
+    overflow-x: hidden;
+    overflow-x: clip;
+  }
+
+  ::selection { background: #FF5A1F; color: #EDEAE6; }
+
+  h1, h2, h3 { @apply font-display; letter-spacing: -0.035em; line-height: 0.94; }
+
+  /* Grain. No blend mode — multiply on a fixed full-screen layer forced a
+     compositing pass every frame and halved the frame rate. Plain alpha at this
+     opacity reads the same, and on a black page it only ever lifts. */
+  body::after {
+    content: '';
+    position: fixed; inset: 0; z-index: 40; pointer-events: none;
+    opacity: .04;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.82' numOctaves='3'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  :focus-visible { outline: 2px solid #FF5A1F; outline-offset: 3px; }
+
+  img, video { display: block; max-width: 100%; }
+}
+
+@layer components {
+  .edge { padding-inline: var(--edge); }
+
+  .label {
+    @apply font-mono text-[11px] uppercase tracking-[0.22em];
+    color: rgba(237,234,230,.5);
+  }
+
+  .skip {
+    position: absolute; left: -9999px;
+  }
+  .skip:focus {
+    left: 1rem; top: 1rem; z-index: 100;
+    background: #FF5A1F; color: #EDEAE6; padding: .75rem 1.25rem;
+  }
+}
+
+/* ---- loader ---- */
+.boot {
+  position: fixed; inset: 0; z-index: 90;
+  display: flex; align-items: center; justify-content: center;
+  background: #0A0A0A;
+  transition: opacity .7s ease, visibility .7s ease;
+}
+.boot.is-done { opacity: 0; visibility: hidden; }
+.boot-in { display: flex; flex-direction: column; align-items: center; gap: 1.6rem; }
+.boot-mark {
+  font-family: 'Syne', ui-sans-serif, system-ui, sans-serif;
+  font-weight: 800; letter-spacing: -.03em;
+  font-size: clamp(1.6rem, 5vw, 2.6rem); color: #EDEAE6;
+}
+/* the aperture: a ring that fills round as the bytes land */
+.boot-iris {
+  position: relative; display: block;
+  width: 46px; height: 46px; border-radius: 50%;
+  border: 1.5px solid rgba(237,234,230,.22);
+}
+.boot-iris i {
+  position: absolute; inset: -1.5px; border-radius: 50%;
+  background: conic-gradient(#FF5A1F var(--fill, 0%), transparent 0);
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 3px));
+          mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 3px));
+}
+.boot-read {
+  display: flex; align-items: baseline; gap: .6rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 11px; letter-spacing: .2em; text-transform: uppercase;
+  color: rgba(237,234,230,.45);
+}
+.boot-read em { font-style: normal; color: #EDEAE6; }
+.boot-what { margin-left: .6rem; }
+/* no JS, no wait: never trap anyone behind a loader that cannot clear */
+.no-js .boot { display: none; }
+
+/* ---- the hero card ----
+   The hero is a rounded plate set into the page rather than a full-bleed
+   band, so the page reads as a sheet with something laid on it. At the very
+   end of the dive the inset and the radius are driven to zero, which lets the
+   footage go full-bleed exactly as we pass through the front element. */
+:root { --hero-inset: 12px; --hero-radius: 26px; }
+
+/* the lens centre, in the card's own coordinates — the hole is punched here */
+:root { --lens-x: 49.6%; --lens-y: 52.5%; }
+@media (max-aspect-ratio: 3/4) { :root { --lens-y: 46%; } }
+
+/* the roll is pulled up under the hero's last screen so the aperture opens onto
+   it; the hero card is z-41 and covers it until the hole is punched */
+.gate-under { margin-top: -100vh; }
+
+/* The mat the card sits in.
+   Pulling the roll up under the hero means it paints over everything in #top
+   except the card itself — including the twelve-pixel gutter round the card,
+   where you could suddenly read the next section's sprocket holes. This is an
+   opaque paper frame over that gutter: fixed, above the roll, and retired as
+   the card goes full bleed and the gutter stops existing.
+
+   Opaque rather than blurred on purpose — a backdrop blur still shows the
+   section underneath, just softer, and it costs a compositing pass per frame
+   on the one element that is on screen the whole time. */
+.hero-mat {
+  position: fixed;
+  inset: 0;
+  z-index: 42;
+  pointer-events: none;
+  border: var(--hero-inset) solid #0A0A0A;
+  border-radius: calc(var(--hero-radius) + var(--hero-inset));
+  will-change: opacity;
+}
+
+/* Sticky, so it tracks the viewport for the whole hero, and z-auto so the work
+   section — which comes later in the document — paints over it. It only has to
+   cover the sliver above the work section while that is still sliding up. */
+.hero-bed {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  margin-bottom: -100vh;
+  background: #0A0A0A;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.hero-frame {
+  position: sticky;
+  top: var(--hero-inset);
+  height: calc(100vh - var(--hero-inset) * 2);
+  margin-inline: var(--hero-inset);
+  border-radius: var(--hero-radius);
+  overflow: hidden;
+  /* own layer: keeps the radius clipping the scaled video, and lifts the card
+     above the page grain so the film does not pick up paper texture */
+  transform: translateZ(0);
+  z-index: 41;
+}
+@media (max-width: 640px) {
+  :root { --hero-inset: 8px; --hero-radius: 18px; }
+}
+
+/* ---- smoke ----
+   Measured, not guessed. The first cut of this used filter: blur(46px) on two
+   large screen-blended elements, and cost 183ms a frame — five and a half
+   frames a second on the idle hero. A blur is re-computed every frame it moves,
+   and a blend mode forces its own compositing pass on top of that.
+
+   A radial gradient is already soft, so the blur bought nothing the stops could
+   not give. Alpha over a near-black plate lightens on its own, so the screen
+   blend bought nothing either. What is left is two transform-only layers, which
+   the compositor moves without ever repainting them. */
+.hero-smoke { will-change: opacity; }
+.smoke {
+  position: absolute;
+  display: block;
+  will-change: transform;
+  backface-visibility: hidden;
+}
+.smoke-warm {
+  top: -24%; right: -26%; width: 86%; height: 126%;
+  background: radial-gradient(closest-side,
+    rgba(255,90,31,.34) 0%, rgba(255,90,31,.24) 24%,
+    rgba(255,145,66,.11) 52%, rgba(255,145,66,.03) 74%, transparent 88%);
+  animation: drift-warm 37s ease-in-out infinite;
+}
+.smoke-cool {
+  bottom: -30%; left: -24%; width: 74%; height: 108%;
+  /* the teal sampled off the barrel's rim light, not the old dusty blue */
+  background: radial-gradient(closest-side,
+    rgba(20,140,146,.26) 0%, rgba(20,140,146,.17) 26%,
+    rgba(81,215,223,.06) 54%, rgba(81,215,223,.02) 76%, transparent 90%);
+  animation: drift-cool 47s ease-in-out infinite;
+}
+/* Periods that do not divide into one another, and travel large enough to read
+   as weather rather than a wobble. */
+@keyframes drift-warm {
+  0%,100% { transform: translate3d(0,0,0) scale(1); }
+  33%     { transform: translate3d(-9%,7%,0) scale(1.18); }
+  66%     { transform: translate3d(6%,-5%,0) scale(.90); }
+}
+@keyframes drift-cool {
+  0%,100% { transform: translate3d(0,0,0) scale(1); }
+  40%     { transform: translate3d(11%,-8%,0) scale(1.22); }
+  75%     { transform: translate3d(-7%,5%,0) scale(.93); }
+}
+
+.hero-well {
+  background:
+    radial-gradient(58% 46% at 50% 52%, rgba(255,145,66,.13), rgba(255,90,31,.06) 42%, transparent 72%),
+    #0A0A0A;
+}
+
+/* ---- hero footage ----
+   Landscape: the clip simply covers the viewport.
+
+   Portrait is the awkward case. Covering a 9:19.5 phone with a 16:9 frame
+   would crop away everything but a strip of barrel; letterboxing the whole
+   frame leaves a 219px band adrift in the middle of the screen. So the stage
+   takes a fixed slice of the height and the footage covers THAT — a moderate
+   side crop that loses only background haze — and its top and bottom edges are
+   masked off so the band bleeds into the ink instead of ending on a seam. */
+.hero-vid {
+  object-fit: cover;
+  will-change: transform;
+  background: #0A0A0A;
+}
+/* the copy sits left of the camera on a wide screen and above it on a phone,
+   so the scrim that keeps it readable has to turn with the layout */
+.hero-scrim {
+  background: linear-gradient(105deg, rgba(10,10,10,.86) 0%, rgba(10,10,10,.42) 48%, transparent 78%);
+}
+
+@media (max-aspect-ratio: 3/4) {
+  .hero-scrim {
+    background: linear-gradient(to bottom, rgba(10,10,10,.92) 0%, rgba(10,10,10,.55) 42%, transparent 70%);
+  }
+  .hero-stage {
+    top: 46%;
+    bottom: auto;
+    height: 54vh;
+    transform: translateY(-50%);
+    -webkit-mask-image: linear-gradient(to bottom, transparent, #000 13%, #000 87%, transparent);
+            mask-image: linear-gradient(to bottom, transparent, #000 13%, #000 87%, transparent);
+  }
+}
+
+/* ---- projects ----
+   A stack of pinned slides. The whole rig is driven from one scroll progress:
+   picture and name each get their own travel rate, and because the picture
+   leaves faster than the name, an outgoing name is still mid-screen when the
+   next one arrives. That crossover is the whole effect — the rest is chrome. */
+.pj-stack { position: absolute; inset: 0; }
+
+.pj {
+  position: absolute; inset: 0;
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  padding-inline: var(--edge);
+  will-change: transform;
+}
+
+.pj-shot {
+  position: relative;
+  width: min(58vw, 720px);
+  aspect-ratio: 3 / 2;
+  border-radius: 14px;
+  overflow: hidden;
+  background: #000000;
+  will-change: transform, opacity;
+}
+.pj-shot img {
+  width: 100%; height: 100%; object-fit: cover;
+  filter: contrast(1.1) saturate(.95) brightness(.94);
+}
+
+/* the name overlaps the bottom of the picture, as in a title card */
+.pj-name {
+  position: relative;
+  width: 100%;
+  max-width: 1440px;
+  margin-top: -3.2vw;
+  /* room for the reference number, which hangs above the title's cap line */
+  padding-top: 1.5rem;
+  will-change: transform, opacity;
+}
+.pj-idx {
+  position: absolute; left: 0; top: 0;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 10px; letter-spacing: .2em; color: rgba(237,234,230,.45);
+}
+.pj-title {
+  font-size: clamp(2.6rem, 8.2vw, 7rem);
+  line-height: .92;
+  letter-spacing: -.035em;
+  color: #EDEAE6;
+  max-width: 16ch;
+  text-wrap: balance;
+}
+.pj-meta {
+  display: flex; flex-wrap: wrap; gap: .4rem 2.4rem;
+  margin-top: 1.1rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 10.5px; letter-spacing: .18em; text-transform: uppercase;
+  color: rgba(237,234,230,.5);
+}
+.pj-open {
+  display: inline-flex; align-items: center; gap: .6rem;
+  margin-top: 1.6rem; padding: .75rem 1.4rem;
+  border-radius: 999px; border: 1px solid rgba(237,234,230,.28);
+  color: #EDEAE6;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 10.5px; letter-spacing: .2em; text-transform: uppercase;
+  transition: background-color .3s ease, color .3s ease, border-color .3s ease;
+}
+.pj-open::after { content: '→'; }
+.pj-open:hover { background: #FF5A1F; border-color: #FF5A1F; color: #EDEAE6; }
+
+/* standing furniture: it does not move with the slides */
+/* Above the slides, not below them. The slides take a z-index of up to 10 as
+   they cross, and at 3 this was painting under them — which meant the ladder
+   never got the pointer and hovering a rung did nothing. */
+.pj-chrome { position: absolute; inset: 0; pointer-events: none; z-index: 20; }
+.pj-rule-l {
+  position: absolute; left: 0; top: 50%; width: calc(var(--edge) * .7); height: 1px;
+  background: rgba(237,234,230,.22);
+}
+.pj-kicker {
+  position: absolute; left: var(--edge); top: calc(var(--hero-inset) + 78px);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 10px; letter-spacing: .24em; text-transform: uppercase;
+  color: rgba(237,234,230,.4);
+}
+.pj-count {
+  position: absolute; right: var(--edge); bottom: calc(var(--hero-inset) + 34px);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 10px; letter-spacing: .2em; color: rgba(237,234,230,.4);
+}
+.pj-count em { font-style: normal; color: #FF9142; }
+/* the tick ladder down the right edge */
+.pj-ticks {
+  position: absolute; right: calc(var(--edge) * .42); top: 50%;
+  transform: translateY(-50%);
+  display: flex; flex-direction: column; gap: 7px;
+}
+.pj-ticks i {
+  display: block; width: 14px; height: 1px; background: rgba(237,234,230,.2);
+  transition: width .35s ease, background-color .35s ease;
+}
+.pj-ticks i.on { width: 26px; background: #FF5A1F; }
+
+@media (max-width: 767px) {
+  .pj-shot { width: 86vw; aspect-ratio: 4 / 3; }
+  .pj-name { margin-top: -7vw; }
+  .pj-idx { position: static; display: block; margin-bottom: .7rem; }
+  .pj-name { padding-top: 0; }
+  .pj-kicker, .pj-rule-l { display: none; }
+}
+
+/* registration marks — the corner crosshairs off a proof sheet. A single mid
+   tone that reads on both the paper and the ink sections, so it needs no blend
+   mode and no state. */
+.marks { position: fixed; inset: 0; z-index: 43; pointer-events: none; }
+.marks i {
+  position: absolute; width: 9px; height: 9px;
+  opacity: .5;
+}
+.marks i::before, .marks i::after {
+  content: ''; position: absolute; background: #8A8177;
+}
+.marks i::before { left: 4px; top: 0; width: 1px; height: 9px; }
+.marks i::after { top: 4px; left: 0; height: 1px; width: 9px; }
+.marks i:nth-child(1) { left: 14px;  top: 14px; }
+.marks i:nth-child(2) { right: 14px; top: 14px; }
+.marks i:nth-child(3) { left: 14px;  bottom: 14px; }
+.marks i:nth-child(4) { right: 14px; bottom: 14px; }
+@media (max-width: 640px) { .marks { display: none; } }
+
+/* ---- nav ----
+   Two floating pieces on the same margin as the hero card. It is persisted
+   across page transitions (transition:persist), so it does not flash out and
+   back on every navigation — it simply stays put while the pages move under it. */
+.nav {
+  position: fixed; inset-inline: 0; top: 0; z-index: 50;
+  padding: calc(var(--hero-inset) + 10px) calc(var(--hero-inset) + 10px) 0;
+  pointer-events: none;
+}
+.nav-in {
+  max-width: 1680px; margin-inline: auto;
+  display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+}
+
+.nav-mark {
+  pointer-events: auto;
+  display: inline-flex; align-items: center; gap: .55rem;
+  font-family: 'Syne', ui-sans-serif, system-ui, sans-serif;
+  font-weight: 800; font-size: 17px; letter-spacing: -.02em;
+  color: #EDEAE6;
+  padding: .5rem .95rem .5rem .7rem;
+  border-radius: 999px;
+}
+.nav-sep { color: #FF5A1F; }
+.nav-dot {
+  width: 9px; height: 9px; border-radius: 50%;
+  background: #FF5A1F; box-shadow: 0 0 0 3px rgba(255,90,31,.18);
+  transition: transform .5s cubic-bezier(.22,.8,.28,1), box-shadow .5s ease;
+}
+.nav-mark:hover .nav-dot { transform: scale(1.5); box-shadow: 0 0 0 6px rgba(255,90,31,.14); }
+
+.nav-pill {
+  pointer-events: auto;
+  display: flex; align-items: center; gap: .25rem;
+  padding: .4rem .4rem .4rem .75rem;
+  border-radius: 999px;
+  border: 1px solid #2A2A2A;
+  background: rgba(18,18,18,.72);
+  -webkit-backdrop-filter: blur(14px) saturate(1.3);
+          backdrop-filter: blur(14px) saturate(1.3);
+}
+
+.nav-link {
+  position: relative;
+  display: inline-flex; align-items: baseline; gap: .45rem;
+  padding: .5rem .85rem;
+  border-radius: 999px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 11px; letter-spacing: .2em; text-transform: uppercase;
+  color: rgba(237,234,230,.62);
+  transition: color .3s ease;
+}
+.nav-link:hover, .nav-link.is-here { color: #EDEAE6; }
+.nav-num { font-size: 9px; opacity: .5; }
+/* the fill grows from the baseline rather than fading, so it reads as a
+   printed block dropping in behind the word */
+.nav-link::before {
+  content: ''; position: absolute; inset: 0;
+  border-radius: 999px; background: currentColor; opacity: 0;
+  transform: scaleY(.2); transform-origin: bottom;
+  transition: transform .4s cubic-bezier(.22,.8,.28,1), opacity .3s ease;
+}
+.nav-link:hover::before { opacity: .1; transform: scaleY(1); }
+.nav-link.is-here::before { opacity: .08; transform: scaleY(1); }
+.nav-link > span { position: relative; }
+
+.nav-cta {
+  display: inline-flex; align-items: center;
+  margin-left: .35rem; padding: .6rem 1.15rem;
+  border-radius: 999px; background: #FF5A1F; color: #EDEAE6;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 11px; letter-spacing: .16em; text-transform: uppercase;
+  transition: transform .35s cubic-bezier(.22,.8,.28,1), background-color .3s ease, color .3s ease;
+}
+.nav-cta:hover { transform: translateY(-1px); background: #FF9142; color: #0A0A0A; }
+
+@media (max-width: 600px) {
+  .nav-mark span:last-child { display: none; }
+  .nav-link { padding: .5rem .6rem; }
+  .nav-num { display: none; }
+  .nav-cta { padding: .6rem .9rem; }
+}
+
+/* ---- the way in ----
+   Two screens. The first is the hero's reveal target, so it is pulled up under
+   the hero (.gate-under) and is covered by the hero card until the aperture
+   punches through — nothing in it can take a click, which is why the link is in
+   the second screen instead. */
+.gate {
+  position: relative;
+  background: #0A0A0A;
+}
+.gate-say, .gate-do {
+  min-height: 100vh;
+  display: grid; align-content: center;
+  padding-inline: var(--edge);
+  max-width: 1680px; margin-inline: auto;
+  width: 100%;
+}
+.gate-k {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 11px; letter-spacing: .24em; text-transform: uppercase;
+  color: rgba(237,234,230,.45);
+}
+.gate-h {
+  margin-top: 1.4rem;
+  font-size: clamp(2.6rem, 9vw, 7.5rem);
+  line-height: .92;
+}
+.gate-h span { display: block; }
+.gate-h span + span { color: #FF5A1F; }
+.gate-p {
+  max-width: 44ch;
+  font-size: clamp(15px, 1.4vw, 19px); line-height: 1.6;
+  color: rgba(237,234,230,.62);
+}
+
+/* one link, and the picture inside it is the one that grows into the next page */
+.gate-go {
+  display: inline-flex; align-items: center; gap: 1.4rem;
+  width: fit-content;
+  margin-top: clamp(2.6rem, 6vw, 4.5rem);
+  padding: .8rem 1.6rem .8rem .8rem;
+  border: 1px solid #2A2A2A; border-radius: 999px;
+  background: #121212;
+  transition: border-color .35s ease, background-color .35s ease, transform .45s cubic-bezier(.22,.8,.28,1);
+}
+.gate-go:hover { border-color: #FF5A1F; background: #1C1C1C; transform: translateX(6px); }
+.gate-go-plate {
+  width: clamp(64px, 8vw, 96px); aspect-ratio: 1;
+  border-radius: 999px; overflow: hidden; flex: none;
+}
+.gate-go-plate img { width: 100%; height: 100%; object-fit: cover; }
+.gate-go-t { display: grid; gap: .3rem; }
+.gate-go-t em {
+  font-style: normal;
+  font-family: 'Syne', ui-sans-serif, sans-serif; font-weight: 800;
+  font-size: clamp(1.05rem, 2vw, 1.5rem); letter-spacing: -.02em;
+}
+.gate-go-t b {
+  font-weight: 400;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 10.5px; letter-spacing: .2em; text-transform: uppercase;
+  color: rgba(237,234,230,.45);
+}
+.gate-go-x { font-size: 20px; color: #FF5A1F; }
+
+/* ---- footer ---- */
+.foot {
+  padding: 14vh var(--edge) 8vh;
+  border-top: 1px solid #1C1C1C;
+  background: #0A0A0A;
+}
+.foot-k {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 11px; letter-spacing: .22em; text-transform: uppercase;
+  color: rgba(237,234,230,.45);
+}
+.foot-mail {
+  display: inline-block; margin-top: 1rem;
+  font-family: 'Syne', ui-sans-serif, sans-serif; font-weight: 800;
+  font-size: clamp(1.6rem, 5vw, 3.4rem); letter-spacing: -.03em;
+  color: #EDEAE6;
+}
+.foot-mail:hover { color: #FF5A1F; }
+.foot-c {
+  margin-top: 4rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 10.5px; letter-spacing: .18em; color: rgba(237,234,230,.32);
+}
+
+/* ---- the ladder ----
+   Not decoration: hovering a rung drives the page's scroll to that project, so
+   there is never a second idea of "which one is showing" to keep in step. */
+.stage { position: sticky; top: 0; height: 100vh; overflow: hidden; }
+
+.ladder {
+  position: absolute; right: calc(var(--edge) * .38); top: 50%;
+  transform: translateY(-50%);
+  display: flex; flex-direction: column; gap: 10px;
+  pointer-events: auto;
+}
+.rung {
+  position: relative;
+  display: flex; align-items: center; justify-content: flex-end;
+  width: 40px; padding: 5px 0;
+  background: none; border: 0; cursor: pointer;
+}
+.rung-bar {
+  display: block; width: 16px; height: 1px; background: rgba(237,234,230,.28);
+  transition: width .35s cubic-bezier(.22,.8,.28,1), background-color .35s ease;
+}
+.rung-tip {
+  /* out of flow, so a long client name cannot shove its own rung out of line */
+  position: absolute; right: 100%; margin-right: .9rem; top: 50%;
+  translate: 0 -50%;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 10px; letter-spacing: .18em; text-transform: uppercase;
+  color: rgba(237,234,230,.55);
+  opacity: 0; transform: translateX(8px);
+  transition: opacity .3s ease, transform .35s cubic-bezier(.22,.8,.28,1);
+  white-space: nowrap; pointer-events: none;
+}
+.rung:hover .rung-bar, .rung:focus-visible .rung-bar { width: 34px; background: #FF9142; }
+.rung:hover .rung-tip, .rung:focus-visible .rung-tip { opacity: 1; transform: none; }
+.rung.on .rung-bar { width: 30px; background: #FF5A1F; }
+.rung.on .rung-tip { opacity: .8; transform: none; color: #EDEAE6; }
+@media (max-width: 767px) { .ladder { display: none; } }
+
+/* the picture is a link now, with its own affordance */
+.pj-shot { display: block; cursor: pointer; }
+.pj-go {
+  position: absolute; left: 50%; top: 50%;
+  transform: translate(-50%, -50%) scale(.9);
+  display: grid; place-items: center;
+  width: clamp(96px, 11vw, 132px); aspect-ratio: 1; border-radius: 999px;
+  background: rgba(10,10,10,.55);
+  -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+  border: 1px solid rgba(237,234,230,.3);
+  opacity: 0; transition: opacity .35s ease, transform .45s cubic-bezier(.22,.8,.28,1);
+}
+.pj-go em {
+  font-style: normal;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 9.5px; letter-spacing: .18em; text-transform: uppercase;
+  text-align: center; color: #EDEAE6;
+}
+.pj-shot:hover .pj-go { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+.pj-line {
+  margin-top: .9rem; max-width: 34ch;
+  font-size: clamp(14px, 1.3vw, 17px); color: rgba(237,234,230,.6);
+}
+
+/* ---- a project ----
+   The picture arrives from the list carrying the same view-transition-name, so
+   the browser grows the one you clicked into the plate on the left rather than
+   cross-fading two documents. Everything else fades in around it. */
+.case { padding-top: clamp(6rem, 12vh, 9rem); }
+
+.case-grid {
+  display: grid; gap: clamp(2rem, 5vw, 4.5rem);
+  padding: 0 var(--edge) clamp(4rem, 10vh, 8rem);
+  max-width: 1680px; margin-inline: auto;
+}
+@media (min-width: 900px) {
+  .case-grid { grid-template-columns: 1.05fr .95fr; align-items: start; }
+  .case-media { position: sticky; top: clamp(6rem, 12vh, 8rem); }
+}
+
+.case-plate {
+  border-radius: 16px; overflow: hidden; background: #121212;
+  aspect-ratio: 4 / 3;
+}
+.case-plate img { width: 100%; height: 100%; object-fit: cover; }
+
+.case-eyebrow {
+  display: flex; flex-wrap: wrap; gap: .5rem 1.4rem; align-items: baseline;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 10.5px; letter-spacing: .2em; text-transform: uppercase;
+  color: rgba(237,234,230,.45);
+}
+.case-eyebrow em { font-style: normal; color: #FF9142; }
+.case-h1 { margin-top: 1rem; font-size: clamp(2.4rem, 6.5vw, 5rem); }
+.case-line {
+  margin-top: 1rem; max-width: 38ch;
+  font-size: clamp(15px, 1.5vw, 19px); line-height: 1.55;
+  color: rgba(237,234,230,.68);
+}
+.case-block { margin-top: clamp(2rem, 4vw, 3rem); }
+.case-k {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 10.5px; letter-spacing: .2em; text-transform: uppercase;
+  color: rgba(237,234,230,.4); margin-bottom: .9rem;
+}
+.case-p { font-size: 15.5px; line-height: 1.7; color: rgba(237,234,230,.78); max-width: 46ch; }
+.case-list { display: grid; gap: .6rem; }
+.case-list li {
+  position: relative; padding-left: 1.15rem;
+  font-size: 15px; line-height: 1.55; color: rgba(237,234,230,.78);
+}
+.case-list li::before {
+  content: ''; position: absolute; left: 0; top: .6em;
+  width: 5px; height: 5px; border-radius: 50%; background: #FF5A1F;
+}
+.case-result { display: grid; gap: 1.1rem; }
+.case-result div { display: flex; align-items: baseline; gap: 1rem; }
+.case-result dt {
+  font-family: 'Syne', ui-sans-serif, sans-serif; font-weight: 800;
+  font-size: clamp(1.5rem, 3vw, 2.3rem); letter-spacing: -.03em;
+  color: #FF9142; min-width: 5ch;
+}
+.case-result dd {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 10.5px; letter-spacing: .16em; text-transform: uppercase;
+  color: rgba(237,234,230,.5);
+}
+.case-cta {
+  display: inline-flex; align-items: center; gap: .7rem;
+  margin-top: clamp(2.4rem, 5vw, 3.4rem);
+  padding: .95rem 1.7rem; border-radius: 999px;
+  background: #FF5A1F; color: #EDEAE6;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 11px; letter-spacing: .18em; text-transform: uppercase;
+  transition: background-color .3s ease, color .3s ease, transform .35s cubic-bezier(.22,.8,.28,1);
+}
+.case-cta::after { content: '→'; }
+.case-cta:hover { background: #FF9142; color: #0A0A0A; transform: translateY(-2px); }
+
+/* the rest of the shoot */
+.case-roll {
+  display: grid; gap: clamp(1rem, 2.4vw, 2rem);
+  padding: 0 var(--edge) clamp(4rem, 10vh, 8rem);
+  max-width: 1680px; margin-inline: auto;
+}
+@media (min-width: 900px) { .case-roll { grid-template-columns: 1fr 1fr; } }
+.case-frame {
+  border-radius: 14px; overflow: hidden; background: #121212;
+  opacity: 0; transform: translateY(26px);
+  transition: opacity .7s ease, transform .8s cubic-bezier(.22,.8,.28,1);
+}
+.case-frame.shown { opacity: 1; transform: none; }
+.no-js .case-frame { opacity: 1; transform: none; }
+.case-frame img, .case-frame video { width: 100%; aspect-ratio: 4/3; object-fit: cover; }
+.case-frame figcaption {
+  display: flex; gap: .9rem; padding: .9rem 1.1rem 1.1rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 10px; letter-spacing: .16em; text-transform: uppercase;
+  color: rgba(237,234,230,.45);
+}
+.case-frame figcaption em { font-style: normal; color: #FF9142; }
+
+.case-step {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 1.4rem;
+  padding: clamp(2rem, 5vh, 3.5rem) var(--edge) clamp(5rem, 12vh, 8rem);
+  border-top: 1px solid #1C1C1C;
+  max-width: 1680px; margin-inline: auto;
+}
+.step-next { margin-left: auto; text-align: right; }
+.step-k {
+  display: block;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 10px; letter-spacing: .2em; text-transform: uppercase;
+  color: rgba(237,234,230,.4);
+}
+.step-t {
+  display: block; margin-top: .3rem;
+  font-family: 'Syne', ui-sans-serif, sans-serif; font-weight: 800;
+  font-size: clamp(1.05rem, 2.4vw, 1.7rem); letter-spacing: -.02em;
+}
+.step:hover .step-t { color: #FF9142; }
+.step-all {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 10.5px; letter-spacing: .2em; text-transform: uppercase;
+  color: rgba(237,234,230,.5);
+  padding: .7rem 1.2rem; border: 1px solid #2A2A2A; border-radius: 999px;
+}
+.step-all:hover { border-color: #FF5A1F; color: #EDEAE6; }
+
+/* ---- page transitions ----
+   The morph carries the picture. Everything that is NOT the picture should get
+   out of its way rather than cross-fade over it, so the rest of the document
+   shrinks back a touch on the way out and rises on the way in. */
+@keyframes page-out {
+  to { opacity: 0; transform: scale(.97) translateY(-8px); }
+}
+@keyframes page-in {
+  from { opacity: 0; transform: scale(1.03) translateY(14px); }
+}
+::view-transition-old(root) {
+  animation: page-out .38s cubic-bezier(.5,0,.75,0) both;
+}
+::view-transition-new(root) {
+  animation: page-in .52s cubic-bezier(.25,1,.5,1) both;
+}
+/* the morphing picture rides its own curve, slower than the page around it */
+::view-transition-group(*) { animation-duration: .62s; }
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(root), ::view-transition-new(root) { animation: none; }
+  ::view-transition-group(*) { animation-duration: .01ms; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* Nothing is driving the stack, so it must not stay a pile of absolutely
+     positioned slides on top of each other. Lay the roll out as a plain list. */
+  #stack { height: auto !important; }
+  .stage { position: static; height: auto; overflow: visible; padding-block: 12vh; }
+  .pj-stack { position: static; display: grid; gap: 14vh; }
+  .pj { position: static; visibility: visible !important; }
+  .pj-shot, .pj-name {
+    transform: none !important; opacity: 1 !important; pointer-events: auto !important;
+  }
+  .pj-chrome { display: none; }
+  .gate-under { margin-top: 0 !important; }
+  #top { height: 100vh !important; }
+  .hero-mat { display: none; }
+  .case-frame { opacity: 1 !important; transform: none !important; }
+}
+
+/* ---- hero copy ----
+   These were Tailwind utilities written inline in the old template. As real
+   classes they survive the move to PHP without dragging the utility soup along. */
+.hero-vig {
+  background: radial-gradient(115% 85% at 50% 45%, transparent 35%, rgba(10,10,10,.74) 100%);
+}
+.hero-copy {
+  position: absolute; inset: 0;
+  display: flex; align-items: flex-start; padding-top: 19vh;
+  pointer-events: none;
+}
+@media (min-width: 768px) { .hero-copy { align-items: center; padding-top: 0; } }
+.hero-copy-in {
+  width: 100%; max-width: 1680px; margin-inline: auto; padding-inline: var(--edge);
+}
+@media (min-width: 768px) { .hero-copy-in { padding-top: 4rem; } }
+.hero-h1 {
+  margin-top: 1.5rem;
+  font-size: clamp(2.6rem, 7.6vw, 6.6rem);
+  white-space: nowrap;
+}
+.hero-h1 .block { display: block; overflow: hidden; padding-bottom: .06em; }
+.hero-sub {
+  margin-top: 1.75rem; max-width: 32ch;
+  font-size: 16px; line-height: 1.65; color: rgba(237,234,230,.7);
+}
+.hero-mid { position: absolute; inset-inline: 0; bottom: 13vh; pointer-events: none; }
+.hero-trades {
+  display: flex; flex-wrap: wrap; gap: .5rem 1.75rem;
+  max-width: 1680px; margin-inline: auto; padding-inline: var(--edge);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 11px; letter-spacing: .22em; text-transform: uppercase;
+  color: rgba(237,234,230,.7);
+}
+.hero-trades li { display: flex; align-items: center; gap: .625rem; }
+.hero-land { position: absolute; inset: 0; display: flex; align-items: flex-end; pointer-events: none; }
+.hero-land-in {
+  width: 100%; max-width: 1680px; margin-inline: auto;
+  padding-inline: var(--edge); padding-bottom: 12vh;
+}
+.hero-land-h {
+  margin-top: 1.25rem; max-width: 18ch;
+  font-family: 'Syne', ui-sans-serif, sans-serif; font-weight: 800;
+  font-size: clamp(2rem, 5.5vw, 4.5rem); line-height: .95; letter-spacing: -.03em;
+}
+.hero-cue {
+  position: absolute; bottom: 2rem; right: var(--edge);
+  display: flex; align-items: center; gap: .75rem;
+}
+.hero-cue-bar { display: block; height: 2.5rem; width: 1px; background: rgba(237,234,230,.3); }
+
+.miss {
+  min-height: 70vh; display: grid; align-content: center; justify-items: start;
+  padding: 20vh var(--edge) 10vh; max-width: 1680px; margin-inline: auto;
+}

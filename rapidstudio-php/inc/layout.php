@@ -1,0 +1,79 @@
+<?php
+declare(strict_types=1);
+require_once __DIR__ . '/helpers.php';
+
+function head_open(string $title, string $description = '', string $here = 'index'): void
+{
+    $b = base_url();
+    ?><!doctype html>
+<html lang="en" class="no-js">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title><?= e($title) ?></title>
+  <meta name="description" content="<?= e($description) ?>">
+  <meta name="theme-color" content="#0A0A0A">
+  <meta name="color-scheme" content="dark">
+  <meta property="og:title" content="<?= e($title) ?>">
+  <meta property="og:description" content="<?= e($description) ?>">
+  <meta property="og:type" content="website">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230A0A0A'/%3E%3Ccircle cx='16' cy='16' r='9' fill='none' stroke='%23FF5A1F' stroke-width='2.6'/%3E%3Ccircle cx='16' cy='16' r='3' fill='%23FF9142'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="<?= e($b) ?>/assets/fonts/fonts.css">
+  <link rel="stylesheet" href="<?= e($b) ?>/assets/site.css">
+  <script>document.documentElement.classList.remove('no-js');</script>
+</head>
+<body class="bg-ink text-chalk">
+  <a href="#main" class="skip">Skip to content</a>
+  <div class="marks" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+<?php
+    nav_bar($here);
+}
+
+function nav_bar(string $here = 'index'): void
+{
+    $links = [
+        ['k' => 'index',    'label' => 'Studio',   'href' => url('/')],
+        ['k' => 'projects', 'label' => 'Projects', 'href' => url('/projects')],
+    ];
+    ?>
+  <header class="nav">
+    <div class="nav-in">
+      <a href="<?= e(url('/')) ?>" class="nav-mark" aria-label="RapidStudio, home">
+        <span class="nav-dot" aria-hidden="true"></span>
+        <span>Rapid<span class="nav-sep">&bull;</span>Studio</span>
+      </a>
+      <nav class="nav-pill" aria-label="Primary">
+        <?php foreach ($links as $i => $l): ?>
+          <a href="<?= e($l['href']) ?>"
+             class="nav-link<?= $here === $l['k'] ? ' is-here' : '' ?>"
+             <?= $here === $l['k'] ? 'aria-current="page"' : '' ?>>
+            <span class="nav-num"><?= str_pad((string) ($i + 1), 2, '0', STR_PAD_LEFT) ?></span>
+            <span><?= e($l['label']) ?></span>
+          </a>
+        <?php endforeach; ?>
+        <a href="mailto:info@rapidsolutions.live" class="nav-cta">Start a brief</a>
+      </nav>
+    </div>
+  </header>
+<?php
+}
+
+function site_footer(): void
+{
+    ?>
+  <footer class="foot">
+    <p class="foot-k">Got something stuck?</p>
+    <a href="mailto:info@rapidsolutions.live" class="foot-mail">info@rapidsolutions.live</a>
+    <p class="foot-c">&copy; <?= date('Y') ?> RapidStudio &middot; Built in-house</p>
+  </footer>
+<?php
+}
+
+function foot_close(string $script = ''): void
+{
+    $b = base_url();
+    if ($script !== '') {
+        echo '  <script type="module" src="' . e($b) . '/assets/' . e($script) . '"></script>' . "\n";
+    }
+    echo "</body>\n</html>\n";
+}

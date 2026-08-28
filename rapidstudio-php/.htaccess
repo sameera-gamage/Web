@@ -1,0 +1,22 @@
+# Clean URLs. /projects → projects.php, /projects/<name> → project.php?slug=<name>
+Options -Indexes
+DirectoryIndex index.php
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+
+  # a real file or folder always wins, so assets and uploads are untouched
+  RewriteCond %{REQUEST_FILENAME} -f [OR]
+  RewriteCond %{REQUEST_FILENAME} -d
+  RewriteRule ^ - [L]
+
+  RewriteRule ^projects/?$              projects.php [L]
+  RewriteRule ^projects/([A-Za-z0-9-]+)/?$  project.php?slug=$1 [L,QSA]
+</IfModule>
+
+# inc/ holds the database password; nothing in it is ever a page
+<IfModule mod_authz_core.c>
+  <FilesMatch "\.(sql|md)$">
+    Require all denied
+  </FilesMatch>
+</IfModule>
