@@ -725,23 +725,31 @@
 .step-all:hover { border-color: #FF5A1F; color: #EDEAE6; }
 
 /* ---- page transitions ----
-   The morph carries the picture. Everything that is NOT the picture should get
-   out of its way rather than cross-fade over it, so the rest of the document
-   shrinks back a touch on the way out and rises on the way in. */
+   Cross-document view transitions: the cover image morphs from the stack into
+   the detail page. The rest of the page shrinks back on exit and rises on entry
+   so it gets out of the picture's way rather than cross-fading over it. */
+@view-transition { navigation: auto; }
+
 @keyframes page-out {
-  to { opacity: 0; transform: scale(.97) translateY(-8px); }
+  to { opacity: 0; transform: scale(.96) translateY(-12px); }
 }
 @keyframes page-in {
-  from { opacity: 0; transform: scale(1.03) translateY(14px); }
+  from { opacity: 0; transform: scale(1.04) translateY(18px); }
 }
 ::view-transition-old(root) {
-  animation: page-out .38s cubic-bezier(.5,0,.75,0) both;
+  animation: page-out .35s cubic-bezier(.5,0,.75,0) both;
 }
 ::view-transition-new(root) {
-  animation: page-in .52s cubic-bezier(.25,1,.5,1) both;
+  animation: page-in .5s cubic-bezier(.25,1,.5,1) both;
 }
-/* the morphing picture rides its own curve, slower than the page around it */
-::view-transition-group(*) { animation-duration: .62s; }
+::view-transition-group(project-cover) {
+  animation-duration: .55s;
+  animation-timing-function: cubic-bezier(.22,.8,.28,1);
+}
+::view-transition-old(project-cover) { animation: none; opacity: 1; }
+::view-transition-new(project-cover) { animation: none; opacity: 1; }
+
+.case-plate { view-transition-name: project-cover; }
 
 @media (prefers-reduced-motion: reduce) {
   ::view-transition-old(root), ::view-transition-new(root) { animation: none; }

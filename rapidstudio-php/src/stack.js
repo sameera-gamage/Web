@@ -75,12 +75,13 @@ export function mountStack({ gsap, ScrollTrigger, lenis, reduced }) {
   }
 
   let progress = 0;
+  const step = 1 / Math.max(1, N - 1);
   ScrollTrigger.create({
     trigger: '#stack',
     start: 'top top',
     end: 'bottom bottom',
-    scrub: 0.5,
-    snap: { snapTo: 1 / Math.max(1, N - 1), duration: { min: 0.25, max: 0.6 }, ease: 'power1.inOut' },
+    scrub: 0.15,
+    snap: { snapTo: step, duration: { min: 0.3, max: 0.7 }, delay: 0.08, ease: 'power2.inOut' },
     onUpdate: (self) => { progress = self.progress; paint(progress); },
   });
   paint(0);
