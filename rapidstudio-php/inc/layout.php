@@ -24,6 +24,13 @@ function head_open(string $title, string $description = '', string $here = 'inde
 </head>
 <body class="bg-ink text-chalk">
   <a href="#main" class="skip">Skip to content</a>
+  <?php if ($here !== 'index'): ?>
+  <div class="curtain" id="curtain" aria-hidden="true">
+    <span class="curtain-l"></span>
+    <span class="curtain-dot"></span>
+    <span class="curtain-r"></span>
+  </div>
+  <?php endif; ?>
   <div class="marks" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
 <?php
     nav_bar($here);
@@ -62,9 +69,34 @@ function site_footer(): void
 {
     ?>
   <footer class="foot">
-    <p class="foot-k">Got something stuck?</p>
-    <a href="mailto:info@rapidsolutions.live" class="foot-mail">info@rapidsolutions.live</a>
-    <p class="foot-c">&copy; <?= date('Y') ?> RapidStudio &middot; Built in-house</p>
+    <div class="foot-tape-wrap" aria-hidden="true">
+      <div class="foot-tape">
+        <span>Strategy</span><span class="foot-sep">&bull;</span>
+        <span>Design</span><span class="foot-sep">&bull;</span>
+        <span>Development</span><span class="foot-sep">&bull;</span>
+        <span>Paid Media</span><span class="foot-sep">&bull;</span>
+        <span>Film</span><span class="foot-sep">&bull;</span>
+        <span>Photography</span><span class="foot-sep">&bull;</span>
+        <span>Strategy</span><span class="foot-sep">&bull;</span>
+        <span>Design</span><span class="foot-sep">&bull;</span>
+        <span>Development</span><span class="foot-sep">&bull;</span>
+        <span>Paid Media</span><span class="foot-sep">&bull;</span>
+        <span>Film</span><span class="foot-sep">&bull;</span>
+        <span>Photography</span><span class="foot-sep">&bull;</span>
+      </div>
+    </div>
+    <div class="foot-body">
+      <p class="foot-k">Got a project in mind?</p>
+      <h2 class="foot-h">Let&rsquo;s build<br>something great.</h2>
+      <a href="mailto:info@rapidsolutions.live" class="foot-mail">
+        <span>info@rapidsolutions.live</span>
+        <span class="foot-arrow" aria-hidden="true">&rarr;</span>
+      </a>
+    </div>
+    <div class="foot-bar">
+      <span>&copy; <?= date('Y') ?> RapidStudio</span>
+      <span>Built in-house</span>
+    </div>
   </footer>
 <?php
 }
@@ -72,6 +104,13 @@ function site_footer(): void
 function foot_close(string $script = ''): void
 {
     $b = base_url();
+    ?>
+  <script>
+    (function(){var c=document.getElementById('curtain');
+    if(c){requestAnimationFrame(function(){c.classList.add('open');
+    setTimeout(function(){c.remove()},900)})}})();
+  </script>
+<?php
     if ($script !== '') {
         echo '  <script type="module" src="' . e($b) . '/assets/' . e($script) . '"></script>' . "\n";
     }
