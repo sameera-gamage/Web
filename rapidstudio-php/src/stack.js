@@ -80,6 +80,7 @@ export function mountStack({ gsap, ScrollTrigger, lenis, reduced }) {
     start: 'top top',
     end: 'bottom bottom',
     scrub: 0.5,
+    snap: { snapTo: 1 / Math.max(1, N - 1), duration: { min: 0.25, max: 0.6 }, ease: 'power1.inOut' },
     onUpdate: (self) => { progress = self.progress; paint(progress); },
   });
   paint(0);
