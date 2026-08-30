@@ -126,6 +126,22 @@ head_open(
         Every job below, start to finish, with the numbers attached. Scroll to
         move through them one at a time.
       </p>
+
+      <!-- the unique piece for the open space: a rotating seal that also
+           drives the page down into the work -->
+      <a href="#work" class="seal" aria-label="Scroll to the work">
+        <svg class="seal-ring" viewBox="0 0 120 120" aria-hidden="true">
+          <defs>
+            <path id="sealpath" d="M60,60 m-42,0 a42,42 0 1,1 84,0 a42,42 0 1,1 -84,0"></path>
+          </defs>
+          <text><textPath href="#sealpath" xlink:href="#sealpath">
+            Scroll to explore &bull; the selected work &bull;
+          </textPath></text>
+        </svg>
+        <span class="seal-core" aria-hidden="true">
+          <span class="seal-arrow">&darr;</span>
+        </span>
+      </a>
     </div>
   </section>
 

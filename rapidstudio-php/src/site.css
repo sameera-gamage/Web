@@ -639,6 +639,46 @@
 .reveal-sec.in { opacity: 1; transform: none; }
 .no-js .reveal-sec { opacity: 1; transform: none; }
 
+/* ---- the rotating seal that fills the open space above the work ---- */
+.gate-say { position: relative; }
+.seal {
+  position: absolute;
+  right: clamp(1rem, 8vw, 8rem);
+  bottom: clamp(2rem, 8vh, 6rem);
+  width: clamp(116px, 13vw, 168px); aspect-ratio: 1;
+  display: grid; place-items: center;
+  color: rgba(237,234,230,.6);
+}
+.seal-ring {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  fill: currentColor;
+  animation: seal-spin 16s linear infinite;
+}
+.seal-ring text {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 8.4px; letter-spacing: .22em; text-transform: uppercase;
+}
+@keyframes seal-spin { to { transform: rotate(360deg); } }
+.seal-core {
+  position: relative; z-index: 1;
+  width: 44%; aspect-ratio: 1; border-radius: 50%;
+  display: grid; place-items: center;
+  background: #FF5A1F; color: #0A0A0A;
+  box-shadow: 0 0 0 1px rgba(255,90,31,.25), 0 10px 30px -10px rgba(255,90,31,.6);
+  transition: transform .5s cubic-bezier(.22,.8,.28,1);
+}
+.seal-arrow { font-size: 20px; line-height: 1; animation: seal-bob 1.8s ease-in-out infinite; }
+@keyframes seal-bob { 0%,100% { transform: translateY(-2px); } 50% { transform: translateY(3px); } }
+.seal:hover .seal-core { transform: scale(1.12); }
+.seal:hover .seal-ring { animation-duration: 7s; }
+
+@media (max-width: 760px) {
+  .seal { position: static; margin-top: 3rem; justify-self: start; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .seal-ring, .seal-arrow { animation: none; }
+}
+
 /* ---- what we do all day ---- */
 .sec-head { max-width: 60ch; }
 .do-grid {

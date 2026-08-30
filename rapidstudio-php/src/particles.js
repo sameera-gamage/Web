@@ -26,9 +26,9 @@ export function mountParticles(reduced) {
   resize();
   addEventListener('resize', resize, { passive: true });
 
-  const COUNT = Math.min(70, Math.round((w * h) / 18000));
-  const LINK = 130;
-  const MOUSE_R = 170;
+  const COUNT = Math.min(150, Math.round((w * h) / 9500));
+  const LINK = 150;
+  const MOUSE_R = 260;
   const particles = [];
 
   let mx = -9999, my = -9999;
@@ -60,13 +60,20 @@ export function mountParticles(reduced) {
       const dx = mx - p.x, dy = my - p.y;
       const md = Math.sqrt(dx * dx + dy * dy);
       if (md < MOUSE_R && md > 1) {
-        const f = 0.018 * (1 - md / MOUSE_R);
+        // stronger, so the field visibly gathers toward the cursor
+        const pull = 1 - md / MOUSE_R;
+        const f = 0.09 * pull * pull;
         p.vx += (dx / md) * f;
         p.vy += (dy / md) * f;
       }
 
-      p.vx *= 0.985;
-      p.vy *= 0.985;
+      p.vx *= 0.94;
+      p.vy *= 0.94;
+
+      // keep them graceful even under a strong pull
+      const sp = Math.hypot(p.vx, p.vy), MAX = 3.2;
+      if (sp > MAX) { p.vx = (p.vx / sp) * MAX; p.vy = (p.vy / sp) * MAX; }
+
       p.x += p.vx;
       p.y += p.vy;
 
@@ -82,7 +89,7 @@ export function mountParticles(reduced) {
         const dx = a.x - b.x, dy = a.y - b.y;
         const d = dx * dx + dy * dy;
         if (d < LINK * LINK) {
-          const alpha = (1 - Math.sqrt(d) / LINK) * 0.07;
+          const alpha = (1 - Math.sqrt(d) / LINK) * 0.11;
           ctx.beginPath();
           ctx.moveTo(a.x, a.y);
           ctx.lineTo(b.x, b.y);
@@ -97,8 +104,8 @@ export function mountParticles(reduced) {
       ctx.beginPath();
       ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
       ctx.fillStyle = p.accent
-        ? 'rgba(255,90,31,0.45)'
-        : 'rgba(255,255,255,0.13)';
+        ? 'rgba(255,90,31,0.55)'
+        : 'rgba(255,255,255,0.18)';
       ctx.fill();
     }
 

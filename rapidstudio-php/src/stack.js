@@ -75,23 +75,43 @@ export function mountStack({ gsap, ScrollTrigger, lenis, reduced }) {
   }
 
   let progress = 0;
-  const step = 1 / Math.max(1, N - 1);
-  ScrollTrigger.create({
+
+  // Snap WITHOUT ever stopping Lenis. Stopping the smooth-scroller was what
+  // made the page feel jammed: while it was stopped the wheel had nothing to
+  // drive. Instead we let scrolling run free, and when it settles we glide to
+  // the nearest project. One scroll, one project — and you can always scroll.
+  let settle = 0;
+  let snapping = false;
+
+  const st = ScrollTrigger.create({
     trigger: '#stack',
     start: 'top top',
     end: 'bottom bottom',
     scrub: 0.15,
-    snap: { snapTo: step, duration: { min: 0.3, max: 0.7 }, delay: 0.08, ease: 'power2.inOut' },
-    onUpdate: (self) => { progress = self.progress; paint(progress); },
-    onToggle: (self) => {
-      if (!lenis) return;
-      if (self.isActive) {
-        lenis.stop();
-      } else {
-        lenis.start();
-      }
+    onUpdate: (self) => {
+      progress = self.progress;
+      paint(progress);
+      if (snapping) return;
+      clearTimeout(settle);
+      settle = setTimeout(() => snapNearest(self), 130);
     },
   });
+
+  function snapNearest(self) {
+    // never yank at the two ends — that is how you leave the section
+    if (self.progress <= 0.004 || self.progress >= 0.996) return;
+    const target = Math.round(self.progress * (N - 1)) / (N - 1);
+    if (Math.abs(target - self.progress) < 0.003) return;
+    const y = self.start + target * (self.end - self.start);
+    snapping = true;
+    if (lenis) {
+      lenis.scrollTo(y, { duration: 0.55, easing: (t) => 1 - Math.pow(1 - t, 3) });
+    } else {
+      scrollTo({ top: y, behavior: 'smooth' });
+    }
+    setTimeout(() => { snapping = false; }, 650);
+  }
+
   paint(0);
   addEventListener('resize', () => paint(progress), { passive: true });
 

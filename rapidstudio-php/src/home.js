@@ -52,3 +52,20 @@ faqs.forEach((d) => {
     if (d.open) faqs.forEach((o) => { if (o !== d) o.open = false; });
   });
 });
+
+// smooth in-page jumps (nav Work/Answers, Start a brief, the seal) via Lenis
+document.querySelectorAll('a[href]').forEach((a) => {
+  const href = a.getAttribute('href') || '';
+  const h = href.indexOf('#');
+  if (h < 0) return;
+  const id = href.slice(h + 1);
+  const target = id && document.getElementById(id);
+  if (!target) return; // not a section on this page — let it navigate away
+  a.addEventListener('click', (e) => {
+    e.preventDefault();
+    const y = target.getBoundingClientRect().top + scrollY - 64;
+    if (lenis) lenis.scrollTo(y, { duration: 1 });
+    else scrollTo({ top: y, behavior: 'smooth' });
+    history.replaceState(null, '', '#' + id);
+  });
+});
