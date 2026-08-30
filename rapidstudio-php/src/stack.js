@@ -83,6 +83,14 @@ export function mountStack({ gsap, ScrollTrigger, lenis, reduced }) {
     scrub: 0.15,
     snap: { snapTo: step, duration: { min: 0.3, max: 0.7 }, delay: 0.08, ease: 'power2.inOut' },
     onUpdate: (self) => { progress = self.progress; paint(progress); },
+    onToggle: (self) => {
+      if (!lenis) return;
+      if (self.isActive) {
+        lenis.stop();
+      } else {
+        lenis.start();
+      }
+    },
   });
   paint(0);
   addEventListener('resize', () => paint(progress), { passive: true });
@@ -94,7 +102,7 @@ export function mountStack({ gsap, ScrollTrigger, lenis, reduced }) {
     const top = rect.top + scrollY;
     const range = section.offsetHeight - innerHeight;
     const y = top + (range * i) / Math.max(1, N - 1);
-    if (lenis) lenis.scrollTo(y, { duration: 0.9 });
+    if (lenis && !lenis.isStopped) lenis.scrollTo(y, { duration: 0.9 });
     else scrollTo({ top: y, behavior: 'smooth' });
   }
 
