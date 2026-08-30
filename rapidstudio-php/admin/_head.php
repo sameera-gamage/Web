@@ -23,6 +23,7 @@ function admin_bar(string $here = ''): void
     <nav class="abar-nav">
       <a href="<?= e(url('/admin/')) ?>"<?= $here === 'list' ? ' class="on"' : '' ?>>Projects</a>
       <a href="<?= e(url('/admin/edit.php')) ?>"<?= $here === 'new' ? ' class="on"' : '' ?>>Add a project</a>
+      <a href="<?= e(url('/admin/leads.php')) ?>"<?= $here === 'leads' ? ' class="on"' : '' ?>>Enquiries</a>
       <a href="<?= e(url('/')) ?>" target="_blank" rel="noopener">View site &nearr;</a>
       <a href="<?= e(url('/admin/logout.php')) ?>" class="out">Sign out</a>
     </nav>

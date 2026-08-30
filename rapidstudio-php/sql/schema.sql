@@ -29,6 +29,19 @@ CREATE TABLE IF NOT EXISTS projects (
   KEY ix_live (status, sort)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- Enquiries from the contact form on the home page.
+CREATE TABLE IF NOT EXISTS leads (
+  id          INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  name        VARCHAR(160) NOT NULL DEFAULT '',
+  email       VARCHAR(200) NOT NULL DEFAULT '',
+  budget      VARCHAR(60)  NOT NULL DEFAULT '',
+  message     TEXT         NULL,
+  seen        TINYINT(1)   NOT NULL DEFAULT 0,
+  created_at  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  KEY ix_new (seen, created_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 CREATE TABLE IF NOT EXISTS media (
   id          INT UNSIGNED NOT NULL AUTO_INCREMENT,
   project_id  INT UNSIGNED NOT NULL,

@@ -2,10 +2,37 @@
 declare(strict_types=1);
 require_once __DIR__ . '/inc/db.php';
 require_once __DIR__ . '/inc/layout.php';
+require_once __DIR__ . '/inc/auth.php';
 
 $projects = all_projects();
-$first = $projects[0] ?? null;
+$count = count($projects);
 $trades = ['Search', 'Paid media', 'Social', 'Brand', 'Film', 'Photography'];
+
+// what the aperture opens onto, and everything below it, lives on this one page
+$services = [
+    ['k' => 'Search',      't' => 'SEO & content that earns the click',        'd' => 'Technical fixes, pages worth ranking, and the writing to back them. We chase demand that already exists before we try to make more.'],
+    ['k' => 'Paid media',  't' => 'Ads that pay for themselves',                'd' => 'Google, Meta, TikTok. Built around a number you care about — a sale, a lead, a booking — not impressions nobody counts.'],
+    ['k' => 'Social',      't' => 'A feed people actually follow',              'd' => 'Planned, shot and posted in-house. One voice across every channel, so the brand sounds like one company, not five freelancers.'],
+    ['k' => 'Brand',       't' => 'Identity that holds up everywhere',         'd' => 'Logo, type, colour and the rules that keep them consistent — from a business card to a billboard to the app icon.'],
+    ['k' => 'Film',        't' => 'Video from script to final cut',            'd' => 'Concept, shoot and edit under one roof. Adverts, explainers, event films — delivered in every crop each platform wants.'],
+    ['k' => 'Photography', 't' => 'Stills that sell the thing',                'd' => 'Product, people and place. Lit and retouched so the picture does the work long before the caption has to.'],
+];
+
+$faqs = [
+    ['q' => 'Do I have to hire you for everything?',
+     'a' => 'No. Most clients start with one thing — usually paid media or a film — and add the rest once they can see it working. You are never locked in to the full six.'],
+    ['q' => 'How fast can you start?',
+     'a' => 'A first call this week, a plan the next, and work moving inside two weeks for most projects. Rush jobs we will tell you honestly whether we can hit.'],
+    ['q' => 'What does it cost?',
+     'a' => 'Projects start around a few thousand; retainers scale with the work. We quote a fixed number before anything begins, so there is no meter running in the background.'],
+    ['q' => 'Who actually does the work?',
+     'a' => 'The people you meet. We are a studio, not a middleman — nothing gets quietly sent offshore. The strategist in your kickoff is the one writing the plan.'],
+    ['q' => 'Do you work with businesses like mine?',
+     'a' => 'Probably. We are built for owners who would rather brief one team than manage five. Industry matters less than whether you want it done properly.'],
+];
+
+$sent = ($_GET['sent'] ?? '') === '1';
+$err  = ($_GET['err'] ?? '') === '1';
 
 head_open(
   'RapidStudio, an independent studio for search, media, film and stills',
@@ -37,9 +64,6 @@ head_open(
         <video id="cam" class="hero-vid h-full w-full"
                poster="<?= e(url('/assets/media/hero-poster.jpg')) ?>"
                preload="none" muted playsinline disablepictureinpicture aria-hidden="true">
-          <!-- VP9 first: smaller, and it covers Chromium builds with no H.264
-               decoder. The URLs sit in data-src so nothing is fetched during
-               parse — preload="none" is only a hint. -->
           <source data-src="<?= e(url('/assets/media/hero-camera-720.webm')) ?>" type="video/webm">
           <source data-src="<?= e(url('/assets/media/hero-camera-720.mp4')) ?>" type="video/mp4">
         </video>
@@ -90,37 +114,175 @@ head_open(
   </section>
 
   <!--
-    ══ the way in ══
-    Two beats, and the split is structural. The first screen is what the hero's
-    aperture opens onto, so it is pulled up under the hero and the hero card
-    covers it until the hole is punched — which means nothing in it can be
-    clicked. So the link lives in the second screen, below the card's reach.
+    ══ the reveal target ══
+    The hero's aperture opens onto this. It is pulled up under the hero card
+    (.gate-under) and covered until the hole is punched, so it must sit first.
   -->
   <section id="gate" class="gate gate-under">
     <div class="gate-say">
-      <p class="gate-k">Six trades, one room</p>
-      <h2 class="gate-h"><span>Everything we</span><span>have made.</span></h2>
-    </div>
-
-    <div class="gate-do">
+      <p class="gate-k">Selected work · <?= str_pad((string) $count, 2, '0', STR_PAD_LEFT) ?> projects</p>
+      <h2 class="gate-h"><span>This is what</span><span>we made.</span></h2>
       <p class="gate-p">
-        Search, paid media, social, brand, film and stills. Run by the same
-        people, in the same building, on the same plan.
-        <?= $projects ? 'Every job below, start to finish, with the numbers attached.' : '' ?>
+        Every job below, start to finish, with the numbers attached. Scroll to
+        move through them one at a time.
       </p>
+    </div>
+  </section>
 
-      <a href="<?= e(url('/projects')) ?>" class="gate-go">
-        <?php if ($first): ?>
-          <span class="gate-go-plate">
-            <img src="<?= e(url($first['cover'])) ?>" alt="" aria-hidden="true" loading="lazy" decoding="async">
-          </span>
+  <?php if ($count): ?>
+  <!-- ══ the work — one page, one scroll ══ -->
+  <section id="work" class="anchor"></section>
+  <section id="stack" class="relative" style="height:<?= $count * 100 + 40 ?>vh">
+    <div class="stage">
+      <div class="pj-chrome">
+        <span class="pj-rule-l" aria-hidden="true"></span>
+        <span class="pj-kicker">Selected work</span>
+        <span class="pj-count"><em id="pj-n">01</em> / <?= str_pad((string) $count, 2, '0', STR_PAD_LEFT) ?></span>
+
+        <div class="ladder" id="ladder" aria-label="Jump to a project">
+          <?php foreach ($projects as $i => $p): ?>
+            <button type="button" class="rung" data-rung="<?= $i ?>"
+                    aria-label="Go to <?= e($p['client']) ?>">
+              <span class="rung-bar" aria-hidden="true"></span>
+              <span class="rung-tip"><?= e($p['client']) ?></span>
+            </button>
+          <?php endforeach; ?>
+        </div>
+      </div>
+
+      <div id="pj-stack" class="pj-stack">
+        <?php foreach ($projects as $i => $p): ?>
+          <article class="pj" data-pj="<?= $i ?>">
+            <a class="pj-shot" href="<?= e(url('/projects/' . $p['slug'])) ?>"
+               aria-label="Open <?= e($p['client']) ?>">
+              <img src="<?= e(url($p['cover'])) ?>" alt="<?= e($p['client'] . ', ' . $p['title']) ?>"
+                   <?= $i < 2 ? '' : 'loading="lazy"' ?> decoding="async">
+              <span class="pj-go"><em>View project</em></span>
+            </a>
+            <div class="pj-name">
+              <span class="pj-idx"><?= e($p['ref']) ?></span>
+              <h2 class="pj-title"><?= e($p['client']) ?></h2>
+              <p class="pj-line"><?= e($p['line']) ?></p>
+              <div class="pj-meta">
+                <span><?= e(implode(' · ', array_map('trim', explode(',', $p['disciplines'])))) ?></span>
+                <span><?= e($p['year']) ?></span>
+              </div>
+            </div>
+          </article>
+        <?php endforeach; ?>
+      </div>
+    </div>
+  </section>
+  <?php endif; ?>
+
+  <!-- ══ what we do all day ══ -->
+  <section id="do" class="sec sec-do reveal-sec">
+    <div class="sec-in">
+      <header class="sec-head">
+        <p class="sec-k">What we do all day</p>
+        <h2 class="sec-h">Six trades, and the<br>reason they sit together.</h2>
+        <p class="sec-lead">
+          Hire six agencies and you spend half your week keeping them in step.
+          Hire one room and the strategy, the words, the pictures and the media
+          buy already agree — because the people making them share a wall.
+        </p>
+      </header>
+
+      <ol class="do-grid">
+        <?php foreach ($services as $i => $s): ?>
+          <li class="do-card">
+            <span class="do-num"><?= str_pad((string) ($i + 1), 2, '0', STR_PAD_LEFT) ?></span>
+            <h3 class="do-k"><?= e($s['k']) ?></h3>
+            <p class="do-t"><?= e($s['t']) ?></p>
+            <p class="do-d"><?= e($s['d']) ?></p>
+          </li>
+        <?php endforeach; ?>
+      </ol>
+    </div>
+  </section>
+
+  <!-- ══ straight answers ══ -->
+  <section id="answers" class="sec sec-faq reveal-sec">
+    <div class="sec-in faq-in">
+      <header class="sec-head faq-head">
+        <p class="sec-k">Straight answers</p>
+        <h2 class="sec-h">The things you were<br>about to email us.</h2>
+        <p class="sec-lead">No sales dance. Here is how it actually works.</p>
+      </header>
+
+      <div class="faq-list">
+        <?php foreach ($faqs as $i => $f): ?>
+          <details class="faq" <?= $i === 0 ? 'open' : '' ?>>
+            <summary class="faq-q">
+              <span><?= e($f['q']) ?></span>
+              <span class="faq-mark" aria-hidden="true"></span>
+            </summary>
+            <div class="faq-a"><p><?= e($f['a']) ?></p></div>
+          </details>
+        <?php endforeach; ?>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ the form ══ -->
+  <section id="say" class="sec sec-say reveal-sec">
+    <div class="sec-in say-in">
+      <div class="say-left">
+        <p class="sec-k">Start a brief</p>
+        <h2 class="sec-h">Tell us what&rsquo;s<br>on your desk.</h2>
+        <p class="sec-lead">
+          A sentence is enough to start. We read every one ourselves and reply
+          within a working day — usually the same one.
+        </p>
+        <a href="mailto:info@rapidsolutions.live" class="say-mail">info@rapidsolutions.live</a>
+      </div>
+
+      <form class="say-form" method="post" action="<?= e(url('/contact.php')) ?>">
+        <?= csrf_field() ?>
+        <?php if ($sent): ?>
+          <p class="say-note say-ok">Got it — thanks. We&rsquo;ll be in touch within a working day.</p>
+        <?php elseif ($err): ?>
+          <p class="say-note say-bad">Please add your name, a valid email and a short message.</p>
         <?php endif; ?>
-        <span class="gate-go-t">
-          <em>Open the work</em>
-          <b><?= str_pad((string) count($projects), 2, '0', STR_PAD_LEFT) ?> projects</b>
-        </span>
-        <span class="gate-go-x" aria-hidden="true">&rarr;</span>
-      </a>
+
+        <!-- honeypot: hidden from people, catnip for bots -->
+        <div class="say-hp" aria-hidden="true">
+          <label>Company <input type="text" name="company" tabindex="-1" autocomplete="off"></label>
+        </div>
+
+        <div class="say-row">
+          <label class="say-field">
+            <span>Your name</span>
+            <input type="text" name="name" required autocomplete="name" placeholder="Jordan Rivera">
+          </label>
+          <label class="say-field">
+            <span>Email</span>
+            <input type="email" name="email" required autocomplete="email" placeholder="you@company.com">
+          </label>
+        </div>
+
+        <label class="say-field">
+          <span>Rough budget <em>(optional)</em></span>
+          <select name="budget">
+            <option value="">Not sure yet</option>
+            <option>Under £5k</option>
+            <option>£5k – £15k</option>
+            <option>£15k – £50k</option>
+            <option>£50k +</option>
+            <option>Ongoing retainer</option>
+          </select>
+        </label>
+
+        <label class="say-field">
+          <span>What do you need?</span>
+          <textarea name="message" rows="4" required placeholder="A line or two about the project, the goal, and when you'd like it live."></textarea>
+        </label>
+
+        <button type="submit" class="say-send">
+          <span>Send the brief</span>
+          <span class="say-arrow" aria-hidden="true">&rarr;</span>
+        </button>
+      </form>
     </div>
   </section>
 

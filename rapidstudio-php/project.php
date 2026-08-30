@@ -14,7 +14,7 @@ if (!$p) {
       <p class="case-k">404</p>
       <h1 class="case-h1">No such project.</h1>
       <p class="case-line">It may have been renamed, or it may not be published yet.</p>
-      <a href="<?= e(url('/projects')) ?>" class="case-cta">See all the work</a>
+      <a href="<?= e(url('/#work')) ?>" class="case-cta">See all the work</a>
     </main>
     <?php
     site_footer();
@@ -101,7 +101,7 @@ head_open($p['client'] . ' — RapidStudio', $p['brief'] ?? '', 'projects');
         <span class="step-t"><?= e($nb['prev']['client']) ?></span>
       </a>
     <?php endif; ?>
-    <a href="<?= e(url('/projects')) ?>" class="step-all">All work</a>
+    <a href="<?= e(url('/#work')) ?>" class="step-all">All work</a>
     <?php if ($nb['next']): ?>
       <a href="<?= e(url('/projects/' . $nb['next']['slug'])) ?>" class="step step-next">
         <span class="step-k">Next</span>

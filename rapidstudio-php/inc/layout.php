@@ -39,8 +39,9 @@ function head_open(string $title, string $description = '', string $here = 'inde
 function nav_bar(string $here = 'index'): void
 {
     $links = [
-        ['k' => 'index',    'label' => 'Studio',   'href' => url('/')],
-        ['k' => 'projects', 'label' => 'Projects', 'href' => url('/projects')],
+        ['k' => 'index',    'label' => 'Studio',  'href' => url('/')],
+        ['k' => 'work',     'label' => 'Work',    'href' => url('/#work')],
+        ['k' => 'answers',  'label' => 'Answers', 'href' => url('/#answers')],
     ];
     ?>
   <header class="nav">
@@ -58,7 +59,7 @@ function nav_bar(string $here = 'index'): void
             <span><?= e($l['label']) ?></span>
           </a>
         <?php endforeach; ?>
-        <a href="mailto:info@rapidsolutions.live" class="nav-cta">Start a brief</a>
+        <a href="<?= e(url('/#say')) ?>" class="nav-cta">Start a brief</a>
       </nav>
     </div>
   </header>
