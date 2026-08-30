@@ -25,14 +25,6 @@ if (!reduced) {
 mountHero({ gsap, ScrollTrigger, createHeroVideo, reduced });
 mountStack({ gsap, ScrollTrigger, lenis, reduced });
 
-// morph the clicked cover into the project page (Chrome/Edge)
-document.querySelectorAll('.pj-shot').forEach((link) => {
-  link.addEventListener('click', () => {
-    const img = link.querySelector('img');
-    if (img) img.style.viewTransitionName = 'project-cover';
-  });
-});
-
 // sections rise in as they arrive
 if (!reduced) {
   const io = new IntersectionObserver((es) => {

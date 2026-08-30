@@ -6,6 +6,11 @@ require_once __DIR__ . '/inc/auth.php';
 
 $projects = all_projects();
 $count = count($projects);
+// the home reel shows at most five; the rest live on the full work page
+$FEATURED = 5;
+$featured = array_slice($projects, 0, $FEATURED);
+$fcount = count($featured);
+$more = $count > $FEATURED;
 $trades = ['Search', 'Paid media', 'Social', 'Brand', 'Film', 'Photography'];
 
 // what the aperture opens onto, and everything below it, lives on this one page
@@ -120,15 +125,25 @@ head_open(
   -->
   <section id="gate" class="gate gate-under">
     <div class="gate-say">
-      <p class="gate-k">Selected work · <?= str_pad((string) $count, 2, '0', STR_PAD_LEFT) ?> projects</p>
-      <h2 class="gate-h"><span>This is what</span><span>we made.</span></h2>
-      <p class="gate-p">
-        Every job below, start to finish, with the numbers attached. Scroll to
-        move through them one at a time.
-      </p>
+      <div class="gate-head">
+        <p class="gate-k">Selected work · <?= str_pad((string) $count, 2, '0', STR_PAD_LEFT) ?> projects</p>
+        <h2 class="gate-h"><span>This is what</span><span>we made.</span></h2>
+        <p class="gate-p">
+          A handful of jobs, start to finish, with the numbers attached. Scroll
+          to move through them one at a time.
+        </p>
+      </div>
 
-      <!-- the unique piece for the open space: a rotating seal that also
-           drives the page down into the work -->
+      <!-- unique smooth-scrolling band that fills the open space -->
+      <div class="gate-marquee" aria-hidden="true">
+        <div class="gate-marquee-row">
+          <?php for ($r = 0; $r < 2; $r++): foreach ($trades as $t): ?>
+            <span class="gm-word"><?= e($t) ?></span><span class="gm-dot">&bull;</span>
+          <?php endforeach; endfor; ?>
+        </div>
+      </div>
+
+      <!-- rotating seal that also drives the page down into the work -->
       <a href="#work" class="seal" aria-label="Scroll to the work">
         <svg class="seal-ring" viewBox="0 0 120 120" aria-hidden="true">
           <defs>
@@ -145,18 +160,18 @@ head_open(
     </div>
   </section>
 
-  <?php if ($count): ?>
+  <?php if ($fcount): ?>
   <!-- ══ the work — one page, one scroll ══ -->
   <section id="work" class="anchor"></section>
-  <section id="stack" class="relative" style="height:<?= $count * 100 + 40 ?>vh">
+  <section id="stack" class="relative" style="height:<?= $fcount * 100 + 40 ?>vh">
     <div class="stage">
       <div class="pj-chrome">
         <span class="pj-rule-l" aria-hidden="true"></span>
         <span class="pj-kicker">Selected work</span>
-        <span class="pj-count"><em id="pj-n">01</em> / <?= str_pad((string) $count, 2, '0', STR_PAD_LEFT) ?></span>
+        <span class="pj-count"><em id="pj-n">01</em> / <?= str_pad((string) $fcount, 2, '0', STR_PAD_LEFT) ?></span>
 
         <div class="ladder" id="ladder" aria-label="Jump to a project">
-          <?php foreach ($projects as $i => $p): ?>
+          <?php foreach ($featured as $i => $p): ?>
             <button type="button" class="rung" data-rung="<?= $i ?>"
                     aria-label="Go to <?= e($p['client']) ?>">
               <span class="rung-bar" aria-hidden="true"></span>
@@ -167,7 +182,7 @@ head_open(
       </div>
 
       <div id="pj-stack" class="pj-stack">
-        <?php foreach ($projects as $i => $p): ?>
+        <?php foreach ($featured as $i => $p): ?>
           <article class="pj" data-pj="<?= $i ?>">
             <a class="pj-shot" href="<?= e(url('/projects/' . $p['slug'])) ?>"
                aria-label="Open <?= e($p['client']) ?>">
@@ -189,6 +204,15 @@ head_open(
       </div>
     </div>
   </section>
+
+  <?php if ($more): ?>
+    <div class="work-more">
+      <a href="<?= e(url('/projects')) ?>" class="work-more-btn">
+        <span>View all <?= $count ?> projects</span>
+        <span class="work-more-x" aria-hidden="true">&rarr;</span>
+      </a>
+    </div>
+  <?php endif; ?>
   <?php endif; ?>
 
   <!-- ══ what we do all day ══ -->
@@ -206,7 +230,7 @@ head_open(
 
       <ol class="do-grid">
         <?php foreach ($services as $i => $s): ?>
-          <li class="do-card">
+          <li class="do-card" data-n="<?= str_pad((string) ($i + 1), 2, '0', STR_PAD_LEFT) ?>">
             <span class="do-num"><?= str_pad((string) ($i + 1), 2, '0', STR_PAD_LEFT) ?></span>
             <h3 class="do-k"><?= e($s['k']) ?></h3>
             <p class="do-t"><?= e($s['t']) ?></p>

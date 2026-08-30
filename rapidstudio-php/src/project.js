@@ -22,20 +22,3 @@ if (reduced) {
   document.querySelectorAll('.case-frame video').forEach((v) => vio.observe(v));
 }
 
-const plate = document.querySelector('.case-plate img');
-if (plate) {
-  document.addEventListener('pagereveal', (e) => {
-    if (e.viewTransition) {
-      plate.style.viewTransitionName = 'project-cover';
-      e.viewTransition.finished.then(() => {
-        plate.style.viewTransitionName = '';
-      });
-    }
-  });
-
-  document.querySelectorAll('.step-prev, .step-next').forEach((link) => {
-    link.addEventListener('click', () => {
-      plate.style.viewTransitionName = 'project-cover';
-    });
-  });
-}

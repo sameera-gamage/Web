@@ -1,26 +1,29 @@
-/* The roll. */
+/* The full work index: smooth scroll, particle field, and cards that rise in. */
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import Lenis from 'lenis';
-import { mountStack } from './stack.js';
 import { mountParticles } from './particles.js';
 
 gsap.registerPlugin(ScrollTrigger);
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
 mountParticles(reduced);
 
-let lenis = null;
 if (!reduced) {
-  lenis = new Lenis({ duration: 0.9, smoothWheel: true, wheelMultiplier: 0.8 });
+  const lenis = new Lenis({ duration: 1.05, smoothWheel: true, wheelMultiplier: 0.9 });
   lenis.on('scroll', ScrollTrigger.update);
   gsap.ticker.add((t) => lenis.raf(t * 1000));
   gsap.ticker.lagSmoothing(0);
-}
-mountStack({ gsap, ScrollTrigger, lenis, reduced });
 
-document.querySelectorAll('.pj-shot').forEach((link) => {
-  link.addEventListener('click', () => {
-    const img = link.querySelector('img');
-    if (img) img.style.viewTransitionName = 'project-cover';
+  const io = new IntersectionObserver((es) => {
+    es.forEach((e) => {
+      if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
+    });
+  }, { rootMargin: '0px 0px -10% 0px' });
+  document.querySelectorAll('.reveal-sec').forEach((el, i) => {
+    el.style.transitionDelay = `${Math.min(i, 6) * 0.05}s`;
+    io.observe(el);
   });
-});
+} else {
+  document.querySelectorAll('.reveal-sec').forEach((el) => el.classList.add('in'));
+}

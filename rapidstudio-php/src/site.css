@@ -252,11 +252,12 @@
 
 .pj-shot {
   position: relative;
-  width: min(58vw, 720px);
-  aspect-ratio: 3 / 2;
-  border-radius: 14px;
+  width: min(66vw, 940px);
+  aspect-ratio: 16 / 10;
+  border-radius: 18px;
   overflow: hidden;
   background: #000000;
+  box-shadow: 0 40px 90px -40px rgba(0,0,0,.8);
   will-change: transform, opacity;
 }
 .pj-shot img {
@@ -457,15 +458,42 @@
    the second screen instead. */
 .gate {
   position: relative;
-  background: #0A0A0A;
+  background: transparent;   /* let the particle field read behind the reveal */
 }
 .gate-say, .gate-do {
+  position: relative;
   min-height: 100vh;
   display: grid; align-content: center;
   padding-inline: var(--edge);
   max-width: 1680px; margin-inline: auto;
   width: 100%;
 }
+.gate-head { max-width: 60ch; }
+
+/* full-bleed marquee band in the open space */
+.gate-marquee {
+  position: absolute; left: 50%; transform: translateX(-50%);
+  bottom: clamp(3.5rem, 12vh, 9rem); width: 100vw;
+  overflow: hidden;
+  border-block: 1px solid rgba(255,255,255,.07);
+  padding-block: 1.15rem;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 9%, #000 91%, transparent);
+          mask-image: linear-gradient(90deg, transparent, #000 9%, #000 91%, transparent);
+}
+.gate-marquee-row {
+  display: inline-flex; align-items: center; gap: 1.6rem;
+  white-space: nowrap; will-change: transform;
+  animation: gate-marq 24s linear infinite;
+}
+@keyframes gate-marq { to { transform: translateX(-50%); } }
+.gm-word {
+  font-family: 'Syne', ui-sans-serif, sans-serif; font-weight: 800;
+  font-size: clamp(1.3rem, 3.2vw, 2.5rem); letter-spacing: -.02em;
+  text-transform: uppercase;
+  color: transparent; -webkit-text-stroke: 1px rgba(237,234,230,.26);
+}
+.gm-dot { color: #FF5A1F; font-size: 1.1rem; }
+@media (prefers-reduced-motion: reduce) { .gate-marquee-row { animation: none; } }
 .gate-k {
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   font-size: 11px; letter-spacing: .24em; text-transform: uppercase;
@@ -643,9 +671,9 @@
 .gate-say { position: relative; }
 .seal {
   position: absolute;
-  right: clamp(1rem, 8vw, 8rem);
-  bottom: clamp(2rem, 8vh, 6rem);
-  width: clamp(116px, 13vw, 168px); aspect-ratio: 1;
+  right: clamp(1rem, 7vw, 7rem);
+  top: 50%; transform: translateY(-50%);
+  width: clamp(116px, 13vw, 172px); aspect-ratio: 1;
   display: grid; place-items: center;
   color: rgba(237,234,230,.6);
 }
@@ -673,40 +701,164 @@
 .seal:hover .seal-ring { animation-duration: 7s; }
 
 @media (max-width: 760px) {
-  .seal { position: static; margin-top: 3rem; justify-self: start; }
+  .seal { position: static; transform: none; margin-top: 3rem; justify-self: start; }
+  .gate-marquee { display: none; }
 }
 @media (prefers-reduced-motion: reduce) {
   .seal-ring, .seal-arrow { animation: none; }
 }
 
-/* ---- what we do all day ---- */
-.sec-head { max-width: 60ch; }
-.do-grid {
-  margin-top: clamp(3rem, 6vw, 5rem);
-  display: grid; gap: 1px;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  background: rgba(255,255,255,.06);
-  border: 1px solid rgba(255,255,255,.06);
-  border-radius: 20px; overflow: hidden;
-}
-.do-card {
-  position: relative;
-  padding: clamp(2rem, 3vw, 3rem);
-  background: #0C0C0C;
-  transition: background-color .4s ease;
-}
-.do-card:hover { background: #131313; }
-.do-num {
+/* ---- the work "view all" button ---- */
+.work-more { display: flex; justify-content: center; padding: 2rem var(--edge) 0; }
+.work-more-btn {
+  display: inline-flex; align-items: center; gap: .9rem;
+  padding: 1rem 2rem; border-radius: 999px;
+  border: 1px solid rgba(255,255,255,.16); background: rgba(18,18,18,.6);
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 11px; letter-spacing: .2em; color: rgba(255,90,31,.7);
+  font-size: 12px; letter-spacing: .16em; text-transform: uppercase;
+  color: #EDEAE6;
+  transition: border-color .35s ease, background-color .35s ease, transform .45s cubic-bezier(.22,.8,.28,1);
 }
-.do-k {
+.work-more-btn:hover { border-color: #FF5A1F; background: #1A1A1A; transform: translateY(-2px); }
+.work-more-x { color: #FF5A1F; transition: transform .3s ease; }
+.work-more-btn:hover .work-more-x { transform: translateX(5px); }
+
+/* ---- the full work index page ---- */
+.work { padding-top: calc(var(--hero-inset) + 108px); }
+.work-hero {
+  max-width: 1680px; margin-inline: auto;
+  padding: clamp(2rem, 6vw, 5rem) var(--edge) clamp(2rem, 5vw, 3.5rem);
+}
+.work-k {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 11px; letter-spacing: .24em; text-transform: uppercase; color: #FF5A1F;
+}
+.work-h {
   margin-top: 1rem;
   font-family: 'Syne', ui-sans-serif, sans-serif; font-weight: 800;
-  font-size: 1.4rem; letter-spacing: -.02em; color: #EDEAE6;
+  font-size: clamp(2.6rem, 7vw, 6rem); line-height: .95; letter-spacing: -.03em; color: #EDEAE6;
+}
+.work-lead {
+  margin-top: 1.6rem; max-width: 54ch;
+  font-size: clamp(15px, 1.4vw, 19px); line-height: 1.6; color: rgba(237,234,230,.62);
+}
+.work-empty { text-align: center; padding: 6rem var(--edge); color: rgba(237,234,230,.5); }
+
+.work-grid {
+  list-style: none;
+  max-width: 1680px; margin-inline: auto;
+  padding: clamp(1rem, 2vw, 2rem) var(--edge) clamp(3rem, 6vw, 5rem);
+  display: grid; gap: clamp(1.6rem, 3vw, 3rem);
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+}
+.wg-card { display: block; }
+.wg-shot {
+  position: relative; overflow: hidden; border-radius: 18px;
+  aspect-ratio: 16 / 10; background: #111;
+  border: 1px solid rgba(255,255,255,.07);
+}
+.wg-shot img {
+  width: 100%; height: 100%; object-fit: cover;
+  filter: contrast(1.05) saturate(.96) brightness(.9);
+  transition: transform .8s cubic-bezier(.22,.8,.28,1), filter .5s ease;
+}
+.wg-card:hover .wg-shot img { transform: scale(1.06); filter: none; }
+.wg-ref {
+  position: absolute; top: 1rem; left: 1rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 10px; letter-spacing: .2em; color: #EDEAE6;
+  background: rgba(10,10,10,.55); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+  padding: .35rem .6rem; border-radius: 999px;
+}
+.wg-go {
+  position: absolute; left: 1rem; bottom: 1rem;
+  display: inline-flex; align-items: center; gap: .5rem;
+  padding: .6rem 1rem; border-radius: 999px;
+  background: #FF5A1F; color: #0A0A0A;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 10.5px; letter-spacing: .12em; text-transform: uppercase; font-weight: 600;
+  opacity: 0; transform: translateY(10px);
+  transition: opacity .4s ease, transform .45s cubic-bezier(.22,.8,.28,1);
+}
+.wg-go em { font-style: normal; }
+.wg-card:hover .wg-go { opacity: 1; transform: none; }
+.wg-foot { padding: 1.1rem .15rem 0; }
+.wg-title {
+  font-family: 'Syne', ui-sans-serif, sans-serif; font-weight: 800;
+  font-size: clamp(1.3rem, 2vw, 1.7rem); letter-spacing: -.02em; color: #EDEAE6;
+  transition: color .3s ease;
+}
+.wg-card:hover .wg-title { color: #FF9142; }
+.wg-line { margin-top: .35rem; font-size: 14.5px; line-height: 1.5; color: rgba(237,234,230,.55); }
+.wg-meta {
+  display: flex; justify-content: space-between; gap: 1rem;
+  margin-top: .9rem; padding-top: .9rem; border-top: 1px solid rgba(255,255,255,.08);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 10px; letter-spacing: .16em; text-transform: uppercase; color: rgba(237,234,230,.45);
+}
+.work-back { display: flex; justify-content: center; padding: 0 var(--edge) clamp(4rem, 8vw, 7rem); }
+.work-back-btn {
+  display: inline-flex; align-items: center; gap: .7rem;
+  padding: .9rem 1.8rem; border-radius: 999px;
+  border: 1px solid rgba(255,255,255,.16);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 12px; letter-spacing: .16em; text-transform: uppercase; color: rgba(237,234,230,.75);
+  transition: border-color .35s ease, color .35s ease;
+}
+.work-back-btn:hover { border-color: #FF5A1F; color: #EDEAE6; }
+
+/* ---- what we do all day ---- */
+.sec-head { max-width: 62ch; }
+.do-grid {
+  margin-top: clamp(3rem, 6vw, 5.5rem);
+  display: grid; gap: clamp(.9rem, 1.4vw, 1.4rem);
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+}
+.do-card {
+  position: relative; overflow: hidden;
+  display: flex; flex-direction: column;
+  padding: clamp(1.8rem, 2.6vw, 2.8rem);
+  min-height: clamp(240px, 26vw, 320px);
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 20px;
+  background:
+    radial-gradient(120% 80% at 100% 0%, rgba(255,90,31,.06), transparent 55%),
+    #0C0C0C;
+  transition: border-color .45s ease, transform .5s cubic-bezier(.22,.8,.28,1);
+}
+/* the accent bar that wipes across the top on hover */
+.do-card::before {
+  content: ''; position: absolute; left: 0; top: 0; height: 3px; width: 100%;
+  background: linear-gradient(90deg, #FF5A1F, #FF9142);
+  transform: scaleX(0); transform-origin: left;
+  transition: transform .5s cubic-bezier(.22,.8,.28,1);
+}
+/* a big ghost number in the corner */
+.do-card::after {
+  content: attr(data-n);
+  position: absolute; right: 1.2rem; bottom: .4rem;
+  font-family: 'Syne', ui-sans-serif, sans-serif; font-weight: 800;
+  font-size: clamp(4rem, 8vw, 7rem); line-height: 1;
+  color: rgba(255,255,255,.03);
+  pointer-events: none; transition: color .5s ease;
+}
+.do-card:hover {
+  border-color: rgba(255,90,31,.4);
+  transform: translateY(-6px);
+}
+.do-card:hover::before { transform: scaleX(1); }
+.do-card:hover::after { color: rgba(255,90,31,.09); }
+.do-num {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 11px; letter-spacing: .2em; color: rgba(255,90,31,.75);
+}
+.do-k {
+  margin-top: 1.1rem;
+  font-family: 'Syne', ui-sans-serif, sans-serif; font-weight: 800;
+  font-size: clamp(1.5rem, 2.2vw, 1.9rem); letter-spacing: -.02em; color: #EDEAE6;
 }
 .do-t { margin-top: .5rem; font-size: 15px; color: rgba(237,234,230,.85); }
-.do-d { margin-top: .9rem; font-size: 14px; line-height: 1.6; color: rgba(237,234,230,.5); }
+.do-d { margin-top: .9rem; font-size: 14px; line-height: 1.6; color: rgba(237,234,230,.5); position: relative; z-index: 1; }
 
 /* ---- straight answers (FAQ) ---- */
 .faq-in {
@@ -1003,31 +1155,28 @@
 .step-all:hover { border-color: #FF5A1F; color: #EDEAE6; }
 
 /* ---- page transitions ----
-   Cross-document view transitions: the cover image morphs from the stack into
-   the detail page. The rest of the page shrinks back on exit and rises on entry
-   so it gets out of the picture's way rather than cross-fading over it. */
+   Cross-document view transitions. A single, reliable move: the page you leave
+   shrinks back and blurs away, the page you arrive on expands up out of a soft
+   blur. No shared-element morph — that was what left a ghost of the old cover
+   sitting on the new page when a navigation was interrupted. The nav bar is
+   named so it holds still while the pages move under it. */
 @view-transition { navigation: auto; }
 
-@keyframes page-out {
-  to { opacity: 0; transform: scale(.96) translateY(-12px); }
+@keyframes vt-shrink {
+  to { opacity: 0; transform: scale(.92); filter: blur(6px); }
 }
-@keyframes page-in {
-  from { opacity: 0; transform: scale(1.04) translateY(18px); }
+@keyframes vt-expand {
+  from { opacity: 0; transform: scale(1.08); filter: blur(6px); }
 }
 ::view-transition-old(root) {
-  animation: page-out .35s cubic-bezier(.5,0,.75,0) both;
+  animation: vt-shrink .42s cubic-bezier(.4,0,.2,1) both;
+  transform-origin: 50% 42%;
 }
 ::view-transition-new(root) {
-  animation: page-in .5s cubic-bezier(.25,1,.5,1) both;
+  animation: vt-expand .55s cubic-bezier(.16,1,.3,1) both;
+  transform-origin: 50% 42%;
 }
-::view-transition-group(project-cover) {
-  animation-duration: .55s;
-  animation-timing-function: cubic-bezier(.22,.8,.28,1);
-}
-::view-transition-old(project-cover) { animation: none; opacity: 1; }
-::view-transition-new(project-cover) { animation: none; opacity: 1; }
-::view-transition-old(nav) { animation: none; }
-::view-transition-new(nav) { animation: none; }
+::view-transition-old(nav), ::view-transition-new(nav) { animation: none; }
 
 @media (prefers-reduced-motion: reduce) {
   ::view-transition-old(root), ::view-transition-new(root) { animation: none; }

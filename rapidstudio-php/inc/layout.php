@@ -107,9 +107,12 @@ function foot_close(string $script = ''): void
     $b = base_url();
     ?>
   <script>
-    (function(){var c=document.getElementById('curtain');
-    if(c){requestAnimationFrame(function(){c.classList.add('open');
-    setTimeout(function(){c.remove()},900)})}})();
+    (function(){var c=document.getElementById('curtain');if(!c)return;
+    /* Chrome/Edge get the smooth shrink/expand view transition instead, so the
+       curtain would just double it — only run it where transitions are absent */
+    if('startViewTransition' in document){c.remove();return;}
+    requestAnimationFrame(function(){c.classList.add('open');
+    setTimeout(function(){c.remove()},900)});})();
   </script>
 <?php
     if ($script !== '') {

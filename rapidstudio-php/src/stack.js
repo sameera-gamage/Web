@@ -87,13 +87,13 @@ export function mountStack({ gsap, ScrollTrigger, lenis, reduced }) {
     trigger: '#stack',
     start: 'top top',
     end: 'bottom bottom',
-    scrub: 0.15,
+    scrub: 0.12,
     onUpdate: (self) => {
       progress = self.progress;
       paint(progress);
       if (snapping) return;
       clearTimeout(settle);
-      settle = setTimeout(() => snapNearest(self), 130);
+      settle = setTimeout(() => snapNearest(self), 55);
     },
   });
 
@@ -105,11 +105,11 @@ export function mountStack({ gsap, ScrollTrigger, lenis, reduced }) {
     const y = self.start + target * (self.end - self.start);
     snapping = true;
     if (lenis) {
-      lenis.scrollTo(y, { duration: 0.55, easing: (t) => 1 - Math.pow(1 - t, 3) });
+      lenis.scrollTo(y, { duration: 0.38, easing: (t) => 1 - Math.pow(1 - t, 4) });
     } else {
       scrollTo({ top: y, behavior: 'smooth' });
     }
-    setTimeout(() => { snapping = false; }, 650);
+    setTimeout(() => { snapping = false; }, 430);
   }
 
   paint(0);
