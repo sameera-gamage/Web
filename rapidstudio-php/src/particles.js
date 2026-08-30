@@ -8,7 +8,7 @@ export function mountParticles(reduced) {
     width: '100%',
     height: '100%',
     pointerEvents: 'none',
-    zIndex: '1',
+    zIndex: '0',
   });
   document.body.prepend(canvas);
 

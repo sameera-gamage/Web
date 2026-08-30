@@ -540,7 +540,7 @@
 /* ---- the ladder ----
    Not decoration: hovering a rung drives the page's scroll to that project, so
    there is never a second idea of "which one is showing" to keep in step. */
-.stage { position: sticky; top: 0; height: 100vh; overflow: hidden; }
+.stage { position: sticky; top: 0; height: 100vh; overflow: hidden; z-index: 2; }
 
 .ladder {
   position: absolute; right: calc(var(--edge) * .38); top: 50%;
@@ -749,7 +749,7 @@
 ::view-transition-old(project-cover) { animation: none; opacity: 1; }
 ::view-transition-new(project-cover) { animation: none; opacity: 1; }
 
-.case-plate { view-transition-name: project-cover; }
+/* view-transition-name applied dynamically via JS only on forward clicks */
 
 @media (prefers-reduced-motion: reduce) {
   ::view-transition-old(root), ::view-transition-new(root) { animation: none; }
