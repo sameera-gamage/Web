@@ -468,7 +468,47 @@
   max-width: 1680px; margin-inline: auto;
   width: 100%;
 }
-.gate-head { max-width: 60ch; }
+.gate-say { z-index: 2; }
+.gate-head { position: relative; z-index: 2; max-width: 60ch; }
+
+/* cursor-lit glow riding over the gate's own constellation field */
+.gate-glow {
+  position: absolute; inset: 0; z-index: 1; pointer-events: none;
+  background: radial-gradient(460px circle at var(--gx, 70%) var(--gy, 40%),
+              rgba(255,90,31,.14), rgba(255,90,31,.04) 40%, transparent 68%);
+  transition: opacity .4s ease;
+}
+
+/* an oversized ghost of the project count, set as a watermark behind the words */
+.gate-ghost {
+  position: absolute; z-index: 0; pointer-events: none;
+  right: clamp(-1rem, 4vw, 6rem); top: 50%; transform: translateY(-54%);
+  font-family: 'Syne', ui-sans-serif, sans-serif; font-weight: 800;
+  font-size: clamp(16rem, 34vw, 40rem); line-height: .8;
+  color: transparent; -webkit-text-stroke: 1px rgba(255,255,255,.05);
+  letter-spacing: -.04em; user-select: none;
+}
+/* a small rotated studio tag pinned to the left edge */
+.gate-edge {
+  position: absolute; left: calc(var(--edge) * .28); top: 50%;
+  transform: rotate(180deg) translateX(50%); transform-origin: left center;
+  writing-mode: vertical-rl;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 10px; letter-spacing: .28em; text-transform: uppercase;
+  color: rgba(237,234,230,.35); white-space: nowrap;
+}
+.gate-k { display: inline-flex; align-items: center; gap: .6rem; }
+.gate-k-dot {
+  width: 7px; height: 7px; border-radius: 50%; background: #FF5A1F;
+  box-shadow: 0 0 0 3px rgba(255,90,31,.18);
+  animation: gate-pulse 2.4s ease-in-out infinite;
+}
+@keyframes gate-pulse {
+  0%,100% { transform: scale(1); box-shadow: 0 0 0 3px rgba(255,90,31,.18); }
+  50% { transform: scale(1.25); box-shadow: 0 0 0 6px rgba(255,90,31,.06); }
+}
+@media (max-width: 900px) { .gate-edge, .gate-ghost { display: none; } }
+@media (prefers-reduced-motion: reduce) { .gate-k-dot { animation: none; } }
 
 /* full-bleed marquee band in the open space */
 .gate-marquee {

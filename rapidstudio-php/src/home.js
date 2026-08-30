@@ -6,12 +6,26 @@ import Lenis from 'lenis';
 import { createHeroVideo } from './heroVideo.js';
 import { mountHero } from './hero.js';
 import { mountStack } from './stack.js';
-import { mountParticles } from './particles.js';
+import { mountParticles, mountField } from './particles.js';
 
 gsap.registerPlugin(ScrollTrigger);
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 mountParticles(reduced);
+
+// the gate sits under the hero's ink backdrop, which hides the page-wide
+// field there — so it gets its own constellation plus a cursor-lit glow
+const gate = document.getElementById('gate');
+if (gate) {
+  mountField(gate, reduced);
+  if (!reduced) {
+    gate.addEventListener('pointermove', (e) => {
+      const r = gate.getBoundingClientRect();
+      gate.style.setProperty('--gx', (e.clientX - r.left) + 'px');
+      gate.style.setProperty('--gy', (e.clientY - r.top) + 'px');
+    }, { passive: true });
+  }
+}
 
 let lenis = null;
 if (!reduced) {

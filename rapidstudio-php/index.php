@@ -124,9 +124,15 @@ head_open(
     (.gate-under) and covered until the hole is punched, so it must sit first.
   -->
   <section id="gate" class="gate gate-under">
+    <!-- cursor-lit glow over the constellation; canvas is injected behind this -->
+    <div class="gate-glow" aria-hidden="true"></div>
+
     <div class="gate-say">
+      <span class="gate-edge" aria-hidden="true">Est. 2019 — Independent studio</span>
+      <span class="gate-ghost" aria-hidden="true"><?= str_pad((string) $count, 2, '0', STR_PAD_LEFT) ?></span>
+
       <div class="gate-head">
-        <p class="gate-k">Selected work · <?= str_pad((string) $count, 2, '0', STR_PAD_LEFT) ?> projects</p>
+        <p class="gate-k"><span class="gate-k-dot"></span>Selected work — <?= str_pad((string) $count, 2, '0', STR_PAD_LEFT) ?> projects</p>
         <h2 class="gate-h"><span>This is what</span><span>we made.</span></h2>
         <p class="gate-p">
           A handful of jobs, start to finish, with the numbers attached. Scroll
