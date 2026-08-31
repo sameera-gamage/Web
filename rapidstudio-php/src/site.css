@@ -269,10 +269,11 @@
 .pj-name {
   position: relative;
   width: 100%;
-  max-width: 1440px;
-  margin-top: -3.2vw;
+  /* match the picture's width so the name sits directly under it as one unit */
+  max-width: min(66vw, 940px);
+  margin-top: -1.4vw;
   /* room for the reference number, which hangs above the title's cap line */
-  padding-top: 1.5rem;
+  padding-top: 1.2rem;
   will-change: transform, opacity;
 }
 .pj-idx {

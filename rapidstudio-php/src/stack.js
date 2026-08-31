@@ -13,8 +13,8 @@
   hovering a rung and scrolling by hand can never disagree.
 */
 
-const SHOT_TRAVEL = 118;   // vh per slide
-const NAME_TRAVEL = 16;
+const SHOT_TRAVEL = 84;    // vh per slide — tighter, so less empty screen between projects
+const NAME_TRAVEL = 13;
 const HOVER_INTENT = 90;   // ms before a rung takes the page anywhere
 
 export function mountStack({ gsap, ScrollTrigger, lenis, reduced }) {
