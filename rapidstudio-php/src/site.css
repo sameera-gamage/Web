@@ -361,7 +361,8 @@
 .reel-item {
   position: sticky; top: 0; height: 100vh;
   display: flex; align-items: center; justify-content: center;
-  overflow-x: clip;   /* a title that breaks out never spills into page scroll */
+  /* note: no overflow here — it would break position:sticky. The title is
+     capped by max-width instead so it never spills into page scroll. */
 }
 .reel-card {
   display: flex; flex-direction: column; align-items: center; justify-content: center;
@@ -387,6 +388,7 @@
 .reel-title-mask {
   position: absolute; left: -12%; bottom: 7%;
   z-index: 5; overflow: hidden; padding-bottom: .2em; padding-left: .06em;
+  max-width: 84vw;   /* clip an over-long title rather than break page scroll */
 }
 .reel-title {
   display: block; white-space: nowrap; text-align: left;
