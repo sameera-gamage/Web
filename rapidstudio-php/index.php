@@ -174,9 +174,12 @@ head_open(
   <!-- ══ the work — a vertical reel: title over the picture, meta beneath ══ -->
   <section id="work" class="anchor"></section>
   <section id="stack" class="reel-wrap">
-    <div class="reel-rail" id="reel-rail" aria-hidden="true">
+    <div class="reel-rail" id="reel-rail">
       <?php foreach ($featured as $i => $p): ?>
-        <button class="reel-tick" data-tick="<?= $i ?>"></button>
+        <button class="reel-tick" data-tick="<?= $i ?>" aria-label="Go to <?= e($p['client']) ?>">
+          <span class="reel-tick-n"><?= str_pad((string) ($i + 1), 2, '0', STR_PAD_LEFT) ?></span>
+          <span class="reel-tick-bar" aria-hidden="true"></span>
+        </button>
       <?php endforeach; ?>
     </div>
 
@@ -304,23 +307,30 @@ head_open(
         <?php endif; ?>
 
         <div class="say-hp" aria-hidden="true">
-          <label>Company <input type="text" name="company" tabindex="-1" autocomplete="off"></label>
+          <label>Website <input type="text" name="website" tabindex="-1" autocomplete="off"></label>
         </div>
 
         <div class="say-row">
-          <label class="say-field"><span>Your name</span>
+          <label class="say-line"><span class="say-n">01</span><span class="say-lab">My name is</span>
             <input type="text" name="name" required autocomplete="name" placeholder="Jordan Rivera"></label>
-          <label class="say-field"><span>Email</span>
+          <label class="say-line"><span class="say-n">02</span><span class="say-lab">Reach me at</span>
             <input type="email" name="email" required autocomplete="email" placeholder="you@company.com"></label>
         </div>
-        <label class="say-field"><span>Rough budget <em>(optional)</em></span>
-          <select name="budget">
-            <option value="">Not sure yet</option>
-            <option>Under £5k</option><option>£5k – £15k</option><option>£15k – £50k</option>
-            <option>£50k +</option><option>Ongoing retainer</option>
-          </select></label>
-        <label class="say-field"><span>What do you need?</span>
-          <textarea name="message" rows="3" required placeholder="A line or two about the project, the goal, and when you'd like it live."></textarea></label>
+
+        <fieldset class="say-chips">
+          <legend><span class="say-n">03</span><span class="say-lab">I need</span></legend>
+          <div class="chips">
+            <?php foreach ($trades as $t): ?>
+              <label class="chip">
+                <input type="checkbox" name="services[]" value="<?= e($t) ?>">
+                <span><?= e($t) ?></span>
+              </label>
+            <?php endforeach; ?>
+          </div>
+        </fieldset>
+
+        <label class="say-line say-line-full"><span class="say-n">04</span><span class="say-lab">Here&rsquo;s the gist</span>
+          <textarea name="message" rows="2" required placeholder="A line or two about the project, the goal, and when you'd like it live."></textarea></label>
 
         <button type="submit" class="say-send"><span>Send the brief</span><span class="say-arrow" aria-hidden="true">&rarr;</span></button>
       </form>
