@@ -355,14 +355,17 @@
    ───────────────────────────────────────────────────────────────── */
 .reel-wrap { position: relative; }
 .reel { position: relative; }
-/* each item is one screen of scroll; its card is pinned and the next card
-   rises over it, so the projects pile front-to-back */
-.reel-item { height: 100vh; }
+/* each item sticks at the top for one screen; because they share the same
+   sticky anchor, the next card piles over the previous — front to back —
+   with no pinned-fixed overlap to leak into the next section */
+.reel-item {
+  position: sticky; top: 0; height: 100vh;
+  display: flex; align-items: center; justify-content: center;
+}
 .reel-card {
-  height: 100vh;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
   will-change: transform, filter;
-  transform-origin: 50% 42%;
+  transform-origin: 50% 45%;
 }
 
 .reel-frame { position: relative; width: min(62vw, 940px); }
@@ -378,18 +381,19 @@
   filter: contrast(1.05) saturate(.98) brightness(.9);
 }
 
-/* the title sits over the picture and is masked so it reveals from below */
+/* the title sits in FRONT of the picture, lower-left, masked so it reveals
+   from below */
 .reel-title-mask {
-  position: absolute; left: 50%; bottom: 6%; transform: translateX(-50%);
-  z-index: 3; overflow: hidden; padding-bottom: .12em;
-  max-width: 96%;
+  position: absolute; left: 4%; bottom: 5%;
+  z-index: 3; overflow: hidden; padding-bottom: .14em;
+  max-width: 92%;
 }
 .reel-title {
-  display: block; white-space: nowrap;
+  display: block; white-space: nowrap; text-align: left;
   font-family: 'Syne', ui-sans-serif, sans-serif; font-weight: 800;
-  font-size: clamp(2.4rem, 8vw, 8rem); line-height: .82; letter-spacing: -.045em;
+  font-size: clamp(2.2rem, 7vw, 7rem); line-height: .82; letter-spacing: -.045em;
   text-transform: uppercase; color: #F4F1EC;
-  text-shadow: 0 12px 60px rgba(0,0,0,.45);
+  text-shadow: 0 12px 60px rgba(0,0,0,.5);
   transition: color .3s ease; will-change: transform;
 }
 .reel-title:hover { color: #FF9142; }
@@ -427,13 +431,12 @@
 .reel-tick.on { width: 42px; background: #FF5A1F; }
 
 @media (max-width: 760px) {
-  .reel-item { height: auto; }
-  .reel-card { height: auto; padding: 7vh 0; }
+  .reel-item { position: static; height: auto; padding: 7vh 0; }
   .reel-frame, .reel-meta { width: 90vw; }
   .reel-idx { position: static; margin: 0 0 .7rem; }
   .reel-rail { display: none; }
   .reel-title { font-size: clamp(1.8rem, 13vw, 4.5rem); }
-  .reel-title-mask { bottom: 5%; }
+  .reel-title-mask { bottom: 5%; left: 4%; }
   .reel-meta { font-size: 9.5px; }
 }
 

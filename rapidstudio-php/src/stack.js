@@ -1,11 +1,12 @@
 /*
   The work stack — a pile of cards.
 
-  Each project owns one screen of scroll. Its card is pinned in place, and the
-  next project's card rises up over it as you scroll; the one you're leaving
-  scales down and dims, so it sits behind the pile rather than vanishing. The
-  title reveals from a mask as each card arrives. A rail on the right tracks the
-  active card and jumps to it on hover.
+  CSS `position: sticky` does the pinning: every card shares the top anchor, so
+  as you scroll the next card rises up and piles over the previous, and they all
+  release together at the end (no fixed-position leak into the next section). We
+  only add the flourish: the card being left scales down and dims so it sits
+  behind the pile, and each title reveals from its mask as the card arrives. The
+  rail on the right tracks the active card and jumps to it on hover.
 */
 export function mountStack({ gsap, ScrollTrigger, reduced }) {
   const reel = document.getElementById('reel');
@@ -44,48 +45,35 @@ export function mountStack({ gsap, ScrollTrigger, reduced }) {
     t.addEventListener('focus', () => goTo(i));
   });
 
-  // track which card is centred (works with or without motion)
   const io = new IntersectionObserver((entries) => {
     entries.forEach((e) => { if (e.isIntersecting) setActive(+e.target.dataset.reel); });
   }, { rootMargin: '-45% 0px -45% 0px' });
   items.forEach((el) => io.observe(el));
 
-  // pinning is desktop-only; touch just scrolls the cards in flow
-  const canPin = !reduced && matchMedia('(min-width: 761px)').matches;
-  if (!canPin) { setActive(0); return; }
+  const canAnimate = !reduced && matchMedia('(min-width: 761px)').matches;
+  if (!canAnimate) { setActive(0); return; }
 
   items.forEach((item, i) => {
     const card = item.querySelector('.reel-card');
     const title = card.querySelector('.reel-title');
-    const last = i === items.length - 1;
 
-    // pin the card so the pile builds up
-    ScrollTrigger.create({
-      trigger: item,
-      start: 'top top',
-      end: 'bottom top',
-      pin: card,
-      pinSpacing: false,
-      anticipatePin: 1,
-    });
-
-    // the card recedes as the NEXT one takes the front
-    if (!last) {
+    // recede behind the pile as the NEXT card takes the front
+    if (i < items.length - 1) {
       gsap.fromTo(card,
         { scale: 1, filter: 'brightness(1)' },
         {
-          scale: 0.88, yPercent: -3, filter: 'brightness(0.4)', ease: 'none',
+          scale: 0.9, yPercent: -2, filter: 'brightness(0.42)', ease: 'none',
           scrollTrigger: { trigger: items[i + 1], start: 'top bottom', end: 'top top', scrub: true },
         });
     }
 
-    // title reveals from its mask as the card arrives, hides as it leaves
+    // title reveals from its mask as the card comes up
     if (title) {
       gsap.fromTo(title,
         { yPercent: 115 },
         {
           yPercent: 0, ease: 'power3.out',
-          scrollTrigger: { trigger: item, start: 'top 78%', end: 'top 30%', scrub: 0.6 },
+          scrollTrigger: { trigger: item, start: 'top 80%', end: 'top 35%', scrub: 0.5 },
         });
     }
   });
