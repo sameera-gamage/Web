@@ -29,26 +29,52 @@ export function mountStack({ gsap, ScrollTrigger, reduced }) {
     ticks.forEach((t, k) => t.classList.toggle('on', k === i));
   };
 
-  function goTo(i) {
+  // absolute document offset — sticky elements report rect.top as 0 when stuck,
+  // so sum offsetTop up the chain instead
+  const docTop = (el) => { let y = 0; while (el) { y += el.offsetTop; el = el.offsetParent; } return y; };
+
+  let snapping = false;
+  function goTo(i, dur = 0.7) {
     const el = items[i];
     if (!el) return;
-    const y = el.getBoundingClientRect().top + scrollY;
+    const y = docTop(el);
+    snapping = true;
     const L = window.__lenis;
-    if (L) L.scrollTo(y, { duration: 0.8 });
+    if (L) L.scrollTo(y, { duration: dur });
     else scrollTo({ top: y, behavior: 'smooth' });
+    setTimeout(() => { snapping = false; }, dur * 1000 + 120);
+    setActive(i);
   }
   let intent = 0;
   ticks.forEach((t, i) => {
-    t.addEventListener('pointerenter', () => { clearTimeout(intent); intent = setTimeout(() => goTo(i), 110); });
+    t.addEventListener('pointerenter', () => { clearTimeout(intent); intent = setTimeout(() => goTo(i, 0.8), 110); });
     t.addEventListener('pointerleave', () => clearTimeout(intent));
-    t.addEventListener('click', () => { clearTimeout(intent); goTo(i); });
-    t.addEventListener('focus', () => goTo(i));
+    t.addEventListener('click', () => { clearTimeout(intent); goTo(i, 0.7); });
+    t.addEventListener('focus', () => goTo(i, 0.7));
   });
 
   const io = new IntersectionObserver((entries) => {
     entries.forEach((e) => { if (e.isIntersecting) setActive(+e.target.dataset.reel); });
   }, { rootMargin: '-45% 0px -45% 0px' });
   items.forEach((el) => io.observe(el));
+
+  // settle the nearest project to centre when scrolling stops
+  let settle = 0;
+  addEventListener('scroll', () => {
+    if (snapping) return;
+    clearTimeout(settle);
+    settle = setTimeout(snapNearest, 120);
+  }, { passive: true });
+  function snapNearest() {
+    if (snapping || !wrap) return;
+    const top = docTop(wrap), bot = top + wrap.offsetHeight;
+    // only while the reel owns the screen — never fight entering/leaving it
+    if (scrollY < top - innerHeight * 0.25 || scrollY > bot - innerHeight * 0.75) return;
+    let best = -1, bd = Infinity;
+    items.forEach((el, i) => { const d = Math.abs(docTop(el) - scrollY); if (d < bd) { bd = d; best = i; } });
+    if (best < 0 || bd < 10 || bd > innerHeight * 0.7) return;
+    goTo(best, 0.55);
+  }
 
   const canAnimate = !reduced && matchMedia('(min-width: 761px)').matches;
   if (!canAnimate) { setActive(0); return; }

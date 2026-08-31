@@ -4,6 +4,10 @@ require_once __DIR__ . '/inc/db.php';
 require_once __DIR__ . '/inc/layout.php';
 require_once __DIR__ . '/inc/auth.php';
 
+// start the session before any HTML is sent, so the form's CSRF token can be
+// issued without "headers already sent" warnings
+session_boot();
+
 $projects = all_projects();
 $count = count($projects);
 // the home reel shows at most five; the rest live on the full work page
