@@ -361,6 +361,7 @@
 .reel-item {
   position: sticky; top: 0; height: 100vh;
   display: flex; align-items: center; justify-content: center;
+  overflow-x: clip;   /* a title that breaks out never spills into page scroll */
 }
 .reel-card {
   display: flex; flex-direction: column; align-items: center; justify-content: center;
@@ -381,19 +382,18 @@
   filter: contrast(1.05) saturate(.98) brightness(.9);
 }
 
-/* the title sits in FRONT of the picture, lower-left, masked so it reveals
-   from below */
+/* the title breaks out of the picture on the LEFT and sits in front of it,
+   masked so it reveals from below */
 .reel-title-mask {
-  position: absolute; left: 4%; bottom: 5%;
-  z-index: 3; overflow: hidden; padding-bottom: .14em;
-  max-width: 92%;
+  position: absolute; left: -6%; bottom: 7%;
+  z-index: 5; overflow: hidden; padding-bottom: .18em; padding-left: .06em;
 }
 .reel-title {
   display: block; white-space: nowrap; text-align: left;
-  font-family: 'Syne', ui-sans-serif, sans-serif; font-weight: 800;
-  font-size: clamp(2.2rem, 7vw, 7rem); line-height: .82; letter-spacing: -.045em;
+  font-family: 'Clash Display', 'Syne', ui-sans-serif, sans-serif; font-weight: 600;
+  font-size: clamp(2.4rem, 7.5vw, 7.5rem); line-height: .84; letter-spacing: -.02em;
   text-transform: uppercase; color: #F4F1EC;
-  text-shadow: 0 12px 60px rgba(0,0,0,.5);
+  text-shadow: 0 14px 70px rgba(0,0,0,.55);
   transition: color .3s ease; will-change: transform;
 }
 .reel-title:hover { color: #FF9142; }
