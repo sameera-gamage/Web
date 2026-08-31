@@ -349,6 +349,77 @@
   .pj-kicker, .pj-rule-l { display: none; }
 }
 
+/* ─────────────────────────────────────────────────────────────────
+   The work reel — a vertical scroll with the title laid over the picture,
+   the index number ruled off to the left, and the credits beneath.
+   ───────────────────────────────────────────────────────────────── */
+.reel-wrap { position: relative; padding: clamp(4rem, 9vh, 10rem) var(--edge) clamp(1rem, 4vh, 4rem); }
+.reel { display: flex; flex-direction: column; gap: clamp(6rem, 13vh, 15rem); }
+.reel-item { position: relative; display: flex; flex-direction: column; align-items: center; }
+
+.reel-frame { position: relative; width: min(70vw, 1040px); }
+.reel-shot {
+  display: block; position: relative;
+  width: 100%; aspect-ratio: 16 / 10;
+  border-radius: 22px; overflow: hidden;
+  background: #111; box-shadow: 0 50px 120px -55px rgba(0,0,0,.9);
+}
+.reel-img {
+  position: absolute; left: 0; top: -9%;
+  width: 100%; height: 118%; object-fit: cover;
+  filter: contrast(1.05) saturate(.98) brightness(.9);
+  will-change: transform;
+}
+.reel-title {
+  position: absolute; left: 50%; bottom: 6%; transform: translateX(-50%);
+  z-index: 3; white-space: nowrap;
+  font-family: 'Syne', ui-sans-serif, sans-serif; font-weight: 800;
+  font-size: clamp(2.8rem, 10.5vw, 11rem); line-height: .8; letter-spacing: -.045em;
+  text-transform: uppercase; color: #F4F1EC;
+  text-shadow: 0 12px 60px rgba(0,0,0,.4);
+  transition: color .3s ease; will-change: transform;
+}
+.reel-title:hover { color: #FF9142; }
+
+.reel-idx {
+  position: absolute; top: 60%; right: calc(100% + clamp(1rem, 3vw, 3rem));
+  display: flex; align-items: center; gap: 1.1rem; z-index: 4; white-space: nowrap;
+  font-family: ui-sans-serif, system-ui, sans-serif;
+  font-size: clamp(13px, 1.1vw, 17px); letter-spacing: .06em; color: rgba(237,234,230,.7);
+}
+.reel-idx-line { display: block; width: clamp(46px, 9vw, 180px); height: 1px; background: rgba(237,234,230,.32); }
+
+.reel-meta {
+  width: min(70vw, 1040px); margin-top: 1.6rem;
+  display: flex; justify-content: space-between; gap: 2rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 11px; letter-spacing: .14em; text-transform: uppercase;
+}
+.reel-meta-col { display: flex; flex-direction: column; gap: .25rem; color: rgba(237,234,230,.82); }
+.reel-meta-r { text-align: right; }
+.reel-meta .dim { color: rgba(237,234,230,.42); }
+
+/* right-edge tick rail, only while the reel is on screen */
+.reel-rail {
+  position: fixed; right: clamp(14px, 2vw, 32px); top: 50%; transform: translateY(-50%);
+  z-index: 45; display: flex; flex-direction: column; gap: 9px;
+  opacity: 0; pointer-events: none; transition: opacity .4s ease;
+}
+.reel-rail.show { opacity: 1; pointer-events: auto; }
+.reel-tick {
+  width: 22px; height: 2px; padding: 0; border: 0; cursor: pointer;
+  background: rgba(237,234,230,.28); transition: width .35s ease, background-color .35s ease;
+}
+.reel-tick.on { width: 42px; background: #FF5A1F; }
+
+@media (max-width: 760px) {
+  .reel-frame, .reel-meta { width: 90vw; }
+  .reel-idx { position: static; margin: 0 0 .7rem; }
+  .reel-rail { display: none; }
+  .reel-title { font-size: clamp(1.8rem, 13vw, 4.5rem); bottom: 5%; }
+  .reel-meta { font-size: 9.5px; }
+}
+
 /* registration marks — the corner crosshairs off a proof sheet. A single mid
    tone that reads on both the paper and the ink sections, so it needs no blend
    mode and no state. */

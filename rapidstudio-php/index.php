@@ -167,58 +167,53 @@ head_open(
   </section>
 
   <?php if ($fcount): ?>
-  <!-- ══ the work — one page, one scroll ══ -->
+  <!-- ══ the work — a vertical reel: title over the picture, meta beneath ══ -->
   <section id="work" class="anchor"></section>
-  <section id="stack" class="relative" style="height:<?= $fcount * 100 + 40 ?>vh">
-    <div class="stage">
-      <div class="pj-chrome">
-        <span class="pj-rule-l" aria-hidden="true"></span>
-        <span class="pj-kicker">Selected work</span>
-        <span class="pj-count"><em id="pj-n">01</em> / <?= str_pad((string) $fcount, 2, '0', STR_PAD_LEFT) ?></span>
+  <section id="stack" class="reel-wrap">
+    <div class="reel-rail" id="reel-rail" aria-hidden="true">
+      <?php foreach ($featured as $i => $p): ?>
+        <button class="reel-tick" data-tick="<?= $i ?>"></button>
+      <?php endforeach; ?>
+    </div>
 
-        <div class="ladder" id="ladder" aria-label="Jump to a project">
-          <?php foreach ($featured as $i => $p): ?>
-            <button type="button" class="rung" data-rung="<?= $i ?>"
-                    aria-label="Go to <?= e($p['client']) ?>">
-              <span class="rung-bar" aria-hidden="true"></span>
-              <span class="rung-tip"><?= e($p['client']) ?></span>
-            </button>
-          <?php endforeach; ?>
-        </div>
-      </div>
-
-      <div id="pj-stack" class="pj-stack">
-        <?php foreach ($featured as $i => $p): ?>
-          <article class="pj" data-pj="<?= $i ?>">
-            <a class="pj-shot" href="<?= e(url('/projects/' . $p['slug'])) ?>"
-               aria-label="Open <?= e($p['client']) ?>">
-              <img src="<?= e(url($p['cover'])) ?>" alt="<?= e($p['client'] . ', ' . $p['title']) ?>"
+    <div class="reel" id="reel">
+      <?php foreach ($featured as $i => $p):
+        $num  = sprintf('00.%02d', $i + 1);
+        $disc = strtoupper(implode(' + ', array_filter(array_map('trim', explode(',', (string) $p['disciplines'])))));
+      ?>
+        <article class="reel-item" data-reel="<?= $i ?>">
+          <div class="reel-frame">
+            <span class="reel-idx"><span class="reel-idx-line"></span><?= $num ?></span>
+            <a class="reel-shot" href="<?= e(url('/projects/' . $p['slug'])) ?>" aria-label="Open <?= e($p['client']) ?>">
+              <img class="reel-img" src="<?= e(url($p['cover'])) ?>"
+                   alt="<?= e($p['client'] . ', ' . $p['title']) ?>"
                    <?= $i < 2 ? '' : 'loading="lazy"' ?> decoding="async">
-              <span class="pj-go"><em>View project</em></span>
             </a>
-            <div class="pj-name">
-              <span class="pj-idx"><?= e($p['ref']) ?></span>
-              <h2 class="pj-title"><?= e($p['client']) ?></h2>
-              <p class="pj-line"><?= e($p['line']) ?></p>
-              <div class="pj-meta">
-                <span><?= e(implode(' · ', array_map('trim', explode(',', $p['disciplines'])))) ?></span>
-                <span><?= e($p['year']) ?></span>
-              </div>
+            <a class="reel-title" href="<?= e(url('/projects/' . $p['slug'])) ?>"><?= e($p['client']) ?></a>
+          </div>
+          <div class="reel-meta">
+            <div class="reel-meta-col">
+              <span><?= e($p['title'] ?: $p['client']) ?></span>
+              <?php if (trim((string) $p['line']) !== ''): ?><span class="dim"><?= e($p['line']) ?></span><?php endif; ?>
             </div>
-          </article>
-        <?php endforeach; ?>
-      </div>
+            <div class="reel-meta-col reel-meta-r">
+              <span><?= e($disc !== '' ? $disc : 'ART DIRECTION + DESIGN') ?></span>
+              <span class="dim"><?= e($p['year']) ?></span>
+            </div>
+          </div>
+        </article>
+      <?php endforeach; ?>
     </div>
-  </section>
 
-  <?php if ($more): ?>
-    <div class="work-more">
-      <a href="<?= e(url('/projects')) ?>" class="work-more-btn">
-        <span>View all <?= $count ?> projects</span>
-        <span class="work-more-x" aria-hidden="true">&rarr;</span>
-      </a>
-    </div>
-  <?php endif; ?>
+    <?php if ($more): ?>
+      <div class="work-more">
+        <a href="<?= e(url('/projects')) ?>" class="work-more-btn">
+          <span>View all <?= $count ?> projects</span>
+          <span class="work-more-x" aria-hidden="true">&rarr;</span>
+        </a>
+      </div>
+    <?php endif; ?>
+  </section>
   <?php endif; ?>
 
   <!-- ══ what we do all day ══ -->
