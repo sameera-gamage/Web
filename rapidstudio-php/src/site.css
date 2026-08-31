@@ -847,58 +847,95 @@
 }
 .work-back-btn:hover { border-color: #FF5A1F; color: #EDEAE6; }
 
-/* ---- what we do all day ---- */
+/* ---- what we do all day : the "one room, six walls" panels ---- */
 .sec-head { max-width: 62ch; }
-.do-grid {
+.rooms {
   margin-top: clamp(3rem, 6vw, 5.5rem);
-  display: grid; gap: clamp(.9rem, 1.4vw, 1.4rem);
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  display: flex; gap: 6px;
+  height: clamp(440px, 64vh, 680px);
+  border-radius: 22px; overflow: hidden;
 }
-.do-card {
+.room {
   position: relative; overflow: hidden;
-  display: flex; flex-direction: column;
-  padding: clamp(1.8rem, 2.6vw, 2.8rem);
-  min-height: clamp(240px, 26vw, 320px);
-  border: 1px solid rgba(255,255,255,.08);
-  border-radius: 20px;
+  flex: 1 1 0; min-width: 0;
   background:
-    radial-gradient(120% 80% at 100% 0%, rgba(255,90,31,.06), transparent 55%),
+    radial-gradient(140% 120% at 50% 100%, rgba(255,90,31,.05), transparent 60%),
     #0C0C0C;
-  transition: border-color .45s ease, transform .5s cubic-bezier(.22,.8,.28,1);
+  border-radius: 16px;
+  cursor: pointer; outline: none;
+  transition: flex-grow .65s cubic-bezier(.66,0,.2,1), background-color .5s ease;
 }
-/* the accent bar that wipes across the top on hover */
-.do-card::before {
-  content: ''; position: absolute; left: 0; top: 0; height: 3px; width: 100%;
-  background: linear-gradient(90deg, #FF5A1F, #FF9142);
-  transform: scaleX(0); transform-origin: left;
-  transition: transform .5s cubic-bezier(.22,.8,.28,1);
+.room + .room { box-shadow: -1px 0 0 rgba(255,255,255,.05); }
+.room.is-open {
+  flex-grow: 6.2;
+  background:
+    radial-gradient(120% 100% at 0% 100%, rgba(255,90,31,.16), transparent 62%),
+    linear-gradient(180deg, #141210, #0C0C0C);
 }
-/* a big ghost number in the corner */
-.do-card::after {
-  content: attr(data-n);
-  position: absolute; right: 1.2rem; bottom: .4rem;
-  font-family: 'Syne', ui-sans-serif, sans-serif; font-weight: 800;
-  font-size: clamp(4rem, 8vw, 7rem); line-height: 1;
-  color: rgba(255,255,255,.03);
-  pointer-events: none; transition: color .5s ease;
+/* accent hairline down the opening edge */
+.room.is-open::before {
+  content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
+  background: linear-gradient(180deg, #FF5A1F, #FF9142);
 }
-.do-card:hover {
-  border-color: rgba(255,90,31,.4);
-  transform: translateY(-6px);
-}
-.do-card:hover::before { transform: scaleX(1); }
-.do-card:hover::after { color: rgba(255,90,31,.09); }
-.do-num {
+
+/* the number sits top-left always */
+.room-num {
+  position: absolute; top: 1.4rem; left: 1.4rem; z-index: 3;
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 11px; letter-spacing: .2em; color: rgba(255,90,31,.75);
+  font-size: 11px; letter-spacing: .2em; color: rgba(255,90,31,.85);
 }
-.do-k {
-  margin-top: 1.1rem;
+/* the vertical spine label, shown while the panel is a sliver */
+.room-spine {
+  position: absolute; left: 1.4rem; bottom: 1.6rem; z-index: 3;
+  writing-mode: vertical-rl; transform: rotate(180deg); transform-origin: left;
   font-family: 'Syne', ui-sans-serif, sans-serif; font-weight: 800;
-  font-size: clamp(1.5rem, 2.2vw, 1.9rem); letter-spacing: -.02em; color: #EDEAE6;
+  font-size: clamp(1.1rem, 1.5vw, 1.5rem); letter-spacing: -.01em;
+  color: rgba(237,234,230,.82); white-space: nowrap;
+  transition: opacity .35s ease;
 }
-.do-t { margin-top: .5rem; font-size: 15px; color: rgba(237,234,230,.85); }
-.do-d { margin-top: .9rem; font-size: 14px; line-height: 1.6; color: rgba(237,234,230,.5); position: relative; z-index: 1; }
+.room.is-open .room-spine { opacity: 0; }
+
+/* the full content, revealed only when open */
+.room-body {
+  position: absolute; inset: 0; z-index: 2;
+  display: flex; flex-direction: column; justify-content: flex-end;
+  padding: clamp(1.6rem, 2.4vw, 2.6rem);
+  opacity: 0; transform: translateY(12px);
+  transition: opacity .45s ease .1s, transform .55s cubic-bezier(.22,.8,.28,1) .1s;
+  pointer-events: none;
+  min-width: clamp(280px, 32vw, 460px);   /* keep text from wrapping while opening */
+}
+.room.is-open .room-body { opacity: 1; transform: none; }
+.room-k {
+  font-family: 'Syne', ui-sans-serif, sans-serif; font-weight: 800;
+  font-size: clamp(1.8rem, 3vw, 2.6rem); letter-spacing: -.025em; color: #EDEAE6;
+}
+.room-t { margin-top: .5rem; font-size: clamp(15px, 1.3vw, 17px); color: #FF9142; }
+.room-d {
+  margin-top: 1rem; max-width: 42ch;
+  font-size: 14.5px; line-height: 1.65; color: rgba(237,234,230,.62);
+}
+.room-ghost {
+  position: absolute; right: 1.2rem; top: 1rem; z-index: 1;
+  font-family: 'Syne', ui-sans-serif, sans-serif; font-weight: 800;
+  font-size: clamp(6rem, 12vw, 12rem); line-height: .8;
+  color: transparent; -webkit-text-stroke: 1px rgba(255,90,31,.1);
+  pointer-events: none; user-select: none;
+}
+
+/* touch / narrow: no accordion — stack them open as tall cards */
+@media (max-width: 900px), (hover: none) {
+  .rooms { flex-direction: column; height: auto; gap: 10px; border-radius: 0; }
+  .room { flex: none; border-radius: 16px; min-height: 220px;
+    background: linear-gradient(180deg, #141210, #0C0C0C); }
+  .room.is-open::before { content: ''; }
+  .room-spine { display: none; }
+  .room-body { position: static; opacity: 1; transform: none; pointer-events: auto;
+    min-width: 0; padding: 3rem 1.6rem 1.6rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .room, .room-body, .room-spine { transition: none; }
+}
 
 /* ---- straight answers (FAQ) ---- */
 .faq-in {

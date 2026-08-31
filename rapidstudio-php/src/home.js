@@ -51,6 +51,16 @@ if (!reduced) {
   document.querySelectorAll('.reveal-sec').forEach((el) => el.classList.add('in'));
 }
 
+// the "one room, six walls" panels: open the one you point at (or focus)
+const rooms = [...document.querySelectorAll('.room')];
+if (rooms.length) {
+  const open = (r) => rooms.forEach((o) => o.classList.toggle('is-open', o === r));
+  rooms.forEach((r) => {
+    r.addEventListener('pointerenter', () => open(r));
+    r.addEventListener('focus', () => open(r));
+  });
+}
+
 // the FAQ is native <details>, but only one open at a time reads calmer
 const faqs = [...document.querySelectorAll('.faq')];
 faqs.forEach((d) => {

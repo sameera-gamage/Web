@@ -234,16 +234,22 @@ head_open(
         </p>
       </header>
 
-      <ol class="do-grid">
-        <?php foreach ($services as $i => $s): ?>
-          <li class="do-card" data-n="<?= str_pad((string) ($i + 1), 2, '0', STR_PAD_LEFT) ?>">
-            <span class="do-num"><?= str_pad((string) ($i + 1), 2, '0', STR_PAD_LEFT) ?></span>
-            <h3 class="do-k"><?= e($s['k']) ?></h3>
-            <p class="do-t"><?= e($s['t']) ?></p>
-            <p class="do-d"><?= e($s['d']) ?></p>
-          </li>
+      <!-- six trades, one room. Each panel is a wall; open one and the others
+           step aside. -->
+      <div class="rooms" id="rooms">
+        <?php foreach ($services as $i => $s): $n = str_pad((string) ($i + 1), 2, '0', STR_PAD_LEFT); ?>
+          <article class="room<?= $i === 0 ? ' is-open' : '' ?>" data-room="<?= $i ?>" tabindex="0">
+            <span class="room-num"><?= $n ?></span>
+            <span class="room-spine" aria-hidden="true"><?= e($s['k']) ?></span>
+            <div class="room-body">
+              <h3 class="room-k"><?= e($s['k']) ?></h3>
+              <p class="room-t"><?= e($s['t']) ?></p>
+              <p class="room-d"><?= e($s['d']) ?></p>
+              <span class="room-ghost" aria-hidden="true"><?= $n ?></span>
+            </div>
+          </article>
         <?php endforeach; ?>
-      </ol>
+      </div>
     </div>
   </section>
 
