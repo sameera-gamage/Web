@@ -275,65 +275,61 @@ head_open(
     </div>
   </section>
 
-  <!-- ══ the form ══ -->
+  <!-- ══ let's connect — the form unfolds from the button ══ -->
   <section id="say" class="sec sec-say reveal-sec">
-    <div class="sec-in say-in">
-      <div class="say-left">
-        <p class="sec-k">Start a brief</p>
-        <h2 class="sec-h">Tell us what&rsquo;s<br>on your desk.</h2>
-        <p class="sec-lead">
-          A sentence is enough to start. We read every one ourselves and reply
-          within a working day — usually the same one.
-        </p>
-        <a href="mailto:info@rapidsolutions.live" class="say-mail">info@rapidsolutions.live</a>
+    <div class="connect<?= ($sent || $err) ? ' is-open' : '' ?>" id="connect">
+      <!-- resting face -->
+      <div class="connect-face">
+        <p class="connect-k">Got a project in mind?</p>
+        <h2 class="connect-h">Let&rsquo;s connect</h2>
+        <button type="button" class="connect-btn" id="connect-open" aria-label="Write a message">
+          <span>Write a<br>message</span>
+        </button>
       </div>
 
-      <form class="say-form" method="post" action="<?= e(url('/contact.php')) ?>">
+      <!-- the form that grows out of the button -->
+      <form class="connect-form" method="post" action="<?= e(url('/contact.php')) ?>">
         <?= csrf_field() ?>
+        <button type="button" class="connect-close" id="connect-close" aria-label="Close">&larr; back</button>
+        <p class="connect-form-k">Tell us what&rsquo;s on your desk</p>
+
         <?php if ($sent): ?>
           <p class="say-note say-ok">Got it — thanks. We&rsquo;ll be in touch within a working day.</p>
         <?php elseif ($err): ?>
           <p class="say-note say-bad">Please add your name, a valid email and a short message.</p>
         <?php endif; ?>
 
-        <!-- honeypot: hidden from people, catnip for bots -->
         <div class="say-hp" aria-hidden="true">
           <label>Company <input type="text" name="company" tabindex="-1" autocomplete="off"></label>
         </div>
 
         <div class="say-row">
-          <label class="say-field">
-            <span>Your name</span>
-            <input type="text" name="name" required autocomplete="name" placeholder="Jordan Rivera">
-          </label>
-          <label class="say-field">
-            <span>Email</span>
-            <input type="email" name="email" required autocomplete="email" placeholder="you@company.com">
-          </label>
+          <label class="say-field"><span>Your name</span>
+            <input type="text" name="name" required autocomplete="name" placeholder="Jordan Rivera"></label>
+          <label class="say-field"><span>Email</span>
+            <input type="email" name="email" required autocomplete="email" placeholder="you@company.com"></label>
         </div>
-
-        <label class="say-field">
-          <span>Rough budget <em>(optional)</em></span>
+        <label class="say-field"><span>Rough budget <em>(optional)</em></span>
           <select name="budget">
             <option value="">Not sure yet</option>
-            <option>Under £5k</option>
-            <option>£5k – £15k</option>
-            <option>£15k – £50k</option>
-            <option>£50k +</option>
-            <option>Ongoing retainer</option>
-          </select>
-        </label>
+            <option>Under £5k</option><option>£5k – £15k</option><option>£15k – £50k</option>
+            <option>£50k +</option><option>Ongoing retainer</option>
+          </select></label>
+        <label class="say-field"><span>What do you need?</span>
+          <textarea name="message" rows="3" required placeholder="A line or two about the project, the goal, and when you'd like it live."></textarea></label>
 
-        <label class="say-field">
-          <span>What do you need?</span>
-          <textarea name="message" rows="4" required placeholder="A line or two about the project, the goal, and when you'd like it live."></textarea>
-        </label>
-
-        <button type="submit" class="say-send">
-          <span>Send the brief</span>
-          <span class="say-arrow" aria-hidden="true">&rarr;</span>
-        </button>
+        <button type="submit" class="say-send"><span>Send the brief</span><span class="say-arrow" aria-hidden="true">&rarr;</span></button>
       </form>
+
+      <!-- social bar -->
+      <div class="connect-foot">
+        <span>Feel free to reach us</span>
+        <div class="connect-social">
+          <a href="mailto:info@rapidsolutions.live">Email</a>
+          <a href="#" rel="noopener">Instagram</a>
+          <a href="#" rel="noopener">LinkedIn</a>
+        </div>
+      </div>
     </div>
   </section>
 

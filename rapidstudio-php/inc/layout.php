@@ -19,8 +19,9 @@ function head_open(string $title, string $description = '', string $here = 'inde
   <meta property="og:type" content="website">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230A0A0A'/%3E%3Ccircle cx='16' cy='16' r='9' fill='none' stroke='%23FF5A1F' stroke-width='2.6'/%3E%3Ccircle cx='16' cy='16' r='3' fill='%23FF9142'/%3E%3C/svg%3E">
   <link rel="stylesheet" href="<?= e($b) ?>/assets/fonts/fonts.css">
-  <link rel="preconnect" href="https://api.fontshare.com" crossorigin>
-  <link rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=clash-display@600,700&display=swap">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@700;800&display=swap">
   <link rel="stylesheet" href="<?= e($b) ?>/assets/site.css">
   <script>document.documentElement.classList.remove('no-js');</script>
 </head>

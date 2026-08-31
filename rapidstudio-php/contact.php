@@ -39,20 +39,7 @@ if ($name === '' || !filter_var($email, FILTER_VALIDATE_EMAIL) || $message === '
     back('err');
 }
 
-// make sure the table is there without asking the user to run more SQL
-db()->exec(
-    'CREATE TABLE IF NOT EXISTS leads (
-      id INT UNSIGNED NOT NULL AUTO_INCREMENT,
-      name VARCHAR(160) NOT NULL DEFAULT "",
-      email VARCHAR(200) NOT NULL DEFAULT "",
-      budget VARCHAR(60) NOT NULL DEFAULT "",
-      message TEXT NULL,
-      seen TINYINT(1) NOT NULL DEFAULT 0,
-      created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      PRIMARY KEY (id),
-      KEY ix_new (seen, created_at)
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci'
-);
+ensure_leads();
 
 $st = db()->prepare('INSERT INTO leads (name, email, budget, message) VALUES (?, ?, ?, ?)');
 $st->execute([

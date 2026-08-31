@@ -69,6 +69,18 @@ faqs.forEach((d) => {
   });
 });
 
+// the connect panel: the form unfolds from the "write a message" button
+const connect = document.getElementById('connect');
+if (connect) {
+  document.getElementById('connect-open')?.addEventListener('click', () => {
+    connect.classList.add('is-open');
+    setTimeout(() => connect.querySelector('input[name="name"]')?.focus(), 400);
+  });
+  document.getElementById('connect-close')?.addEventListener('click', () => {
+    connect.classList.remove('is-open');
+  });
+}
+
 // smooth in-page jumps (nav Work/Answers, Start a brief, the seal) via Lenis
 document.querySelectorAll('a[href]').forEach((a) => {
   const href = a.getAttribute('href') || '';

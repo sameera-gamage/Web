@@ -57,13 +57,14 @@ export function mountStack({ gsap, ScrollTrigger, reduced }) {
     const card = item.querySelector('.reel-card');
     const title = card.querySelector('.reel-title');
 
-    // recede behind the pile as the NEXT card takes the front
+    // recede AND fade right out as the NEXT card takes the front, so old
+    // titles never ghost through from behind
     if (i < items.length - 1) {
       gsap.fromTo(card,
-        { scale: 1, filter: 'brightness(1)' },
+        { scale: 1, autoAlpha: 1 },
         {
-          scale: 0.9, yPercent: -2, filter: 'brightness(0.42)', ease: 'none',
-          scrollTrigger: { trigger: items[i + 1], start: 'top bottom', end: 'top top', scrub: true },
+          scale: 0.92, yPercent: -2, autoAlpha: 0, ease: 'none',
+          scrollTrigger: { trigger: items[i + 1], start: 'top 85%', end: 'top 30%', scrub: true },
         });
     }
 

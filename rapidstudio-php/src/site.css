@@ -385,13 +385,13 @@
 /* the title breaks out of the picture on the LEFT and sits in front of it,
    masked so it reveals from below */
 .reel-title-mask {
-  position: absolute; left: -6%; bottom: 7%;
-  z-index: 5; overflow: hidden; padding-bottom: .18em; padding-left: .06em;
+  position: absolute; left: -12%; bottom: 7%;
+  z-index: 5; overflow: hidden; padding-bottom: .2em; padding-left: .06em;
 }
 .reel-title {
   display: block; white-space: nowrap; text-align: left;
-  font-family: 'Clash Display', 'Syne', ui-sans-serif, sans-serif; font-weight: 600;
-  font-size: clamp(2.4rem, 7.5vw, 7.5rem); line-height: .84; letter-spacing: -.02em;
+  font-family: 'Bricolage Grotesque', 'Syne', ui-sans-serif, sans-serif; font-weight: 800;
+  font-size: clamp(2.4rem, 7.5vw, 7.5rem); line-height: .84; letter-spacing: -.03em;
   text-transform: uppercase; color: #F4F1EC;
   text-shadow: 0 14px 70px rgba(0,0,0,.55);
   transition: color .3s ease; will-change: transform;
@@ -1068,27 +1068,91 @@
 }
 
 /* ---- the form ---- */
-.say-in {
-  display: grid; gap: clamp(2.5rem, 5vw, 5rem);
-  grid-template-columns: 1fr;
+/* ---- the connect panel ---- */
+.sec-say { padding-inline: clamp(1rem, 4vw, 3rem); }
+.connect {
+  position: relative; overflow: hidden;
+  max-width: 1560px; margin-inline: auto;
+  min-height: clamp(420px, 62vh, 640px);
+  display: grid; place-items: center;
+  padding: clamp(2.5rem, 6vw, 6rem) var(--edge);
+  border-radius: 28px;
+  background:
+    radial-gradient(120% 120% at 80% 20%, rgba(255,90,31,.06), transparent 55%),
+    radial-gradient(140% 120% at 20% 90%, rgba(255,255,255,.03), transparent 60%),
+    #0C0C0C;
+  border: 1px solid rgba(255,255,255,.07);
 }
-@media (min-width: 900px) { .say-in { grid-template-columns: 0.9fr 1.1fr; align-items: start; } }
-.say-mail {
-  display: inline-block; margin-top: 2rem;
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 13px; letter-spacing: .1em; color: rgba(237,234,230,.55);
-  border-bottom: 1px solid rgba(255,90,31,.4); padding-bottom: 2px;
-  transition: color .3s ease, border-color .3s ease;
-}
-.say-mail:hover { color: #EDEAE6; border-color: #FF5A1F; }
 
-.say-form {
-  display: grid; gap: 1.2rem;
-  padding: clamp(1.6rem, 3vw, 2.6rem);
-  border: 1px solid rgba(255,255,255,.08); border-radius: 20px;
-  background: rgba(12,12,12,.72);
-  -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+/* resting face */
+.connect-face {
+  text-align: center; display: grid; justify-items: center;
+  transition: opacity .45s ease, transform .55s cubic-bezier(.22,.8,.28,1);
 }
+.connect-k {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 12px; letter-spacing: .22em; text-transform: uppercase; color: rgba(237,234,230,.5);
+}
+.connect-h {
+  margin-top: 1rem;
+  font-family: 'Bricolage Grotesque', 'Syne', ui-sans-serif, sans-serif; font-weight: 800;
+  font-size: clamp(3rem, 11vw, 9rem); line-height: .9; letter-spacing: -.04em;
+  text-transform: uppercase; color: #F4F1EC;
+}
+.connect-btn {
+  margin-top: clamp(2rem, 4vw, 3.5rem);
+  width: clamp(120px, 13vw, 168px); aspect-ratio: 1; border-radius: 50%;
+  border: 1px solid rgba(237,234,230,.35); background: transparent; cursor: pointer;
+  color: #EDEAE6;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 11px; letter-spacing: .14em; text-transform: uppercase; line-height: 1.4;
+  transition: transform .5s cubic-bezier(.22,.8,.28,1), background-color .4s ease, color .4s ease, border-color .4s ease;
+}
+.connect-btn:hover { background: #FF5A1F; border-color: #FF5A1F; color: #0A0A0A; transform: scale(1.06); }
+
+/* the form, folded away until the button is pressed */
+.connect-form {
+  position: absolute; inset: 0;
+  display: grid; align-content: center; gap: 1rem;
+  width: min(680px, 92%); margin-inline: auto;
+  padding: clamp(1.6rem, 4vw, 3rem) 0;
+  opacity: 0; visibility: hidden; transform: scale(.7);
+  transform-origin: 50% 72%;
+  transition: opacity .45s ease, transform .55s cubic-bezier(.22,.8,.28,1), visibility .45s;
+}
+.connect.is-open .connect-face { opacity: 0; transform: scale(.85); pointer-events: none; }
+.connect.is-open .connect-form { opacity: 1; visibility: visible; transform: none; }
+.connect.is-open .connect-foot { opacity: 0; pointer-events: none; }
+.connect-foot { transition: opacity .35s ease; }
+.connect-form-k {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 11px; letter-spacing: .2em; text-transform: uppercase; color: rgba(237,234,230,.45);
+}
+.connect-close {
+  justify-self: start; background: none; border: 0; cursor: pointer; padding: 0;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 11px; letter-spacing: .16em; text-transform: uppercase; color: rgba(237,234,230,.6);
+  transition: color .3s ease;
+}
+.connect-close:hover { color: #FF5A1F; }
+
+/* social bar pinned to the panel foot */
+.connect-foot {
+  position: absolute; left: 0; right: 0; bottom: 0;
+  display: flex; justify-content: space-between; align-items: center; gap: 1rem;
+  padding: 1.2rem clamp(1.4rem, 3vw, 2.4rem);
+  border-top: 1px solid rgba(255,255,255,.06);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 10.5px; letter-spacing: .16em; text-transform: uppercase; color: rgba(237,234,230,.4);
+}
+.connect-social { display: flex; gap: clamp(1rem, 3vw, 2.5rem); }
+.connect-social a { color: rgba(237,234,230,.7); transition: color .3s ease; }
+.connect-social a:hover { color: #FF5A1F; }
+@media (max-width: 620px) {
+  .connect-foot { flex-direction: column; gap: .5rem; font-size: 9.5px; }
+  .connect-form { width: 92%; }
+}
+
 .say-hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
 .say-row { display: grid; gap: 1.2rem; grid-template-columns: 1fr; }
 @media (min-width: 560px) { .say-row { grid-template-columns: 1fr 1fr; } }

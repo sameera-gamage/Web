@@ -5,19 +5,7 @@ require_once __DIR__ . '/../inc/db.php';
 require_once __DIR__ . '/_head.php';
 require_admin();
 
-// make sure the table exists even if the site has never taken an enquiry yet
-db()->exec(
-    'CREATE TABLE IF NOT EXISTS leads (
-      id INT UNSIGNED NOT NULL AUTO_INCREMENT,
-      name VARCHAR(160) NOT NULL DEFAULT "",
-      email VARCHAR(200) NOT NULL DEFAULT "",
-      budget VARCHAR(60) NOT NULL DEFAULT "",
-      message TEXT NULL,
-      seen TINYINT(1) NOT NULL DEFAULT 0,
-      created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      PRIMARY KEY (id), KEY ix_new (seen, created_at)
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci'
-);
+ensure_leads();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     check_csrf();

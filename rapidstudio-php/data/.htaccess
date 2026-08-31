@@ -1,0 +1,2 @@
+# The SQLite database lives here — never let it be served over the web.
+Require all denied

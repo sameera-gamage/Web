@@ -9,10 +9,16 @@ declare(strict_types=1);
 
 $config = [
     'db' => [
+        // 'sqlite' needs no database server — the site creates and seeds a file
+        // the first time it runs. Switch to 'mysql' only if you want to use one.
+        'driver'      => 'sqlite',
+        'sqlite_path' => __DIR__ . '/../data/rapidstudio.sqlite',
+
+        // used only when driver is 'mysql'
         'host' => '127.0.0.1',
         'name' => 'rapidstudio',
         'user' => 'root',
-        'pass' => '',            // XAMPP's MySQL has no root password by default
+        'pass' => '',
         'charset' => 'utf8mb4',
     ],
 

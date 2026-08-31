@@ -27,43 +27,58 @@ function engine(canvas, measure, reduced) {
   const LINK = 150, MOUSE_R = 260;
   const particles = [];
 
-  let mx = -9999, my = -9999;
+  let mx = -9999, my = -9999, lmx = -9999, lmy = -9999;
   addEventListener('pointermove', (e) => { mx = e.clientX - ox; my = e.clientY - oy; }, { passive: true });
   addEventListener('pointerleave', () => { mx = my = -9999; });
 
   for (let i = 0; i < COUNT; i++) {
     const accent = Math.random() > 0.55;
+    const x = Math.random() * w, y = Math.random() * h;
     particles.push({
-      x: Math.random() * w, y: Math.random() * h,
-      vx: (Math.random() - 0.5) * 0.25, vy: (Math.random() - 0.5) * 0.25,
+      x, y, hx: x, hy: y,            // home, so the field settles back like water
+      vx: 0, vy: 0,
       r: accent ? Math.random() * 1.2 + 1 : Math.random() * 0.8 + 0.5,
       accent,
-      wander: Math.random() * Math.PI * 2,
-      wanderSpeed: Math.random() * 0.003 + 0.001,
+      drift: Math.random() * Math.PI * 2,
     });
   }
 
   function frame() {
     ctx.clearRect(0, 0, w, h);
+
+    // cursor velocity — a fast stroke displaces more water than a slow one
+    const mvx = (mx > -9000 && lmx > -9000) ? mx - lmx : 0;
+    const mvy = (my > -9000 && lmy > -9000) ? my - lmy : 0;
+    const speed = Math.min(60, Math.hypot(mvx, mvy));
+    lmx = mx; lmy = my;
+
     for (const p of particles) {
-      p.wander += p.wanderSpeed;
-      p.vx += Math.cos(p.wander) * 0.008;
-      p.vy += Math.sin(p.wander) * 0.008;
-      const dx = mx - p.x, dy = my - p.y;
-      const md = Math.sqrt(dx * dx + dy * dy);
-      if (md < MOUSE_R && md > 1) {
-        const pull = 1 - md / MOUSE_R;
-        const f = 0.09 * pull * pull;
-        p.vx += (dx / md) * f; p.vy += (dy / md) * f;
+      // a whisper of idle drift so the surface is never dead still
+      p.drift += 0.01;
+      p.vx += Math.cos(p.drift) * 0.01;
+      p.vy += Math.sin(p.drift) * 0.01;
+
+      // push AWAY from the cursor (displace), harder the faster it moves,
+      // and carry a little along the stroke — the wake
+      const dx = p.x - mx, dy = p.y - my;
+      const md = Math.hypot(dx, dy);
+      if (md < MOUSE_R && md > 0.01) {
+        const f = 1 - md / MOUSE_R;
+        const push = f * f * (0.5 + speed * 0.14);
+        p.vx += (dx / md) * push;
+        p.vy += (dy / md) * push;
+        p.vx += mvx * f * 0.05;
+        p.vy += mvy * f * 0.05;
       }
-      p.vx *= 0.94; p.vy *= 0.94;
-      const sp = Math.hypot(p.vx, p.vy), MAX = 3.2;
+
+      // spring home so the ripples calm down
+      p.vx += (p.hx - p.x) * 0.012;
+      p.vy += (p.hy - p.y) * 0.012;
+
+      p.vx *= 0.86; p.vy *= 0.86;   // viscosity
+      const sp = Math.hypot(p.vx, p.vy), MAX = 6;
       if (sp > MAX) { p.vx = (p.vx / sp) * MAX; p.vy = (p.vy / sp) * MAX; }
       p.x += p.vx; p.y += p.vy;
-      if (p.x < -20) p.x = w + 20;
-      if (p.x > w + 20) p.x = -20;
-      if (p.y < -20) p.y = h + 20;
-      if (p.y > h + 20) p.y = -20;
     }
     for (let i = 0; i < particles.length; i++) {
       for (let j = i + 1; j < particles.length; j++) {
