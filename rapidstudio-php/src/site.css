@@ -357,7 +357,7 @@
 .reel { display: flex; flex-direction: column; gap: clamp(6rem, 13vh, 15rem); }
 .reel-item { position: relative; display: flex; flex-direction: column; align-items: center; }
 
-.reel-frame { position: relative; width: min(70vw, 1040px); }
+.reel-frame { position: relative; width: min(84vw, 1460px); }
 .reel-shot {
   display: block; position: relative;
   width: 100%; aspect-ratio: 16 / 10;
@@ -382,18 +382,18 @@
 .reel-title:hover { color: #FF9142; }
 
 .reel-idx {
-  position: absolute; top: 60%; right: calc(100% + clamp(1rem, 3vw, 3rem));
-  display: flex; align-items: center; gap: 1.1rem; z-index: 4; white-space: nowrap;
+  position: absolute; top: 60%; right: calc(100% + clamp(.7rem, 1.6vw, 1.6rem));
+  display: flex; align-items: center; gap: .8rem; z-index: 4; white-space: nowrap;
   font-family: ui-sans-serif, system-ui, sans-serif;
-  font-size: clamp(13px, 1.1vw, 17px); letter-spacing: .06em; color: rgba(237,234,230,.7);
+  font-size: clamp(13px, 1.1vw, 18px); letter-spacing: .06em; color: rgba(237,234,230,.75);
 }
-.reel-idx-line { display: block; width: clamp(46px, 9vw, 180px); height: 1px; background: rgba(237,234,230,.32); }
+.reel-idx-line { display: block; width: clamp(26px, 4vw, 92px); height: 1px; background: rgba(237,234,230,.32); }
 
 .reel-meta {
-  width: min(70vw, 1040px); margin-top: 1.6rem;
+  width: min(84vw, 1460px); margin-top: 1.7rem;
   display: flex; justify-content: space-between; gap: 2rem;
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 11px; letter-spacing: .14em; text-transform: uppercase;
+  font-size: 12.5px; letter-spacing: .14em; text-transform: uppercase;
 }
 .reel-meta-col { display: flex; flex-direction: column; gap: .25rem; color: rgba(237,234,230,.82); }
 .reel-meta-r { text-align: right; }
