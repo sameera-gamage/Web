@@ -353,51 +353,65 @@
    The work reel — a vertical scroll with the title laid over the picture,
    the index number ruled off to the left, and the credits beneath.
    ───────────────────────────────────────────────────────────────── */
-.reel-wrap { position: relative; padding: clamp(3rem, 6vh, 6rem) var(--edge) clamp(1rem, 3vh, 3rem); }
-.reel { display: flex; flex-direction: column; gap: clamp(3.5rem, 7vh, 8rem); }
-.reel-item { position: relative; display: flex; flex-direction: column; align-items: center; }
+.reel-wrap { position: relative; }
+.reel { position: relative; }
+/* each item is one screen of scroll; its card is pinned and the next card
+   rises over it, so the projects pile front-to-back */
+.reel-item { height: 100vh; }
+.reel-card {
+  height: 100vh;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  will-change: transform, filter;
+  transform-origin: 50% 42%;
+}
 
-.reel-frame { position: relative; width: min(84vw, 1460px); }
+.reel-frame { position: relative; width: min(62vw, 940px); }
 .reel-shot {
   display: block; position: relative;
-  width: 100%; aspect-ratio: 2 / 1;   /* wide + shorter, more cinematic */
-  border-radius: 22px; overflow: hidden;
-  background: #111; box-shadow: 0 50px 120px -55px rgba(0,0,0,.9);
+  width: 100%; aspect-ratio: 16 / 10;
+  border-radius: 18px; overflow: hidden;
+  background: #111; box-shadow: 0 40px 100px -50px rgba(0,0,0,.9);
 }
 .reel-img {
-  position: absolute; left: 0; top: -9%;
-  width: 100%; height: 118%; object-fit: cover;
+  position: absolute; inset: 0;
+  width: 100%; height: 100%; object-fit: cover;
   filter: contrast(1.05) saturate(.98) brightness(.9);
-  will-change: transform;
+}
+
+/* the title sits over the picture and is masked so it reveals from below */
+.reel-title-mask {
+  position: absolute; left: 50%; bottom: 6%; transform: translateX(-50%);
+  z-index: 3; overflow: hidden; padding-bottom: .12em;
+  max-width: 96%;
 }
 .reel-title {
-  position: absolute; left: 50%; bottom: 6%; transform: translateX(-50%);
-  z-index: 3; white-space: nowrap;
+  display: block; white-space: nowrap;
   font-family: 'Syne', ui-sans-serif, sans-serif; font-weight: 800;
-  font-size: clamp(2.8rem, 10.5vw, 11rem); line-height: .8; letter-spacing: -.045em;
+  font-size: clamp(2.4rem, 8vw, 8rem); line-height: .82; letter-spacing: -.045em;
   text-transform: uppercase; color: #F4F1EC;
-  text-shadow: 0 12px 60px rgba(0,0,0,.4);
+  text-shadow: 0 12px 60px rgba(0,0,0,.45);
   transition: color .3s ease; will-change: transform;
 }
 .reel-title:hover { color: #FF9142; }
 
 .reel-idx {
-  position: absolute; top: 60%; right: calc(100% + clamp(.7rem, 1.6vw, 1.6rem));
+  position: absolute; top: 58%; right: calc(100% + clamp(.7rem, 1.6vw, 1.6rem));
   display: flex; align-items: center; gap: .8rem; z-index: 4; white-space: nowrap;
   font-family: ui-sans-serif, system-ui, sans-serif;
-  font-size: clamp(13px, 1.1vw, 18px); letter-spacing: .06em; color: rgba(237,234,230,.75);
+  font-size: clamp(12px, 1vw, 16px); letter-spacing: .06em; color: rgba(237,234,230,.75);
 }
-.reel-idx-line { display: block; width: clamp(26px, 4vw, 92px); height: 1px; background: rgba(237,234,230,.32); }
+.reel-idx-line { display: block; width: clamp(24px, 3.5vw, 80px); height: 1px; background: rgba(237,234,230,.32); }
 
 .reel-meta {
-  width: min(84vw, 1460px); margin-top: 1.7rem;
+  width: min(62vw, 940px); margin-top: 1.4rem;
   display: flex; justify-content: space-between; gap: 2rem;
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 12.5px; letter-spacing: .14em; text-transform: uppercase;
+  font-size: 11.5px; letter-spacing: .14em; text-transform: uppercase;
 }
 .reel-meta-col { display: flex; flex-direction: column; gap: .25rem; color: rgba(237,234,230,.82); }
 .reel-meta-r { text-align: right; }
 .reel-meta .dim { color: rgba(237,234,230,.42); }
+.work-more { padding-top: 3rem; }
 
 /* right-edge tick rail, only while the reel is on screen */
 .reel-rail {
@@ -413,10 +427,13 @@
 .reel-tick.on { width: 42px; background: #FF5A1F; }
 
 @media (max-width: 760px) {
+  .reel-item { height: auto; }
+  .reel-card { height: auto; padding: 7vh 0; }
   .reel-frame, .reel-meta { width: 90vw; }
   .reel-idx { position: static; margin: 0 0 .7rem; }
   .reel-rail { display: none; }
-  .reel-title { font-size: clamp(1.8rem, 13vw, 4.5rem); bottom: 5%; }
+  .reel-title { font-size: clamp(1.8rem, 13vw, 4.5rem); }
+  .reel-title-mask { bottom: 5%; }
   .reel-meta { font-size: 9.5px; }
 }
 

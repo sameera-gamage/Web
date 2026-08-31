@@ -1,11 +1,11 @@
 /*
-  The work reel.
+  The work stack — a pile of cards.
 
-  A natural vertical scroll: each project is a big picture with the client name
-  laid over it and the credits beneath. The picture parallaxes inside its frame
-  and the title drifts as the block travels, so there is depth without a pin.
-  When scrolling settles, the nearest project glides to centre. The slim rail on
-  the right tracks the active project and — on hover or click — jumps to it.
+  Each project owns one screen of scroll. Its card is pinned in place, and the
+  next project's card rises up over it as you scroll; the one you're leaving
+  scales down and dims, so it sits behind the pile rather than vanishing. The
+  title reveals from a mask as each card arrives. A rail on the right tracks the
+  active card and jumps to it on hover.
 */
 export function mountStack({ gsap, ScrollTrigger, reduced }) {
   const reel = document.getElementById('reel');
@@ -21,81 +21,74 @@ export function mountStack({ gsap, ScrollTrigger, reduced }) {
       { rootMargin: '-8% 0px -8% 0px' }).observe(wrap);
   }
 
-  const lenis = () => window.__lenis;
-  const frameOf = (el) => el.querySelector('.reel-frame') || el;
-  const centerY = (el) => { const r = frameOf(el).getBoundingClientRect(); return r.top + r.height / 2; };
-
-  let snapping = false;
-  function goTo(i, dur = 0.7) {
-    const el = items[i];
-    if (!el) return;
-    const f = frameOf(el);
-    const y = f.getBoundingClientRect().top + scrollY - (innerHeight - f.offsetHeight) / 2;
-    snapping = true;
-    const L = lenis();
-    if (L) L.scrollTo(y, { duration: dur, easing: (t) => 1 - Math.pow(1 - t, 3) });
-    else scrollTo({ top: y, behavior: 'smooth' });
-    setTimeout(() => { snapping = false; }, dur * 1000 + 120);
-    setActive(i);
-  }
-
   let active = -1;
-  function setActive(i) {
+  const setActive = (i) => {
     if (i === active) return;
     active = i;
     ticks.forEach((t, k) => t.classList.toggle('on', k === i));
-  }
+  };
 
-  // light the tick for whichever block owns the centre of the screen
+  function goTo(i) {
+    const el = items[i];
+    if (!el) return;
+    const y = el.getBoundingClientRect().top + scrollY;
+    const L = window.__lenis;
+    if (L) L.scrollTo(y, { duration: 0.8 });
+    else scrollTo({ top: y, behavior: 'smooth' });
+  }
+  let intent = 0;
+  ticks.forEach((t, i) => {
+    t.addEventListener('pointerenter', () => { clearTimeout(intent); intent = setTimeout(() => goTo(i), 110); });
+    t.addEventListener('pointerleave', () => clearTimeout(intent));
+    t.addEventListener('click', () => { clearTimeout(intent); goTo(i); });
+    t.addEventListener('focus', () => goTo(i));
+  });
+
+  // track which card is centred (works with or without motion)
   const io = new IntersectionObserver((entries) => {
     entries.forEach((e) => { if (e.isIntersecting) setActive(+e.target.dataset.reel); });
   }, { rootMargin: '-45% 0px -45% 0px' });
   items.forEach((el) => io.observe(el));
 
-  // ---- snap: settle the nearest project to centre ----
-  let settle = 0;
-  function snapNearest() {
-    if (snapping) return;
-    const mid = innerHeight / 2;
-    let best = -1, bd = Infinity;
-    items.forEach((el, i) => { const d = Math.abs(centerY(el) - mid); if (d < bd) { bd = d; best = i; } });
-    if (best < 0) return;
-    if (bd < 8) return;                        // already centred
-    if (bd > innerHeight * 0.55) return;       // between sections — let it be
-    goTo(best, 0.45);
-  }
-  if (!reduced) {
-    addEventListener('scroll', () => {
-      if (snapping) return;
-      clearTimeout(settle);
-      settle = setTimeout(snapNearest, 90);
-    }, { passive: true });
-  }
+  // pinning is desktop-only; touch just scrolls the cards in flow
+  const canPin = !reduced && matchMedia('(min-width: 761px)').matches;
+  if (!canPin) { setActive(0); return; }
 
-  // ---- the rail: hover (with intent) or click to jump ----
-  let intent = 0;
-  ticks.forEach((t, i) => {
-    t.addEventListener('pointerenter', () => { clearTimeout(intent); intent = setTimeout(() => goTo(i, 0.8), 110); });
-    t.addEventListener('pointerleave', () => clearTimeout(intent));
-    t.addEventListener('click', () => { clearTimeout(intent); goTo(i, 0.7); });
-    t.addEventListener('focus', () => goTo(i, 0.7));
-  });
+  items.forEach((item, i) => {
+    const card = item.querySelector('.reel-card');
+    const title = card.querySelector('.reel-title');
+    const last = i === items.length - 1;
 
-  if (reduced) return;
-
-  // ---- per-block parallax ----
-  items.forEach((el) => {
-    const img = el.querySelector('.reel-img');
-    const title = el.querySelector('.reel-title');
-    gsap.fromTo(img, { yPercent: -9 }, {
-      yPercent: 9, ease: 'none',
-      scrollTrigger: { trigger: el, start: 'top bottom', end: 'bottom top', scrub: true },
+    // pin the card so the pile builds up
+    ScrollTrigger.create({
+      trigger: item,
+      start: 'top top',
+      end: 'bottom top',
+      pin: card,
+      pinSpacing: false,
+      anticipatePin: 1,
     });
+
+    // the card recedes as the NEXT one takes the front
+    if (!last) {
+      gsap.fromTo(card,
+        { scale: 1, filter: 'brightness(1)' },
+        {
+          scale: 0.88, yPercent: -3, filter: 'brightness(0.4)', ease: 'none',
+          scrollTrigger: { trigger: items[i + 1], start: 'top bottom', end: 'top top', scrub: true },
+        });
+    }
+
+    // title reveals from its mask as the card arrives, hides as it leaves
     if (title) {
-      gsap.fromTo(title, { yPercent: 16 }, {
-        yPercent: -16, ease: 'none',
-        scrollTrigger: { trigger: el, start: 'top bottom', end: 'bottom top', scrub: true },
-      });
+      gsap.fromTo(title,
+        { yPercent: 115 },
+        {
+          yPercent: 0, ease: 'power3.out',
+          scrollTrigger: { trigger: item, start: 'top 78%', end: 'top 30%', scrub: 0.6 },
+        });
     }
   });
+
+  ScrollTrigger.refresh();
 }
