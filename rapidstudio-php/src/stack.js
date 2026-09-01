@@ -1,12 +1,11 @@
 /*
-  The work stack — a pile of cards.
+  The work stack — a pile of sticky cards with one fixed caption.
 
-  CSS `position: sticky` does the pinning: every card shares the top anchor, so
-  as you scroll the next card rises up and piles over the previous, and they all
-  release together at the end (no fixed-position leak into the next section). We
-  only add the flourish: the card being left scales down and dims so it sits
-  behind the pile, and each title reveals from its mask as the card arrives. The
-  rail on the right tracks the active card and jumps to it on hover.
+  CSS `position: sticky` pins each card so the next rises over it. On top we add:
+  a depth grow (each project swells from the back to full size), a recede/fade of
+  the card being left, a right-side rail that tracks the active project, and one
+  caption held in a fixed spot whose text rolls out (down) and in (up) as the
+  active project changes.
 */
 export function mountStack({ gsap, ScrollTrigger, reduced }) {
   const reel = document.getElementById('reel');
@@ -15,32 +14,45 @@ export function mountStack({ gsap, ScrollTrigger, reduced }) {
   const ticks = [...document.querySelectorAll('.reel-tick')];
   if (!items.length) return;
 
-  const wrap = document.getElementById('stack');
   const rail = document.getElementById('reel-rail');
   const caption = document.getElementById('reel-caption');
   const capLine = document.getElementById('reel-caption-line');
-  if (wrap) {
-    new IntersectionObserver(([e]) => {
-      rail && rail.classList.toggle('show', e.isIntersecting);
-      caption && caption.classList.toggle('show', e.isIntersecting);
-    }, { rootMargin: '-8% 0px -8% 0px' }).observe(wrap);
-  }
+  const N = items.length;
 
-  // roll the caption: old name drops away (down), new name rises in (up) — in
-  // the one fixed spot
+  // desktop only: on touch / reduced motion the reel is a plain list with each
+  // card's own title, no pinning, rail or caption
+  const canAnimate = !reduced && matchMedia('(min-width: 761px)').matches;
+  if (!canAnimate) return;
+
+  // absolute document offsets — sticky elements report rect.top as 0 when stuck
+  const docTop = (el) => { let y = 0; while (el) { y += el.offsetTop; el = el.offsetParent; } return y; };
+  const reelTop = () => docTop(items[0]);
+  const stepH = () => (N > 1 ? docTop(items[1]) - docTop(items[0]) : innerHeight);
+
+  // ---- caption: roll the name out (down) and the next one in (up), queued so
+  //      fast scrolling always lands on the right name ----
+  let swapping = false, pending = null, curName = null;
+  function runSwap(name) {
+    swapping = true;
+    gsap.timeline({
+      onComplete() {
+        swapping = false;
+        if (pending !== null && pending !== curName) { const n = pending; pending = null; runSwap(n); }
+        else pending = null;
+      },
+    })
+      .to(capLine, { yPercent: 120, autoAlpha: 0, duration: 0.26, ease: 'power2.in' })
+      .add(() => { capLine.textContent = name; curName = name; })
+      .set(capLine, { yPercent: 120, autoAlpha: 0 })
+      .to(capLine, { yPercent: 0, autoAlpha: 1, duration: 0.5, ease: 'power3.out' });
+  }
   function swapCaption(i) {
-    if (!capLine) return;
     const el = items[i];
     const name = el.dataset.name || '';
     if (caption) caption.setAttribute('href', el.dataset.href || '#');
-    if (capLine.textContent === name) return;
-    if (reduced) { capLine.textContent = name; return; }
-    gsap.killTweensOf(capLine);
-    gsap.timeline()
-      .to(capLine, { yPercent: 120, autoAlpha: 0, duration: 0.28, ease: 'power2.in' })
-      .add(() => { capLine.textContent = name; })
-      .set(capLine, { yPercent: 120, autoAlpha: 0 })
-      .to(capLine, { yPercent: 0, autoAlpha: 1, duration: 0.5, ease: 'power3.out' });
+    if (!capLine || name === curName) return;
+    if (swapping) { pending = name; return; }
+    runSwap(name);
   }
 
   let active = -1;
@@ -51,15 +63,11 @@ export function mountStack({ gsap, ScrollTrigger, reduced }) {
     swapCaption(i);
   };
 
-  // absolute document offset — sticky elements report rect.top as 0 when stuck,
-  // so sum offsetTop up the chain instead
-  const docTop = (el) => { let y = 0; while (el) { y += el.offsetTop; el = el.offsetParent; } return y; };
-
+  // ---- jump from the rail ----
   let snapping = false;
   function goTo(i, dur = 0.7) {
-    const el = items[i];
-    if (!el) return;
-    const y = docTop(el);
+    if (!items[i]) return;
+    const y = docTop(items[i]);
     snapping = true;
     const L = window.__lenis;
     if (L) L.scrollTo(y, { duration: dur });
@@ -75,43 +83,34 @@ export function mountStack({ gsap, ScrollTrigger, reduced }) {
     t.addEventListener('focus', () => goTo(i, 0.7));
   });
 
-  // active project = whichever card is nearest to where we've scrolled. Driven
-  // by scroll position, not an observer, so it updates going up AND down.
-  function updateActive() {
-    let best = 0, bd = Infinity;
-    items.forEach((el, i) => { const d = Math.abs(docTop(el) - scrollY); if (d < bd) { bd = d; best = i; } });
-    setActive(best);
-  }
-
-  // settle the nearest project to centre when scrolling stops
+  // ---- one scroll handler drives active, show-range and centre-snap ----
   let settle = 0;
-  addEventListener('scroll', () => {
-    updateActive();
+  function onScroll() {
+    const rel = (scrollY - reelTop()) / stepH();      // 0 at first project, N-1 at last
+    const idx = Math.max(0, Math.min(N - 1, Math.round(rel)));
+    setActive(idx);
+
+    const inReel = rel > -0.45 && rel < (N - 1) + 0.45;
+    rail && rail.classList.toggle('show', inReel);
+    caption && caption.classList.toggle('show', inReel);
+
     if (snapping) return;
     clearTimeout(settle);
-    settle = setTimeout(snapNearest, 120);
-  }, { passive: true });
-  updateActive();
-  function snapNearest() {
-    if (snapping || !wrap) return;
-    const top = docTop(wrap), bot = top + wrap.offsetHeight;
-    // only while the reel owns the screen — never fight entering/leaving it
-    if (scrollY < top - innerHeight * 0.25 || scrollY > bot - innerHeight * 0.75) return;
-    let best = -1, bd = Infinity;
-    items.forEach((el, i) => { const d = Math.abs(docTop(el) - scrollY); if (d < bd) { bd = d; best = i; } });
-    if (best < 0 || bd < 10 || bd > innerHeight * 0.7) return;
-    goTo(best, 0.55);
+    settle = setTimeout(() => {
+      if (snapping) return;
+      if (rel <= -0.4 || rel >= (N - 1) + 0.4) return;   // let entry/exit be free
+      if (Math.abs(rel - idx) > 0.02) goTo(idx, 0.5);
+    }, 120);
   }
+  addEventListener('scroll', onScroll, { passive: true });
+  addEventListener('resize', () => { ScrollTrigger.refresh(); onScroll(); }, { passive: true });
+  onScroll();
 
-  const canAnimate = !reduced && matchMedia('(min-width: 761px)').matches;
-  if (!canAnimate) { setActive(0); return; }
-
+  // ---- depth + recede ----
   items.forEach((item, i) => {
     const card = item.querySelector('.reel-card');
     const depth = item.querySelector('.reel-depth');
 
-    // DEPTH: the project rises from further back — small, then grows to its
-    // original size as it reaches the middle. (First one is already at size.)
     if (depth && i > 0) {
       gsap.fromTo(depth,
         { scale: 0.78, filter: 'brightness(0.6)' },
@@ -120,9 +119,7 @@ export function mountStack({ gsap, ScrollTrigger, reduced }) {
           scrollTrigger: { trigger: item, start: 'top bottom', end: 'top center', scrub: true },
         });
     }
-
-    // recede AND fade right out as the NEXT card takes the front
-    if (i < items.length - 1) {
+    if (i < N - 1) {
       gsap.fromTo(card,
         { scale: 1, autoAlpha: 1 },
         {
@@ -133,4 +130,5 @@ export function mountStack({ gsap, ScrollTrigger, reduced }) {
   });
 
   ScrollTrigger.refresh();
+  onScroll();
 }
