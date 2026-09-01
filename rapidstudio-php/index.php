@@ -277,24 +277,25 @@ head_open(
   <!-- ══ straight answers — an interactive index: pick a question on the left,
        the answer opens large on the right ══ -->
   <section id="answers" class="sec sec-faq reveal-sec">
-    <div class="sec-in faq-in">
-      <header class="sec-head faq-head">
-        <p class="sec-k">Straight answers</p>
-        <h2 class="sec-h">The things you were<br>about to email us.</h2>
-        <p class="sec-lead">No sales dance. Point at a question.</p>
-      </header>
-
+    <div class="sec-in">
       <?php $ftot = sprintf('%02d', count($faqs)); ?>
       <div class="qa" id="qa">
-        <div class="qa-list" role="tablist" aria-label="Questions">
-          <?php foreach ($faqs as $i => $f): ?>
-            <button class="qa-tab" type="button" role="tab" data-i="<?= $i ?>"
-                    id="qa-tab-<?= $i ?>" aria-controls="qa-panel-<?= $i ?>">
-              <span class="qa-n"><?= sprintf('%02d', $i + 1) ?></span>
-              <span class="qa-q"><?= e($f['q']) ?></span>
-              <span class="qa-go" aria-hidden="true">&rarr;</span>
-            </button>
-          <?php endforeach; ?>
+        <div class="qa-left">
+          <header class="sec-head faq-head">
+            <p class="sec-k">Straight answers</p>
+            <h2 class="sec-h">The things you were about to email us.</h2>
+            <p class="sec-lead">No sales dance. Point at a question.</p>
+          </header>
+          <div class="qa-list" role="tablist" aria-label="Questions">
+            <?php foreach ($faqs as $i => $f): ?>
+              <button class="qa-tab" type="button" role="tab" data-i="<?= $i ?>"
+                      id="qa-tab-<?= $i ?>" aria-controls="qa-panel-<?= $i ?>">
+                <span class="qa-n"><?= sprintf('%02d', $i + 1) ?></span>
+                <span class="qa-q"><?= e($f['q']) ?></span>
+                <span class="qa-go" aria-hidden="true">&rarr;</span>
+              </button>
+            <?php endforeach; ?>
+          </div>
         </div>
 
         <div class="qa-stage">

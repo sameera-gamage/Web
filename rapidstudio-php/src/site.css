@@ -1086,13 +1086,14 @@
 }
 
 /* ---- straight answers (FAQ) ---- */
-.faq-in { display: grid; gap: clamp(2.2rem, 4vw, 3.4rem); }
-.faq-head { max-width: 40ch; }
+.faq-head { max-width: 20ch; margin-bottom: clamp(1.6rem, 3.5vw, 2.6rem); }
+.faq-head .sec-h { font-size: clamp(2rem, 3.6vw, 3.2rem); }
 
-/* the interactive index: a list of questions on the left, one large answer
-   panel on the right that swaps as you point at a question */
+/* the interactive index: the intro and question list on the left, one large
+   answer panel on the right that swaps as you point at a question */
 .qa { display: grid; grid-template-columns: 1fr; gap: clamp(1.6rem, 4vw, 3.5rem); align-items: start; }
-@media (min-width: 900px) { .qa { grid-template-columns: 1.02fr 1fr; } }
+@media (min-width: 900px) { .qa { grid-template-columns: 1.05fr 1fr; } }
+.qa-left { display: flex; flex-direction: column; }
 
 .qa-list { display: flex; flex-direction: column; }
 .qa-tab {

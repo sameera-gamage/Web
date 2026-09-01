@@ -110,7 +110,10 @@ export function mountHero({ gsap, ScrollTrigger, createHeroVideo, reduced }) {
       const w = ease(0.84, 0.93, v) * (1 - 0.35 * ease(0.94, 1, v));  // inside the barrel
       const open = ease(0.84, 0.95, v);    // card -> full bleed
       const rev = ease(0.90, 1, v);        // the aperture opens onto the next section
-      const bed = ease(0.76, 0.88, v);     // ink behind the card, before the hole
+      // ink behind the card while the barrel goes dark, then cleared as the
+      // aperture opens so the work section shows the live particle field
+      // through the hole rather than a flat black plate
+      const bed = ease(0.76, 0.88, v) * (1 - ease(0.93, 1, v));
 
       set(heroA, 'opacity', a, 'a');
       set(heroA, 'transform', `translateY(${((1 - a) * -40).toFixed(1)}px)`, 'at');
