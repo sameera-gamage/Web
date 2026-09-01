@@ -4,14 +4,19 @@
   On the desktop the reel pins to one stage (#reel-stage sticks for the whole
   section) and every card is positioned on top of the others. A card's look is
   computed directly from how far the page has scrolled — no scrubbed tweens, no
-  sticky-offset guesswork — so the picture, its depth and its overlaid title all
-  move as one and can never fall out of step:
+  sticky-offset guesswork — so the picture and its depth can never fall out of
+  step:
 
-    • the incoming project grows from the back (scale 0.8 → 1) and fades up;
-    • the one you leave recedes (scale 1 → 0.88) and fades behind the next.
+    • the incoming project slides up from below into the front and fades in;
+    • the one you leave recedes a touch and fades behind it.
 
-  SPEED sets how much scrolling one project takes (higher = slower / longer).
-  A single scroll settles the nearest project to the centre and holds it there.
+  The centred project also reacts to the cursor: the card tilts in real
+  perspective and its picture drifts inside the frame, giving the pile a sense
+  of depth (a gentle 3-D parallax). A fixed caption holds the active project's
+  name and rolls out/in as the project changes.
+
+  SPEED sets how much scrolling one project takes (higher = longer / more
+  scroll per project). A single scroll settles the nearest project to centre.
 */
 export function mountStack({ gsap, ScrollTrigger, reduced }) {
   const reel = document.getElementById('reel');
@@ -19,6 +24,7 @@ export function mountStack({ gsap, ScrollTrigger, reduced }) {
   if (!reel || !stage) return;
   const items = [...stage.querySelectorAll('.reel-item')];
   const cards = items.map((it) => it.querySelector('.reel-card'));
+  const imgs = items.map((it) => it.querySelector('.reel-img'));
   const ticks = [...document.querySelectorAll('.reel-tick')];
   const rail = document.getElementById('reel-rail');
   const caption = document.getElementById('reel-caption');
@@ -30,8 +36,9 @@ export function mountStack({ gsap, ScrollTrigger, reduced }) {
   const canAnimate = !reduced && matchMedia('(min-width: 761px)').matches;
   if (!canAnimate) return;
 
-  // one project takes SPEED viewports of scroll — turn this up to slow it down
-  const SPEED = 1.6;
+  // one project takes SPEED viewports of scroll — turn this up for a longer,
+  // slower hand-off, down for a quicker one
+  const SPEED = 2.2;
   const step = () => innerHeight * SPEED;
 
   reel.classList.add('is-live');
@@ -72,72 +79,102 @@ export function mountStack({ gsap, ScrollTrigger, reduced }) {
     if (swapping) { pending = name; return; }
     runSwap(name);
   }
-  // seed the first name without a roll
-  if (capLine && items[0]) {
+  if (capLine && items[0]) {                 // seed the first name without a roll
     capLine.textContent = curName = items[0].dataset.name || '';
     caption && caption.setAttribute('href', items[0].dataset.href || '#');
   }
 
-  // ---- paint the pile for a given fractional position p (0 = first centred) ----
-  let active = -1;
+  // ---- pile geometry, stored per card so the tilt can be composed on top ----
+  const base = items.map(() => ({ y: 0, s: 1 }));
+  let active = -1, prevImg = null;
   function setActive(i) {
     if (i === active) return;
+    if (prevImg) prevImg.style.transform = '';   // drop the old card's parallax
     active = i;
+    prevImg = imgs[i] || null;
     ticks.forEach((t, k) => t.classList.toggle('on', k === i));
     swapCaption(i);
   }
 
-  function paint(p) {
+  function computePile(p) {
     for (let i = 0; i < N; i++) {
       const d = p - i;                 // <0 upcoming · 0 centred · >0 left behind
       let t, scale, opacity, y, bright;
       if (d <= 0) {                    // the NEW one slides up from below, to the front
-        t = Math.max(0, d + 1);        // d=-1 → 0 (waiting below) · d=0 → 1 (settled)
+        t = Math.max(0, d + 1);
         y = (1 - t) * 46;              // travels up from ~46% down into place
-        scale = 0.94 + 0.06 * t;       // a touch of grow as it arrives
-        opacity = Math.min(1, t * 1.7);// reads as a solid card by the time it's most of the way up
+        scale = 0.94 + 0.06 * t;
+        opacity = Math.min(1, t * 1.7);
         bright = 0.62 + 0.38 * t;
       } else {                         // the OLD one stays and recedes behind it
-        t = Math.min(1, d);            // 0 front · 1 gone
+        t = Math.min(1, d);
         scale = 1 - 0.1 * t;
         opacity = 1 - t;
         y = -3 * t;
         bright = 1 - 0.35 * t;
       }
-      const it = items[i], card = cards[i];
+      const it = items[i];
       const vis = opacity > 0.012;
       it.style.opacity = vis ? opacity.toFixed(3) : '0';
       it.style.visibility = vis ? 'visible' : 'hidden';
       it.style.zIndex = String(i);
-      if (card) {
-        card.style.transform = `translateY(${y.toFixed(2)}%) scale(${scale.toFixed(3)})`;
-        card.style.filter = `brightness(${bright.toFixed(3)})`;
-      }
+      base[i].y = y; base[i].s = scale;
+      if (cards[i]) cards[i].style.filter = `brightness(${bright.toFixed(3)})`;
     }
+  }
+
+  // ---- cursor parallax: tilt the centred card, drift its picture inside ----
+  let tgX = 0, tgY = 0, curX = 0, curY = 0;   // targets and eased values (-1..1)
+  stage.addEventListener('pointermove', (e) => {
+    tgX = (e.clientX / innerWidth) * 2 - 1;
+    tgY = (e.clientY / innerHeight) * 2 - 1;
+  }, { passive: true });
+  stage.addEventListener('pointerleave', () => { tgX = 0; tgY = 0; });
+
+  function render() {
+    curX += (tgX - curX) * 0.12;
+    curY += (tgY - curY) * 0.12;
+    const ry = curX * 7, rx = -curY * 5;       // card tilt, degrees
+    for (let i = 0; i < N; i++) {
+      const c = cards[i];
+      if (!c) continue;
+      let tr = `perspective(1100px) translateY(${base[i].y.toFixed(2)}%) scale(${base[i].s.toFixed(3)})`;
+      if (i === active) tr += ` rotateX(${rx.toFixed(2)}deg) rotateY(${ry.toFixed(2)}deg)`;
+      c.style.transform = tr;
+    }
+    if (imgs[active]) imgs[active].style.transform =
+      `translate(${(curX * 18).toFixed(1)}px, ${(curY * 18).toFixed(1)}px) scale(1.08)`;
   }
 
   const pos = () => Math.max(0, Math.min(N - 1, (scrollY - reelTop()) / step()));
 
-  // ---- rAF-gated scroll: paint every frame the scroll moved, plus centre-snap ----
-  let ticking = false, lastY = -1, settle = 0, snapping = false;
-  function frame() {
-    ticking = false;
+  // ---- one rAF loop while the reel is on screen: track scroll, paint, parallax ----
+  let running = false, raf = 0;
+  function loop() {
     const rawTop = scrollY - reelTop();
     const p = pos();
-    paint(p);
+    computePile(p);
     setActive(Math.round(p));
-    // show the rail only while the reel owns the screen
+    render();
     const inReel = rawTop > -innerHeight * 0.5 && rawTop < (N - 1) * step() + innerHeight * 0.5;
     rail && rail.classList.toggle('show', inReel);
+    if (running) raf = requestAnimationFrame(loop);
   }
-  function onScroll() {
-    if (!ticking) { ticking = true; requestAnimationFrame(frame); }
-    if (scrollY === lastY) return;
-    lastY = scrollY;
+  function start() { if (!running) { running = true; raf = requestAnimationFrame(loop); } }
+  function stop() { running = false; cancelAnimationFrame(raf); }
+
+  if ('IntersectionObserver' in window) {
+    new IntersectionObserver(([e]) => { e.isIntersecting ? start() : stop(); }, { rootMargin: '200px' }).observe(reel);
+  } else { start(); }
+
+  // ---- centre-snap on scroll settle ----
+  let settle = 0, snapping = false;
+  addEventListener('scroll', () => {
+    start();                                   // make sure the loop is awake mid-scroll
     if (snapping) return;
     clearTimeout(settle);
     settle = setTimeout(snapToNearest, 150);
-  }
+  }, { passive: true });
 
   function goTo(i, dur = 0.7) {
     if (i < 0 || i >= N) return;
@@ -153,7 +190,7 @@ export function mountStack({ gsap, ScrollTrigger, reduced }) {
   function snapToNearest() {
     if (snapping) return;
     const p = (scrollY - reelTop()) / step();
-    if (p <= -0.35 || p >= (N - 1) + 0.35) return;   // leave the entry/exit free
+    if (p <= -0.35 || p >= (N - 1) + 0.35) return;
     const i = Math.max(0, Math.min(N - 1, Math.round(p)));
     if (Math.abs(p - i) > 0.02) goTo(i, 0.6);
   }
@@ -167,10 +204,12 @@ export function mountStack({ gsap, ScrollTrigger, reduced }) {
     t.addEventListener('focus', () => goTo(i, 0.65));
   });
 
-  addEventListener('scroll', onScroll, { passive: true });
-  addEventListener('resize', () => { layout(); ScrollTrigger && ScrollTrigger.refresh(); frame(); }, { passive: true });
+  addEventListener('resize', () => { layout(); ScrollTrigger && ScrollTrigger.refresh(); computePile(pos()); render(); }, { passive: true });
 
   layout();
-  frame();
+  computePile(pos());
+  setActive(Math.round(pos()));
+  render();
+  start();
   ScrollTrigger && ScrollTrigger.refresh();
 }

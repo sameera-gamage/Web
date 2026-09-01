@@ -442,6 +442,9 @@
 .reel.is-live .reel-card {
   will-change: transform, filter; transform-origin: 50% 50%;
 }
+/* the picture drifts inside its frame for the cursor parallax (JS drives it);
+   the frame clips the slight overscale so no edges show */
+.reel.is-live .reel-img { will-change: transform; }
 /* in the live pile the title is the fixed caption, so hide each card's own */
 .reel.is-live .reel-headline { display: none; }
 /* the caption holds the picture's lower-left — anchored to a frame-sized box
