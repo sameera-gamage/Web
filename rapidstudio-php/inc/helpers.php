@@ -22,6 +22,15 @@ function url(string $path): string
     return base_url() . '/' . ltrim($path, '/');
 }
 
+/** A URL with a ?v=<mtime> tag, so browsers always fetch the latest build. */
+function asset_url(string $path): string
+{
+    $rel = '/' . ltrim($path, '/');
+    $file = __DIR__ . '/..' . $rel;
+    $v = is_file($file) ? filemtime($file) : time();
+    return base_url() . $rel . '?v=' . $v;
+}
+
 /** "one per line" text into a clean list. */
 function lines(?string $text): array
 {

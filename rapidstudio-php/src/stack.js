@@ -88,20 +88,24 @@ export function mountStack({ gsap, ScrollTrigger, reduced }) {
 
   // ---- one scroll handler drives active, show-range and centre-snap ----
   let settle = 0;
-  function onScroll() {
-    const rel = (scrollY - reelTop()) / stepH();   // 0 at first project, N-1 at last
-    const idx = Math.max(0, Math.min(N - 1, Math.round(rel)));
-    setActive(idx);
-
-    const inReel = rel > -0.45 && rel < (N - 1) + 0.45;
+  const showRange = () => {
+    const rel = (scrollY - reelTop()) / stepH();
+    const inReel = rel > -0.4 && rel < (N - 1) + 0.4;
     rail && rail.classList.toggle('show', inReel);
     caption && caption.classList.toggle('show', inReel);
+    return rel;
+  };
+  function onScroll() {
+    const rel = showRange();
+    setActive(Math.max(0, Math.min(N - 1, Math.round(rel))));
 
     if (snapping) return;
     clearTimeout(settle);
     settle = setTimeout(() => {
+      showRange();                                        // re-confirm hide/show at rest
       if (snapping) return;
       if (rel <= -0.4 || rel >= (N - 1) + 0.4) return;   // let entry/exit be free
+      const idx = Math.max(0, Math.min(N - 1, Math.round(rel)));
       if (Math.abs(rel - idx) > 0.03) goTo(idx, 0.65);
     }, 160);
   }

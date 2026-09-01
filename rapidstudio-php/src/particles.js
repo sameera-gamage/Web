@@ -7,7 +7,7 @@
                    backdrop). Both react to the cursor.
 */
 
-function engine(canvas, measure, reduced) {
+function engine(canvas, measure, reduced, isVisible) {
   const ctx = canvas.getContext('2d');
   const dpr = Math.min(devicePixelRatio || 1, 2);
   let w = 1, h = 1, ox = 0, oy = 0;
@@ -100,9 +100,19 @@ function engine(canvas, measure, reduced) {
       ctx.fillStyle = p.accent ? 'rgba(255,90,31,0.55)' : 'rgba(255,255,255,0.18)';
       ctx.fill();
     }
-    requestAnimationFrame(frame);
+    schedule();
   }
-  frame();
+
+  // Don't burn frames when nobody can see them: skip when the tab is hidden
+  // or (for a scoped field) when the element is scrolled off-screen.
+  function schedule() {
+    if (document.hidden || (isVisible && !isVisible())) {
+      setTimeout(schedule, 250);
+    } else {
+      requestAnimationFrame(frame);
+    }
+  }
+  schedule();
 }
 
 export function mountParticles(reduced) {
@@ -124,8 +134,13 @@ export function mountField(el, reduced) {
     pointerEvents: 'none', zIndex: '0',
   });
   el.prepend(canvas);
+  // track whether the gate is on-screen so the loop can idle when it isn't
+  let onScreen = true;
+  if ('IntersectionObserver' in window) {
+    new IntersectionObserver(([e]) => { onScreen = e.isIntersecting; }, { rootMargin: '120px' }).observe(el);
+  }
   engine(canvas, () => {
     const r = el.getBoundingClientRect();
     return { w: el.clientWidth, h: el.clientHeight, ox: r.left, oy: r.top };
-  }, reduced);
+  }, reduced, () => onScreen);
 }

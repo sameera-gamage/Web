@@ -22,7 +22,7 @@ function head_open(string $title, string $description = '', string $here = 'inde
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@700;800&display=swap">
-  <link rel="stylesheet" href="<?= e($b) ?>/assets/site.css">
+  <link rel="stylesheet" href="<?= e(asset_url('/assets/site.css')) ?>">
   <script>document.documentElement.classList.remove('no-js');</script>
 </head>
 <body class="bg-ink text-chalk">
@@ -119,7 +119,7 @@ function foot_close(string $script = ''): void
   </script>
 <?php
     if ($script !== '') {
-        echo '  <script type="module" src="' . e($b) . '/assets/' . e($script) . '"></script>' . "\n";
+        echo '  <script type="module" src="' . e(asset_url('/assets/' . $script)) . '"></script>' . "\n";
     }
     echo "</body>\n</html>\n";
 }

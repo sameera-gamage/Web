@@ -407,9 +407,9 @@ html:not(.no-js) .reel-title-mask { display: none; }
    rolled out (down) / in (up from below) as the project changes */
 .reel-caption {
   position: fixed;
-  /* left edge of the (centred) picture, nudged a touch further left */
-  left: clamp(2.5vw, calc(50% - min(31vw, 470px) - 1.5vw), 40vw);
-  bottom: 16%;
+  /* a little left of the picture's left edge, held at the vertical middle */
+  left: clamp(2vw, calc(50% - min(31vw, 470px) - 3vw), 40vw);
+  top: 50%; transform: translateY(-50%);
   z-index: 8; text-align: left; pointer-events: none;
   opacity: 0; transition: opacity .4s ease;
 }
