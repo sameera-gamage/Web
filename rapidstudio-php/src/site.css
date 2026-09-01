@@ -406,22 +406,28 @@ html:not(.no-js) .reel-title-mask { display: none; }
 /* the ONE fixed caption: the active project's name, held in the same place and
    rolled out (down) / in (up from below) as the project changes */
 .reel-caption {
-  position: fixed; left: 50%; top: 64%; transform: translateX(-50%);
-  z-index: 8; text-align: center; pointer-events: none;
+  position: fixed;
+  /* left edge of the (centred) picture, nudged a touch further left */
+  left: clamp(2.5vw, calc(50% - min(31vw, 470px) - 1.5vw), 40vw);
+  bottom: 16%;
+  z-index: 8; text-align: left; pointer-events: none;
   opacity: 0; transition: opacity .4s ease;
 }
 .reel-caption.show { opacity: 1; pointer-events: auto; }
-.reel-caption-mask { display: block; overflow: hidden; padding: .06em .1em .18em; }
+.reel-caption-mask { display: block; overflow: hidden; padding: .04em .06em .2em; }
 .reel-caption-line {
-  display: block; white-space: nowrap;
+  display: block; white-space: nowrap; text-align: left;
   font-family: 'Bricolage Grotesque', 'Syne', ui-sans-serif, sans-serif; font-weight: 800;
   font-size: clamp(2.6rem, 8vw, 8rem); line-height: .9; letter-spacing: -.03em;
   text-transform: uppercase; color: #F4F1EC;
-  text-shadow: 0 16px 70px rgba(0,0,0,.6);
+  text-shadow: 0 16px 70px rgba(0,0,0,.65);
   transition: color .3s ease; will-change: transform;
 }
 .reel-caption:hover .reel-caption-line { color: #FF9142; }
-@media (max-width: 760px) { .reel-caption { top: 60%; } .reel-caption-line { font-size: clamp(1.8rem, 13vw, 4.5rem); } }
+@media (max-width: 760px) {
+  .reel-caption { left: 4vw; bottom: 12%; }
+  .reel-caption-line { font-size: clamp(1.8rem, 13vw, 4.5rem); }
+}
 
 .reel-idx {
   position: absolute; top: 58%; right: calc(100% + clamp(.7rem, 1.6vw, 1.6rem));

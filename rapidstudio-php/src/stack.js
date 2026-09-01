@@ -102,32 +102,34 @@ export function mountStack({ gsap, ScrollTrigger, reduced }) {
     settle = setTimeout(() => {
       if (snapping) return;
       if (rel <= -0.4 || rel >= (N - 1) + 0.4) return;   // let entry/exit be free
-      if (Math.abs(rel - idx) > 0.02) goTo(idx, 0.5);
-    }, 120);
+      if (Math.abs(rel - idx) > 0.03) goTo(idx, 0.65);
+    }, 160);
   }
   addEventListener('scroll', onScroll, { passive: true });
   addEventListener('resize', () => { ScrollTrigger.refresh(); onScroll(); }, { passive: true });
   onScroll();
 
-  // ---- depth + recede ----
+  // ---- depth + recede (scrub-smoothed so it glides with the scroll) ----
   items.forEach((item, i) => {
     const card = item.querySelector('.reel-card');
     const depth = item.querySelector('.reel-depth');
 
+    // incoming project rises from the back and grows to full size
     if (depth && i > 0) {
       gsap.fromTo(depth,
-        { scale: 0.78, filter: 'brightness(0.6)' },
+        { scale: 0.82, filter: 'brightness(0.55)' },
         {
           scale: 1, filter: 'brightness(1)', ease: 'none',
-          scrollTrigger: { trigger: item, start: 'top bottom', end: 'top center', scrub: true },
+          scrollTrigger: { trigger: item, start: 'top bottom', end: 'top center', scrub: 0.6 },
         });
     }
+    // the one you're leaving eases back a touch and fades behind the next
     if (i < N - 1) {
       gsap.fromTo(card,
         { scale: 1, autoAlpha: 1 },
         {
-          scale: 0.9, yPercent: -2, autoAlpha: 0, ease: 'none',
-          scrollTrigger: { trigger: items[i + 1], start: 'top 82%', end: 'top 28%', scrub: true },
+          scale: 0.88, yPercent: -2, autoAlpha: 0, ease: 'none',
+          scrollTrigger: { trigger: items[i + 1], start: 'top 82%', end: 'top 26%', scrub: 0.6 },
         });
     }
   });
