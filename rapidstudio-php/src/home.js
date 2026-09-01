@@ -107,13 +107,40 @@ if (connect) {
     const foot = connect.querySelector('.connect-foot');
     gsap.set(connect, { transformOrigin: '50% 100%' });
     const tl = gsap.timeline({
-      scrollTrigger: { trigger: say, start: 'top 95%', end: 'top 35%', scrub: 0.8 },
+      scrollTrigger: { trigger: say, start: 'top bottom', end: 'top center', scrub: 0.8 },
     });
-    tl.from(connect, { yPercent: 9, scale: 0.94, autoAlpha: 0.3, ease: 'none' }, 0)
-      .from(k,   { y: 46, autoAlpha: 0, ease: 'none' }, 0.05)
-      .from(h,   { y: 96, autoAlpha: 0, ease: 'none' }, 0)
-      .from(btn, { y: 62, autoAlpha: 0, ease: 'none' }, 0.12)
-      .from(foot, { y: 30, ease: 'none' }, 0.18);   // y only — its opacity is owned by the open/close state
+    tl.from(connect, { yPercent: 10, scale: 0.92, autoAlpha: 0.25, ease: 'none' }, 0)
+      .from(k,   { y: 50, autoAlpha: 0, ease: 'none' }, 0.05)
+      .from(h,   { y: 110, autoAlpha: 0, ease: 'none' }, 0)
+      .from(btn, { y: 70, autoAlpha: 0, ease: 'none' }, 0.12)
+      .from(foot, { y: 34, ease: 'none' }, 0.18);   // y only — its opacity is owned by the open/close state
+  }
+
+  // magnetic button: while the panel is at rest, "Write a message" chases the
+  // cursor around the container and springs home when the pointer leaves.
+  const magnet = document.getElementById('connect-open');
+  if (magnet && !reduced) {
+    let tx = 0, ty = 0, cx = 0, cy = 0, running = false;
+    const tick = () => {
+      cx += (tx - cx) * 0.16; cy += (ty - cy) * 0.16;
+      magnet.style.transform = `translate(${cx.toFixed(1)}px, ${cy.toFixed(1)}px)`;
+      if (Math.abs(tx - cx) > 0.3 || Math.abs(ty - cy) > 0.3) requestAnimationFrame(tick);
+      else { magnet.style.transform = `translate(${tx.toFixed(1)}px, ${ty.toFixed(1)}px)`; running = false; }
+    };
+    const wake = () => { if (!running) { running = true; requestAnimationFrame(tick); } };
+    connect.addEventListener('pointermove', (e) => {
+      if (connect.classList.contains('is-open')) return;
+      const r = magnet.getBoundingClientRect();
+      const homeX = r.left + r.width / 2 - cx;   // subtract current offset → stable home centre
+      const homeY = r.top + r.height / 2 - cy;
+      tx = (e.clientX - homeX) * 0.45;
+      ty = (e.clientY - homeY) * 0.45;
+      const m = Math.hypot(tx, ty), max = 200;   // leash so it stays in the panel
+      if (m > max) { tx = tx / m * max; ty = ty / m * max; }
+      magnet.classList.add('is-chasing');
+      wake();
+    }, { passive: true });
+    connect.addEventListener('pointerleave', () => { tx = 0; ty = 0; magnet.classList.remove('is-chasing'); wake(); });
   }
 }
 

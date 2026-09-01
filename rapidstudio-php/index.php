@@ -324,11 +324,13 @@ head_open(
         </button>
       </div>
 
-      <!-- the form that grows out of the button -->
-      <form class="connect-form" method="post" action="<?= e(url('/contact.php')) ?>">
+      <!-- the brief, written as a short note rather than a stack of fields -->
+      <form class="connect-form note" method="post" action="<?= e(url('/contact.php')) ?>">
         <?= csrf_field() ?>
-        <button type="button" class="connect-close" id="connect-close" aria-label="Close">&larr; back</button>
-        <p class="connect-form-k">Tell us what&rsquo;s on your desk</p>
+        <div class="note-top">
+          <button type="button" class="connect-close" id="connect-close" aria-label="Close">&larr; back</button>
+          <span class="note-eyebrow">New brief</span>
+        </div>
 
         <?php if ($sent): ?>
           <p class="say-note say-ok">Got it — thanks. We&rsquo;ll be in touch within a working day.</p>
@@ -340,29 +342,32 @@ head_open(
           <label>Website <input type="text" name="website" tabindex="-1" autocomplete="off"></label>
         </div>
 
-        <div class="say-row">
-          <label class="say-line"><span class="say-n">01</span><span class="say-lab">My name is</span>
-            <input type="text" name="name" required autocomplete="name" placeholder="Jordan Rivera"></label>
-          <label class="say-line"><span class="say-n">02</span><span class="say-lab">Reach me at</span>
-            <input type="email" name="email" required autocomplete="email" placeholder="you@company.com"></label>
+        <div class="note-body">
+          <p class="note-line">Hi RapidStudio, I&rsquo;m
+            <input class="note-in" name="name" required autocomplete="name" placeholder="your name">
+            &mdash; reach me at
+            <input class="note-in note-in-wide" type="email" name="email" required autocomplete="email" placeholder="you@company.com">.</p>
+
+          <p class="note-line note-chips-line">I&rsquo;m after&nbsp;
+            <span class="note-chips">
+              <?php foreach ($trades as $t): ?>
+                <label class="chip">
+                  <input type="checkbox" name="services[]" value="<?= e($t) ?>">
+                  <span><?= e($t) ?></span>
+                </label>
+              <?php endforeach; ?>
+            </span>
+          </p>
+
+          <p class="note-line note-line-msg">Here&rsquo;s the gist &mdash;</p>
+          <textarea class="note-area" name="message" rows="3" required
+                    placeholder="A line or two about the project, the goal, and when you'd like it live."></textarea>
         </div>
 
-        <fieldset class="say-chips">
-          <legend><span class="say-n">03</span><span class="say-lab">I need</span></legend>
-          <div class="chips">
-            <?php foreach ($trades as $t): ?>
-              <label class="chip">
-                <input type="checkbox" name="services[]" value="<?= e($t) ?>">
-                <span><?= e($t) ?></span>
-              </label>
-            <?php endforeach; ?>
-          </div>
-        </fieldset>
-
-        <label class="say-line say-line-full"><span class="say-n">04</span><span class="say-lab">Here&rsquo;s the gist</span>
-          <textarea name="message" rows="2" required placeholder="A line or two about the project, the goal, and when you'd like it live."></textarea></label>
-
-        <button type="submit" class="say-send"><span>Send the brief</span><span class="say-arrow" aria-hidden="true">&rarr;</span></button>
+        <div class="note-send-row">
+          <button type="submit" class="say-send"><span>Send the brief</span><span class="say-arrow" aria-hidden="true">&rarr;</span></button>
+          <span class="note-reassure">A real person reads this &mdash; reply within a working day.</span>
+        </div>
       </form>
 
       <!-- social bar — this doubles as the page footer -->
