@@ -313,7 +313,7 @@ head_open(
   </section>
 
   <!-- ══ let's connect — the form unfolds from the button ══ -->
-  <section id="say" class="sec sec-say reveal-sec">
+  <section id="say" class="sec sec-say">
     <div class="connect<?= ($sent || $err) ? ' is-open' : '' ?>" id="connect">
       <!-- resting face -->
       <div class="connect-face">

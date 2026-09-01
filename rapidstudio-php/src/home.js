@@ -95,6 +95,26 @@ if (connect) {
   document.getElementById('connect-close')?.addEventListener('click', () => {
     connect.classList.remove('is-open');
   });
+
+  // footer reveal: as the connect panel scrolls up into view it lifts and
+  // settles, and the big LET'S CONNECT rises a touch further for depth —
+  // scrubbed to the scroll so it glides in rather than snapping.
+  if (!reduced) {
+    const say = document.getElementById('say');
+    const k = connect.querySelector('.connect-k');
+    const h = connect.querySelector('.connect-h');
+    const btn = connect.querySelector('.connect-btn');
+    const foot = connect.querySelector('.connect-foot');
+    gsap.set(connect, { transformOrigin: '50% 100%' });
+    const tl = gsap.timeline({
+      scrollTrigger: { trigger: say, start: 'top 95%', end: 'top 35%', scrub: 0.8 },
+    });
+    tl.from(connect, { yPercent: 9, scale: 0.94, autoAlpha: 0.3, ease: 'none' }, 0)
+      .from(k,   { y: 46, autoAlpha: 0, ease: 'none' }, 0.05)
+      .from(h,   { y: 96, autoAlpha: 0, ease: 'none' }, 0)
+      .from(btn, { y: 62, autoAlpha: 0, ease: 'none' }, 0.12)
+      .from(foot, { y: 30, ease: 'none' }, 0.18);   // y only — its opacity is owned by the open/close state
+  }
 }
 
 // smooth in-page jumps (nav Work/Answers, Start a brief, the seal) via Lenis
