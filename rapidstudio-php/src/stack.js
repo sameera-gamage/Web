@@ -53,18 +53,23 @@ export function mountStack({ gsap, ScrollTrigger, reduced }) {
     t.addEventListener('focus', () => goTo(i, 0.7));
   });
 
-  const io = new IntersectionObserver((entries) => {
-    entries.forEach((e) => { if (e.isIntersecting) setActive(+e.target.dataset.reel); });
-  }, { rootMargin: '-45% 0px -45% 0px' });
-  items.forEach((el) => io.observe(el));
+  // active project = whichever card is nearest to where we've scrolled. Driven
+  // by scroll position, not an observer, so it updates going up AND down.
+  function updateActive() {
+    let best = 0, bd = Infinity;
+    items.forEach((el, i) => { const d = Math.abs(docTop(el) - scrollY); if (d < bd) { bd = d; best = i; } });
+    setActive(best);
+  }
 
   // settle the nearest project to centre when scrolling stops
   let settle = 0;
   addEventListener('scroll', () => {
+    updateActive();
     if (snapping) return;
     clearTimeout(settle);
     settle = setTimeout(snapNearest, 120);
   }, { passive: true });
+  updateActive();
   function snapNearest() {
     if (snapping || !wrap) return;
     const top = docTop(wrap), bot = top + wrap.offsetHeight;
@@ -81,7 +86,19 @@ export function mountStack({ gsap, ScrollTrigger, reduced }) {
 
   items.forEach((item, i) => {
     const card = item.querySelector('.reel-card');
+    const depth = item.querySelector('.reel-depth');
     const title = card.querySelector('.reel-title');
+
+    // DEPTH: the project rises from further back — small, then grows to its
+    // original size as it reaches the middle. (First one is already at size.)
+    if (depth && i > 0) {
+      gsap.fromTo(depth,
+        { scale: 0.78, filter: 'brightness(0.6)' },
+        {
+          scale: 1, filter: 'brightness(1)', ease: 'none',
+          scrollTrigger: { trigger: item, start: 'top bottom', end: 'top center', scrub: true },
+        });
+    }
 
     // recede AND fade right out as the NEXT card takes the front, so old
     // titles never ghost through from behind
@@ -89,8 +106,8 @@ export function mountStack({ gsap, ScrollTrigger, reduced }) {
       gsap.fromTo(card,
         { scale: 1, autoAlpha: 1 },
         {
-          scale: 0.92, yPercent: -2, autoAlpha: 0, ease: 'none',
-          scrollTrigger: { trigger: items[i + 1], start: 'top 85%', end: 'top 30%', scrub: true },
+          scale: 0.9, yPercent: -2, autoAlpha: 0, ease: 'none',
+          scrollTrigger: { trigger: items[i + 1], start: 'top 82%', end: 'top 28%', scrub: true },
         });
     }
 
@@ -100,7 +117,7 @@ export function mountStack({ gsap, ScrollTrigger, reduced }) {
         { yPercent: 115 },
         {
           yPercent: 0, ease: 'power3.out',
-          scrollTrigger: { trigger: item, start: 'top 80%', end: 'top 35%', scrub: 0.5 },
+          scrollTrigger: { trigger: item, start: 'top 78%', end: 'top 32%', scrub: 0.5 },
         });
     }
   });

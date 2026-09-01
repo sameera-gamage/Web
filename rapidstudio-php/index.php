@@ -190,25 +190,27 @@ head_open(
       ?>
         <article class="reel-item" data-reel="<?= $i ?>">
           <div class="reel-card">
-            <div class="reel-frame">
-              <span class="reel-idx"><span class="reel-idx-line"></span><?= $num ?></span>
-              <a class="reel-shot" href="<?= e(url('/projects/' . $p['slug'])) ?>" aria-label="Open <?= e($p['client']) ?>">
-                <img class="reel-img" src="<?= e(url($p['cover'])) ?>"
-                     alt="<?= e($p['client'] . ', ' . $p['title']) ?>"
-                     <?= $i < 2 ? '' : 'loading="lazy"' ?> decoding="async">
-              </a>
-              <span class="reel-title-mask">
-                <a class="reel-title" href="<?= e(url('/projects/' . $p['slug'])) ?>"><?= e($p['client']) ?></a>
-              </span>
-            </div>
-            <div class="reel-meta">
-              <div class="reel-meta-col">
-                <span><?= e($p['title'] ?: $p['client']) ?></span>
-                <?php if (trim((string) $p['line']) !== ''): ?><span class="dim"><?= e($p['line']) ?></span><?php endif; ?>
+            <div class="reel-depth">
+              <div class="reel-frame">
+                <span class="reel-idx"><span class="reel-idx-line"></span><?= $num ?></span>
+                <a class="reel-shot" href="<?= e(url('/projects/' . $p['slug'])) ?>" aria-label="Open <?= e($p['client']) ?>">
+                  <img class="reel-img" src="<?= e(url($p['cover'])) ?>"
+                       alt="<?= e($p['client'] . ', ' . $p['title']) ?>"
+                       <?= $i < 2 ? '' : 'loading="lazy"' ?> decoding="async">
+                </a>
+                <span class="reel-title-mask">
+                  <a class="reel-title" href="<?= e(url('/projects/' . $p['slug'])) ?>"><?= e($p['client']) ?></a>
+                </span>
               </div>
-              <div class="reel-meta-col reel-meta-r">
-                <span><?= e($disc !== '' ? $disc : 'ART DIRECTION + DESIGN') ?></span>
-                <span class="dim"><?= e($p['year']) ?></span>
+              <div class="reel-meta">
+                <div class="reel-meta-col">
+                  <span><?= e($p['title'] ?: $p['client']) ?></span>
+                  <?php if (trim((string) $p['line']) !== ''): ?><span class="dim"><?= e($p['line']) ?></span><?php endif; ?>
+                </div>
+                <div class="reel-meta-col reel-meta-r">
+                  <span><?= e($disc !== '' ? $disc : 'ART DIRECTION + DESIGN') ?></span>
+                  <span class="dim"><?= e($p['year']) ?></span>
+                </div>
               </div>
             </div>
           </div>

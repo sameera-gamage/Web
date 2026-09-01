@@ -369,6 +369,10 @@
   will-change: transform, filter;
   transform-origin: 50% 45%;
 }
+.reel-depth {
+  display: flex; flex-direction: column; align-items: center;
+  will-change: transform, filter; transform-origin: 50% 50%;
+}
 
 .reel-frame { position: relative; width: min(62vw, 940px); }
 .reel-shot {
@@ -1088,7 +1092,7 @@
 .connect {
   position: relative; overflow: hidden;
   max-width: 1560px; margin-inline: auto;
-  min-height: clamp(420px, 62vh, 640px);
+  min-height: clamp(560px, 82vh, 860px);
   display: grid; place-items: center;
   padding: clamp(2.5rem, 6vw, 6rem) var(--edge);
   border-radius: 28px;
