@@ -61,13 +61,29 @@ if (rooms.length) {
   });
 }
 
-// the FAQ is native <details>, but only one open at a time reads calmer
-const faqs = [...document.querySelectorAll('.faq')];
-faqs.forEach((d) => {
-  d.addEventListener('toggle', () => {
-    if (d.open) faqs.forEach((o) => { if (o !== d) o.open = false; });
-  });
-});
+// the FAQ index: point at a question on the left, its answer opens on the
+// right. Without JS every panel just shows in a readable stack.
+const qa = document.getElementById('qa');
+if (qa) {
+  const tabs = [...qa.querySelectorAll('.qa-tab')];
+  const panels = [...qa.querySelectorAll('.qa-panel')];
+  if (tabs.length) {
+    qa.classList.add('is-tabs');
+    let cur = -1;
+    const show = (i) => {
+      if (i === cur || i < 0 || i >= tabs.length) return;
+      cur = i;
+      tabs.forEach((t, k) => { const on = k === i; t.classList.toggle('on', on); t.setAttribute('aria-selected', on ? 'true' : 'false'); });
+      panels.forEach((p, k) => p.classList.toggle('on', k === i));
+    };
+    tabs.forEach((t, i) => {
+      t.addEventListener('pointerenter', () => show(i));
+      t.addEventListener('click', () => show(i));
+      t.addEventListener('focus', () => show(i));
+    });
+    show(0);
+  }
+}
 
 // the connect panel: the form unfolds from the "write a message" button
 const connect = document.getElementById('connect');

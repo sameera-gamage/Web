@@ -23,8 +23,8 @@ function engine(canvas, measure, reduced, isVisible) {
   addEventListener('resize', resize, { passive: true });
   addEventListener('scroll', () => { const m = measure(); ox = m.ox; oy = m.oy; }, { passive: true });
 
-  const COUNT = Math.min(260, Math.max(90, Math.round((w * h) / 5200)));
-  const LINK = 150, MOUSE_R = 320;
+  const COUNT = Math.min(500, Math.max(180, Math.round((w * h) / 2700)));
+  const LINK = 138, MOUSE_R = 320;
   const particles = [];
 
   let mx = -9999, my = -9999, lmx = -9999, lmy = -9999;

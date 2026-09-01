@@ -274,25 +274,40 @@ head_open(
     </div>
   </section>
 
-  <!-- ══ straight answers ══ -->
+  <!-- ══ straight answers — an interactive index: pick a question on the left,
+       the answer opens large on the right ══ -->
   <section id="answers" class="sec sec-faq reveal-sec">
     <div class="sec-in faq-in">
       <header class="sec-head faq-head">
         <p class="sec-k">Straight answers</p>
         <h2 class="sec-h">The things you were<br>about to email us.</h2>
-        <p class="sec-lead">No sales dance. Here is how it actually works.</p>
+        <p class="sec-lead">No sales dance. Point at a question.</p>
       </header>
 
-      <div class="faq-list">
-        <?php foreach ($faqs as $i => $f): ?>
-          <details class="faq" <?= $i === 0 ? 'open' : '' ?>>
-            <summary class="faq-q">
-              <span><?= e($f['q']) ?></span>
-              <span class="faq-mark" aria-hidden="true"></span>
-            </summary>
-            <div class="faq-a"><p><?= e($f['a']) ?></p></div>
-          </details>
-        <?php endforeach; ?>
+      <?php $ftot = sprintf('%02d', count($faqs)); ?>
+      <div class="qa" id="qa">
+        <div class="qa-list" role="tablist" aria-label="Questions">
+          <?php foreach ($faqs as $i => $f): ?>
+            <button class="qa-tab" type="button" role="tab" data-i="<?= $i ?>"
+                    id="qa-tab-<?= $i ?>" aria-controls="qa-panel-<?= $i ?>">
+              <span class="qa-n"><?= sprintf('%02d', $i + 1) ?></span>
+              <span class="qa-q"><?= e($f['q']) ?></span>
+              <span class="qa-go" aria-hidden="true">&rarr;</span>
+            </button>
+          <?php endforeach; ?>
+        </div>
+
+        <div class="qa-stage">
+          <?php foreach ($faqs as $i => $f): ?>
+            <article class="qa-panel" id="qa-panel-<?= $i ?>" role="tabpanel"
+                     aria-labelledby="qa-tab-<?= $i ?>" data-i="<?= $i ?>">
+              <span class="qa-count"><?= sprintf('%02d', $i + 1) ?><span class="dim"> / <?= $ftot ?></span></span>
+              <h3 class="qa-panel-q"><?= e($f['q']) ?></h3>
+              <p class="qa-panel-a"><?= e($f['a']) ?></p>
+            </article>
+          <?php endforeach; ?>
+          <a class="qa-more" href="<?= e(url('/#say')) ?>">Still wondering? <span>Ask us straight &rarr;</span></a>
+        </div>
       </div>
     </div>
   </section>
@@ -350,18 +365,17 @@ head_open(
         <button type="submit" class="say-send"><span>Send the brief</span><span class="say-arrow" aria-hidden="true">&rarr;</span></button>
       </form>
 
-      <!-- social bar -->
-      <div class="connect-foot">
-        <span>Feel free to reach us</span>
+      <!-- social bar — this doubles as the page footer -->
+      <footer class="connect-foot">
+        <a class="connect-mail" href="mailto:info@rapidsolutions.live">info@rapidsolutions.live</a>
         <div class="connect-social">
-          <a href="mailto:info@rapidsolutions.live">Email</a>
           <a href="#" rel="noopener">Instagram</a>
           <a href="#" rel="noopener">LinkedIn</a>
+          <a href="mailto:info@rapidsolutions.live">Email</a>
         </div>
-      </div>
+        <p class="connect-copy">&copy; <?= date('Y') ?> RapidStudio &bull; Built in-house</p>
+      </footer>
     </div>
   </section>
-
-  <?php site_footer(); ?>
 </main>
 <?php foot_close('home.js'); ?>
