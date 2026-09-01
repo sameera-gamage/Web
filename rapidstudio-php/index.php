@@ -184,45 +184,39 @@ head_open(
     </div>
 
     <div class="reel" id="reel">
+      <div class="reel-stage" id="reel-stage">
       <?php foreach ($featured as $i => $p):
         $num  = sprintf('00.%02d', $i + 1);
         $disc = strtoupper(implode(' + ', array_filter(array_map('trim', explode(',', (string) $p['disciplines'])))));
+        $href = url('/projects/' . $p['slug']);
       ?>
-        <article class="reel-item" data-reel="<?= $i ?>"
-                 data-name="<?= e($p['client']) ?>" data-href="<?= e(url('/projects/' . $p['slug'])) ?>">
+        <article class="reel-item" data-reel="<?= $i ?>">
           <div class="reel-card">
-            <div class="reel-depth">
-              <div class="reel-frame">
-                <span class="reel-idx"><span class="reel-idx-line"></span><?= $num ?></span>
-                <a class="reel-shot" href="<?= e(url('/projects/' . $p['slug'])) ?>" aria-label="Open <?= e($p['client']) ?>">
-                  <img class="reel-img" src="<?= e(url($p['cover'])) ?>"
-                       alt="<?= e($p['client'] . ', ' . $p['title']) ?>"
-                       <?= $i < 2 ? '' : 'loading="lazy"' ?> decoding="async">
-                </a>
-                <span class="reel-title-mask">
-                  <a class="reel-title" href="<?= e(url('/projects/' . $p['slug'])) ?>"><?= e($p['client']) ?></a>
-                </span>
+            <div class="reel-frame">
+              <span class="reel-idx"><span class="reel-idx-line"></span><?= $num ?></span>
+              <a class="reel-shot" href="<?= e($href) ?>" aria-label="Open <?= e($p['client']) ?>">
+                <img class="reel-img" src="<?= e(url($p['cover'])) ?>"
+                     alt="<?= e($p['client'] . ', ' . $p['title']) ?>"
+                     <?= $i < 2 ? '' : 'loading="lazy"' ?> decoding="async">
+                <span class="reel-shade" aria-hidden="true"></span>
+              </a>
+              <a class="reel-headline" href="<?= e($href) ?>"><?= e($p['client']) ?></a>
+            </div>
+            <div class="reel-meta">
+              <div class="reel-meta-col">
+                <span><?= e($p['title'] ?: $p['client']) ?></span>
+                <?php if (trim((string) $p['line']) !== ''): ?><span class="dim"><?= e($p['line']) ?></span><?php endif; ?>
               </div>
-              <div class="reel-meta">
-                <div class="reel-meta-col">
-                  <span><?= e($p['title'] ?: $p['client']) ?></span>
-                  <?php if (trim((string) $p['line']) !== ''): ?><span class="dim"><?= e($p['line']) ?></span><?php endif; ?>
-                </div>
-                <div class="reel-meta-col reel-meta-r">
-                  <span><?= e($disc !== '' ? $disc : 'ART DIRECTION + DESIGN') ?></span>
-                  <span class="dim"><?= e($p['year']) ?></span>
-                </div>
+              <div class="reel-meta-col reel-meta-r">
+                <span><?= e($disc !== '' ? $disc : 'ART DIRECTION + DESIGN') ?></span>
+                <span class="dim"><?= e($p['year']) ?></span>
               </div>
             </div>
           </div>
         </article>
       <?php endforeach; ?>
+      </div>
     </div>
-
-    <!-- one fixed caption: the active project's name, rolled in and out in place -->
-    <a class="reel-caption" id="reel-caption" href="#" aria-hidden="true">
-      <span class="reel-caption-mask"><span class="reel-caption-line" id="reel-caption-line"></span></span>
-    </a>
 
     <?php if ($more): ?>
       <div class="work-more">

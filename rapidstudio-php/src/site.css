@@ -350,87 +350,56 @@
 }
 
 /* ─────────────────────────────────────────────────────────────────
-   The work reel — a vertical scroll with the title laid over the picture,
-   the index number ruled off to the left, and the credits beneath.
+   The work reel — a front-to-back pile of cards. Each project's title is
+   laid over its own picture (in front, to the left) so the name can never
+   drift out of sync with the image; the index number is ruled off further
+   left, the credits sit beneath. On the desktop the reel pins to one stage
+   and the cards are driven straight from the scroll position (depth grow +
+   fade), which is what gives the pile its front-to-back motion. With JS off
+   or on a phone it degrades to a plain vertical list.
    ───────────────────────────────────────────────────────────────── */
 .reel-wrap { position: relative; }
 .reel { position: relative; }
-/* each item sticks at the top for one screen; because they share the same
-   sticky anchor, the next card piles over the previous — front to back —
-   with no pinned-fixed overlap to leak into the next section */
-.reel-item {
-  position: sticky; top: 0; height: 100vh;
-  display: flex; align-items: center; justify-content: center;
-  /* note: no overflow here — it would break position:sticky. The title is
-     capped by max-width instead so it never spills into page scroll. */
-}
+
+/* ---- fallback (no-JS / mobile): a plain stacked list ---- */
+.reel-item { position: relative; padding: 6vh 0; }
 .reel-card {
   display: flex; flex-direction: column; align-items: center; justify-content: center;
-  will-change: transform, filter;
-  transform-origin: 50% 45%;
-}
-.reel-depth {
-  display: flex; flex-direction: column; align-items: center;
-  will-change: transform, filter; transform-origin: 50% 50%;
 }
 
-.reel-frame { position: relative; width: min(62vw, 940px); }
+.reel-frame { position: relative; width: min(64vw, 980px); max-width: 92vw; }
 .reel-shot {
   display: block; position: relative;
   width: 100%; aspect-ratio: 16 / 10;
   border-radius: 18px; overflow: hidden;
-  background: #111; box-shadow: 0 40px 100px -50px rgba(0,0,0,.9);
+  background: #111; box-shadow: 0 40px 110px -55px rgba(0,0,0,.9);
 }
 .reel-img {
   position: absolute; inset: 0;
   width: 100%; height: 100%; object-fit: cover;
-  filter: contrast(1.05) saturate(.98) brightness(.9);
+  filter: contrast(1.04) saturate(.98) brightness(.82);
+}
+/* a soft wash under the title so white type stays readable over any photo */
+.reel-shade {
+  position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(180deg, rgba(10,10,10,0) 42%, rgba(10,10,10,.62) 100%),
+              linear-gradient(90deg, rgba(10,10,10,.45) 0%, rgba(10,10,10,0) 46%);
 }
 
-/* per-card title — used only when JS is off (no caption swap available) */
-.reel-title-mask {
-  position: absolute; left: -12%; bottom: 7%;
-  z-index: 5; overflow: hidden; padding-bottom: .2em; padding-left: .06em;
-  max-width: 84vw;
-}
-.reel-title {
-  display: block; white-space: nowrap; text-align: left;
+/* the title, laid OVER its own picture — lower-left, in front */
+.reel-headline {
+  position: absolute; left: -4%; bottom: 6%; z-index: 5;
+  max-width: 112%; text-decoration: none;
   font-family: 'Bricolage Grotesque', 'Syne', ui-sans-serif, sans-serif; font-weight: 800;
-  font-size: clamp(2.4rem, 7.5vw, 7.5rem); line-height: .84; letter-spacing: -.03em;
-  text-transform: uppercase; color: #F4F1EC;
-  text-shadow: 0 14px 70px rgba(0,0,0,.55);
+  font-size: clamp(2.3rem, 6.6vw, 7rem); line-height: .84; letter-spacing: -.035em;
+  text-transform: uppercase; color: #F7F4EF;
+  text-shadow: 0 14px 60px rgba(0,0,0,.6);
   transition: color .3s ease;
 }
-html:not(.no-js) .reel-title-mask { display: none; }
-
-/* the ONE fixed caption: the active project's name, held in the same place and
-   rolled out (down) / in (up from below) as the project changes */
-.reel-caption {
-  position: fixed;
-  /* a little left of the picture's left edge, held at the vertical middle */
-  left: clamp(2vw, calc(50% - min(31vw, 470px) - 3vw), 40vw);
-  top: 50%; transform: translateY(-50%);
-  z-index: 8; text-align: left; pointer-events: none;
-  opacity: 0; transition: opacity .4s ease;
-}
-.reel-caption.show { opacity: 1; pointer-events: auto; }
-.reel-caption-mask { display: block; overflow: hidden; padding: .04em .06em .2em; }
-.reel-caption-line {
-  display: block; white-space: nowrap; text-align: left;
-  font-family: 'Bricolage Grotesque', 'Syne', ui-sans-serif, sans-serif; font-weight: 800;
-  font-size: clamp(2.6rem, 8vw, 8rem); line-height: .9; letter-spacing: -.03em;
-  text-transform: uppercase; color: #F4F1EC;
-  text-shadow: 0 16px 70px rgba(0,0,0,.65);
-  transition: color .3s ease; will-change: transform;
-}
-.reel-caption:hover .reel-caption-line { color: #FF9142; }
-@media (max-width: 760px) {
-  .reel-caption { left: 4vw; bottom: 12%; }
-  .reel-caption-line { font-size: clamp(1.8rem, 13vw, 4.5rem); }
-}
+.reel-headline:hover { color: #FF9142; }
 
 .reel-idx {
-  position: absolute; top: 58%; right: calc(100% + clamp(.7rem, 1.6vw, 1.6rem));
+  position: absolute; top: 8%; right: calc(100% + clamp(.7rem, 1.6vw, 1.6rem));
   display: flex; align-items: center; gap: .8rem; z-index: 4; white-space: nowrap;
   font-family: ui-sans-serif, system-ui, sans-serif;
   font-size: clamp(12px, 1vw, 16px); letter-spacing: .06em; color: rgba(237,234,230,.75);
@@ -438,7 +407,7 @@ html:not(.no-js) .reel-title-mask { display: none; }
 .reel-idx-line { display: block; width: clamp(24px, 3.5vw, 80px); height: 1px; background: rgba(237,234,230,.32); }
 
 .reel-meta {
-  width: min(62vw, 940px); margin-top: 1.4rem;
+  width: min(64vw, 980px); max-width: 92vw; margin-top: 1.3rem;
   display: flex; justify-content: space-between; gap: 2rem;
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   font-size: 11.5px; letter-spacing: .14em; text-transform: uppercase;
@@ -447,6 +416,20 @@ html:not(.no-js) .reel-title-mask { display: none; }
 .reel-meta-r { text-align: right; }
 .reel-meta .dim { color: rgba(237,234,230,.42); }
 .work-more { padding-top: 3rem; }
+
+/* ---- live pile (desktop, motion allowed): JS adds .is-live to #reel ---- */
+.reel.is-live { height: 100vh; /* replaced with the real track height by JS */ }
+.reel.is-live .reel-stage {
+  position: sticky; top: 0; height: 100vh; display: block;
+}
+.reel.is-live .reel-item {
+  position: absolute; inset: 0; padding: 0;
+  display: flex; align-items: center; justify-content: center;
+  will-change: transform, opacity;
+}
+.reel.is-live .reel-card {
+  will-change: transform, filter; transform-origin: 50% 50%;
+}
 
 /* right-edge tick rail, only while the reel is on screen */
 .reel-rail {
@@ -475,14 +458,10 @@ html:not(.no-js) .reel-title-mask { display: none; }
 .reel-tick.on .reel-tick-bar { width: 60px; background: #FF5A1F; }
 
 @media (max-width: 760px) {
-  .reel-item { position: static; height: auto; padding: 7vh 0; }
   .reel-frame, .reel-meta { width: 90vw; }
-  .reel-idx { position: static; margin: 0 0 .7rem; }
-  .reel-rail, .reel-caption { display: none; }
-  /* no fixed caption on mobile — show each card's own title again */
-  html:not(.no-js) .reel-title-mask { display: block; }
-  .reel-title { font-size: clamp(1.8rem, 13vw, 4.5rem); }
-  .reel-title-mask { bottom: 5%; left: 4%; }
+  .reel-idx { position: absolute; top: 6%; }
+  .reel-rail { display: none; }
+  .reel-headline { font-size: clamp(1.9rem, 12vw, 4.5rem); left: 2%; }
   .reel-meta { font-size: 9.5px; }
 }
 
