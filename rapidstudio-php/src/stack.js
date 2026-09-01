@@ -38,7 +38,7 @@ export function mountStack({ gsap, ScrollTrigger, reduced }) {
 
   // one project takes SPEED viewports of scroll — turn this up for a longer,
   // slower hand-off, down for a quicker one
-  const SPEED = 1;
+  const SPEED = 0.5;
   const step = () => innerHeight * SPEED;
 
   reel.classList.add('is-live');

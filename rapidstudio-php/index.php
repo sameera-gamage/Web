@@ -28,16 +28,18 @@ $services = [
 ];
 
 $faqs = [
-    ['q' => 'Do I have to hire you for everything?',
-     'a' => 'No. Most clients start with one thing — usually paid media or a film — and add the rest once they can see it working. You are never locked in to the full six.'],
-    ['q' => 'How fast can you start?',
-     'a' => 'A first call this week, a plan the next, and work moving inside two weeks for most projects. Rush jobs we will tell you honestly whether we can hit.'],
-    ['q' => 'What does it cost?',
-     'a' => 'Projects start around a few thousand; retainers scale with the work. We quote a fixed number before anything begins, so there is no meter running in the background.'],
-    ['q' => 'Who actually does the work?',
-     'a' => 'The people you meet. We are a studio, not a middleman — nothing gets quietly sent offshore. The strategist in your kickoff is the one writing the plan.'],
-    ['q' => 'Do you work with businesses like mine?',
-     'a' => 'Probably. We are built for owners who would rather brief one team than manage five. Industry matters less than whether you want it done properly.'],
+    ['q' => 'Who owns the accounts and files when it’s over?',
+     'a' => 'You do — every one. Ad accounts, analytics, source files, raw footage: all in your name from day one. Walk away whenever you like and nothing leaves with us.'],
+    ['q' => 'Do you report on money, or on vanity numbers?',
+     'a' => 'Money. Reach and likes get a line at the bottom; the top of every report is leads, calls and revenue. If a channel isn’t paying its way, we say so and cut it.'],
+    ['q' => 'Do you use AI to make our work?',
+     'a' => 'As a tool, never as the author. It speeds up drafts and rough edits behind the scenes — a person still writes the words, shoots the film and signs it off. Nothing ships that we wouldn’t put our own name on.'],
+    ['q' => 'What if the first thing you make doesn’t land?',
+     'a' => 'We rework it. The first cut is a starting point, not a bill you’re stuck with — a revision is built into everything, and if a direction is plainly wrong we start over rather than defend it.'],
+    ['q' => 'We already have someone in-house — is that a problem?',
+     'a' => 'The opposite. We slot in around your marketer as the trades they can’t cover, hand work back cleanly, and make them look good. We’re here to add a room, not take a job.'],
+    ['q' => 'Is there anything you won’t do?',
+     'a' => 'Buy followers, run a channel we can’t measure, or tie you into a contract to keep you. If something isn’t right for your business we’ll talk you out of it — even when it’s work we’d be paid for.'],
 ];
 
 $sent = ($_GET['sent'] ?? '') === '1';
