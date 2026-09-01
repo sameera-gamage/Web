@@ -188,7 +188,8 @@ head_open(
         $num  = sprintf('00.%02d', $i + 1);
         $disc = strtoupper(implode(' + ', array_filter(array_map('trim', explode(',', (string) $p['disciplines'])))));
       ?>
-        <article class="reel-item" data-reel="<?= $i ?>">
+        <article class="reel-item" data-reel="<?= $i ?>"
+                 data-name="<?= e($p['client']) ?>" data-href="<?= e(url('/projects/' . $p['slug'])) ?>">
           <div class="reel-card">
             <div class="reel-depth">
               <div class="reel-frame">
@@ -217,6 +218,11 @@ head_open(
         </article>
       <?php endforeach; ?>
     </div>
+
+    <!-- one fixed caption: the active project's name, rolled in and out in place -->
+    <a class="reel-caption" id="reel-caption" href="#" aria-hidden="true">
+      <span class="reel-caption-mask"><span class="reel-caption-line" id="reel-caption-line"></span></span>
+    </a>
 
     <?php if ($more): ?>
       <div class="work-more">

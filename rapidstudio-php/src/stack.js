@@ -17,9 +17,30 @@ export function mountStack({ gsap, ScrollTrigger, reduced }) {
 
   const wrap = document.getElementById('stack');
   const rail = document.getElementById('reel-rail');
-  if (wrap && rail) {
-    new IntersectionObserver(([e]) => rail.classList.toggle('show', e.isIntersecting),
-      { rootMargin: '-8% 0px -8% 0px' }).observe(wrap);
+  const caption = document.getElementById('reel-caption');
+  const capLine = document.getElementById('reel-caption-line');
+  if (wrap) {
+    new IntersectionObserver(([e]) => {
+      rail && rail.classList.toggle('show', e.isIntersecting);
+      caption && caption.classList.toggle('show', e.isIntersecting);
+    }, { rootMargin: '-8% 0px -8% 0px' }).observe(wrap);
+  }
+
+  // roll the caption: old name drops away (down), new name rises in (up) — in
+  // the one fixed spot
+  function swapCaption(i) {
+    if (!capLine) return;
+    const el = items[i];
+    const name = el.dataset.name || '';
+    if (caption) caption.setAttribute('href', el.dataset.href || '#');
+    if (capLine.textContent === name) return;
+    if (reduced) { capLine.textContent = name; return; }
+    gsap.killTweensOf(capLine);
+    gsap.timeline()
+      .to(capLine, { yPercent: 120, autoAlpha: 0, duration: 0.28, ease: 'power2.in' })
+      .add(() => { capLine.textContent = name; })
+      .set(capLine, { yPercent: 120, autoAlpha: 0 })
+      .to(capLine, { yPercent: 0, autoAlpha: 1, duration: 0.5, ease: 'power3.out' });
   }
 
   let active = -1;
@@ -27,6 +48,7 @@ export function mountStack({ gsap, ScrollTrigger, reduced }) {
     if (i === active) return;
     active = i;
     ticks.forEach((t, k) => t.classList.toggle('on', k === i));
+    swapCaption(i);
   };
 
   // absolute document offset — sticky elements report rect.top as 0 when stuck,
@@ -87,7 +109,6 @@ export function mountStack({ gsap, ScrollTrigger, reduced }) {
   items.forEach((item, i) => {
     const card = item.querySelector('.reel-card');
     const depth = item.querySelector('.reel-depth');
-    const title = card.querySelector('.reel-title');
 
     // DEPTH: the project rises from further back — small, then grows to its
     // original size as it reaches the middle. (First one is already at size.)
@@ -100,24 +121,13 @@ export function mountStack({ gsap, ScrollTrigger, reduced }) {
         });
     }
 
-    // recede AND fade right out as the NEXT card takes the front, so old
-    // titles never ghost through from behind
+    // recede AND fade right out as the NEXT card takes the front
     if (i < items.length - 1) {
       gsap.fromTo(card,
         { scale: 1, autoAlpha: 1 },
         {
           scale: 0.9, yPercent: -2, autoAlpha: 0, ease: 'none',
           scrollTrigger: { trigger: items[i + 1], start: 'top 82%', end: 'top 28%', scrub: true },
-        });
-    }
-
-    // title reveals from its mask as the card comes up
-    if (title) {
-      gsap.fromTo(title,
-        { yPercent: 115 },
-        {
-          yPercent: 0, ease: 'power3.out',
-          scrollTrigger: { trigger: item, start: 'top 78%', end: 'top 32%', scrub: 0.5 },
         });
     }
   });

@@ -387,12 +387,11 @@
   filter: contrast(1.05) saturate(.98) brightness(.9);
 }
 
-/* the title breaks out of the picture on the LEFT and sits in front of it,
-   masked so it reveals from below */
+/* per-card title — used only when JS is off (no caption swap available) */
 .reel-title-mask {
   position: absolute; left: -12%; bottom: 7%;
   z-index: 5; overflow: hidden; padding-bottom: .2em; padding-left: .06em;
-  max-width: 84vw;   /* clip an over-long title rather than break page scroll */
+  max-width: 84vw;
 }
 .reel-title {
   display: block; white-space: nowrap; text-align: left;
@@ -400,9 +399,29 @@
   font-size: clamp(2.4rem, 7.5vw, 7.5rem); line-height: .84; letter-spacing: -.03em;
   text-transform: uppercase; color: #F4F1EC;
   text-shadow: 0 14px 70px rgba(0,0,0,.55);
+  transition: color .3s ease;
+}
+html:not(.no-js) .reel-title-mask { display: none; }
+
+/* the ONE fixed caption: the active project's name, held in the same place and
+   rolled out (down) / in (up from below) as the project changes */
+.reel-caption {
+  position: fixed; left: 50%; top: 64%; transform: translateX(-50%);
+  z-index: 8; text-align: center; pointer-events: none;
+  opacity: 0; transition: opacity .4s ease;
+}
+.reel-caption.show { opacity: 1; pointer-events: auto; }
+.reel-caption-mask { display: block; overflow: hidden; padding: .06em .1em .18em; }
+.reel-caption-line {
+  display: block; white-space: nowrap;
+  font-family: 'Bricolage Grotesque', 'Syne', ui-sans-serif, sans-serif; font-weight: 800;
+  font-size: clamp(2.6rem, 8vw, 8rem); line-height: .9; letter-spacing: -.03em;
+  text-transform: uppercase; color: #F4F1EC;
+  text-shadow: 0 16px 70px rgba(0,0,0,.6);
   transition: color .3s ease; will-change: transform;
 }
-.reel-title:hover { color: #FF9142; }
+.reel-caption:hover .reel-caption-line { color: #FF9142; }
+@media (max-width: 760px) { .reel-caption { top: 60%; } .reel-caption-line { font-size: clamp(1.8rem, 13vw, 4.5rem); } }
 
 .reel-idx {
   position: absolute; top: 58%; right: calc(100% + clamp(.7rem, 1.6vw, 1.6rem));
@@ -453,7 +472,9 @@
   .reel-item { position: static; height: auto; padding: 7vh 0; }
   .reel-frame, .reel-meta { width: 90vw; }
   .reel-idx { position: static; margin: 0 0 .7rem; }
-  .reel-rail { display: none; }
+  .reel-rail, .reel-caption { display: none; }
+  /* no fixed caption on mobile — show each card's own title again */
+  html:not(.no-js) .reel-title-mask { display: block; }
   .reel-title { font-size: clamp(1.8rem, 13vw, 4.5rem); }
   .reel-title-mask { bottom: 5%; left: 4%; }
   .reel-meta { font-size: 9.5px; }
