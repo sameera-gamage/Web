@@ -21,6 +21,8 @@ export function mountStack({ gsap, ScrollTrigger, reduced }) {
   const cards = items.map((it) => it.querySelector('.reel-card'));
   const ticks = [...document.querySelectorAll('.reel-tick')];
   const rail = document.getElementById('reel-rail');
+  const caption = document.getElementById('reel-caption');
+  const capLine = document.getElementById('reel-caption-line');
   const N = items.length;
   if (!N) return;
 
@@ -44,30 +46,63 @@ export function mountStack({ gsap, ScrollTrigger, reduced }) {
     reel.style.height = ((N - 1) * step() + innerHeight) + 'px';
   }
 
+  // ---- caption: roll the old name out (down) and the new one in (up), held in
+  //      one fixed spot. Queued so fast scrolling always lands on the right name.
+  let swapping = false, pending = null, curName = null;
+  function runSwap(name) {
+    swapping = true;
+    gsap.timeline({
+      onComplete() {
+        swapping = false;
+        if (pending !== null && pending !== curName) { const n = pending; pending = null; runSwap(n); }
+        else pending = null;
+      },
+    })
+      .to(capLine, { yPercent: 120, autoAlpha: 0, duration: 0.26, ease: 'power2.in' })
+      .add(() => { capLine.textContent = name; curName = name; })
+      .set(capLine, { yPercent: 120, autoAlpha: 0 })
+      .to(capLine, { yPercent: 0, autoAlpha: 1, duration: 0.5, ease: 'power3.out' });
+  }
+  function swapCaption(i) {
+    const el = items[i];
+    if (!el) return;
+    const name = el.dataset.name || '';
+    if (caption) caption.setAttribute('href', el.dataset.href || '#');
+    if (!capLine || name === curName) return;
+    if (swapping) { pending = name; return; }
+    runSwap(name);
+  }
+  // seed the first name without a roll
+  if (capLine && items[0]) {
+    capLine.textContent = curName = items[0].dataset.name || '';
+    caption && caption.setAttribute('href', items[0].dataset.href || '#');
+  }
+
   // ---- paint the pile for a given fractional position p (0 = first centred) ----
   let active = -1;
   function setActive(i) {
     if (i === active) return;
     active = i;
     ticks.forEach((t, k) => t.classList.toggle('on', k === i));
+    swapCaption(i);
   }
 
   function paint(p) {
     for (let i = 0; i < N; i++) {
       const d = p - i;                 // <0 upcoming · 0 centred · >0 left behind
       let t, scale, opacity, y, bright;
-      if (d <= 0) {                    // rising from the back to the front
-        t = Math.max(0, d + 1);        // d=-1 → 0 (deep back) · d=0 → 1 (front)
-        scale = 0.8 + 0.2 * t;
-        opacity = t;
-        y = (1 - t) * 6;               // eases up from just below
-        bright = 0.5 + 0.5 * t;
-      } else {                         // receding behind the next one
+      if (d <= 0) {                    // the NEW one slides up from below, to the front
+        t = Math.max(0, d + 1);        // d=-1 → 0 (waiting below) · d=0 → 1 (settled)
+        y = (1 - t) * 46;              // travels up from ~46% down into place
+        scale = 0.94 + 0.06 * t;       // a touch of grow as it arrives
+        opacity = Math.min(1, t * 1.7);// reads as a solid card by the time it's most of the way up
+        bright = 0.62 + 0.38 * t;
+      } else {                         // the OLD one stays and recedes behind it
         t = Math.min(1, d);            // 0 front · 1 gone
-        scale = 1 - 0.12 * t;
+        scale = 1 - 0.1 * t;
         opacity = 1 - t;
-        y = -4 * t;
-        bright = 1 - 0.4 * t;
+        y = -3 * t;
+        bright = 1 - 0.35 * t;
       }
       const it = items[i], card = cards[i];
       const vis = opacity > 0.012;

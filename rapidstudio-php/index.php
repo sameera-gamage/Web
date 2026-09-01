@@ -190,7 +190,8 @@ head_open(
         $disc = strtoupper(implode(' + ', array_filter(array_map('trim', explode(',', (string) $p['disciplines'])))));
         $href = url('/projects/' . $p['slug']);
       ?>
-        <article class="reel-item" data-reel="<?= $i ?>">
+        <article class="reel-item" data-reel="<?= $i ?>"
+                 data-name="<?= e($p['client']) ?>" data-href="<?= e($href) ?>">
           <div class="reel-card">
             <div class="reel-frame">
               <span class="reel-idx"><span class="reel-idx-line"></span><?= $num ?></span>
@@ -215,6 +216,16 @@ head_open(
           </div>
         </article>
       <?php endforeach; ?>
+
+        <!-- the ONE fixed caption: held in place over the pile, its text rolled
+             out (down) and the next rolled in (up) as the active project changes.
+             It lives inside the pinned stage, so it holds its spot while the
+             cards slide and scrolls away cleanly when the reel ends. -->
+        <div class="reel-capwrap" aria-hidden="true">
+          <a class="reel-caption" id="reel-caption" href="#">
+            <span class="reel-caption-mask"><span class="reel-caption-line" id="reel-caption-line"></span></span>
+          </a>
+        </div>
       </div>
     </div>
 
