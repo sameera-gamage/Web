@@ -24,10 +24,13 @@ export function mountStack({ gsap, ScrollTrigger, reduced }) {
   const canAnimate = !reduced && matchMedia('(min-width: 761px)').matches;
   if (!canAnimate) return;
 
-  // absolute document offsets — sticky elements report rect.top as 0 when stuck
+  // Geometry from STABLE references only. A sticky element's offsetTop reports
+  // its *stuck* position (it tracks the scroll), so it must never be used here.
+  // The wrapper is not sticky, and every card is one viewport tall.
+  const wrap = document.getElementById('stack');
   const docTop = (el) => { let y = 0; while (el) { y += el.offsetTop; el = el.offsetParent; } return y; };
-  const reelTop = () => docTop(items[0]);
-  const stepH = () => (N > 1 ? docTop(items[1]) - docTop(items[0]) : innerHeight);
+  const reelTop = () => docTop(wrap);
+  const stepH = () => innerHeight;
 
   // ---- caption: roll the name out (down) and the next one in (up), queued so
   //      fast scrolling always lands on the right name ----
@@ -67,7 +70,7 @@ export function mountStack({ gsap, ScrollTrigger, reduced }) {
   let snapping = false;
   function goTo(i, dur = 0.7) {
     if (!items[i]) return;
-    const y = docTop(items[i]);
+    const y = reelTop() + i * stepH();
     snapping = true;
     const L = window.__lenis;
     if (L) L.scrollTo(y, { duration: dur });
@@ -86,7 +89,7 @@ export function mountStack({ gsap, ScrollTrigger, reduced }) {
   // ---- one scroll handler drives active, show-range and centre-snap ----
   let settle = 0;
   function onScroll() {
-    const rel = (scrollY - reelTop()) / stepH();      // 0 at first project, N-1 at last
+    const rel = (scrollY - reelTop()) / stepH();   // 0 at first project, N-1 at last
     const idx = Math.max(0, Math.min(N - 1, Math.round(rel)));
     setActive(idx);
 
