@@ -1431,68 +1431,26 @@
    The picture arrives from the list carrying the same view-transition-name, so
    the browser grows the one you clicked into the plate on the left rather than
    cross-fading two documents. Everything else fades in around it. */
-.case { padding-top: clamp(6rem, 12vh, 9rem); }
+/* ═════════════════════════════════════════════════════════════════
+   Project case study — a cinematic, parallax-scrolled page
+   ═════════════════════════════════════════════════════════════════ */
 
-.case-grid {
-  display: grid; gap: clamp(2rem, 5vw, 4.5rem);
-  padding: 0 var(--edge) clamp(4rem, 10vh, 8rem);
-  max-width: 1680px; margin-inline: auto;
+/* 404 */
+.miss {
+  min-height: 72vh; display: grid; align-content: center; gap: 1rem;
+  padding: 0 var(--edge); max-width: 1680px; margin-inline: auto;
 }
-@media (min-width: 900px) {
-  .case-grid { grid-template-columns: 1.05fr .95fr; align-items: start; }
-  .case-media { position: sticky; top: clamp(6rem, 12vh, 8rem); }
-}
-
-.case-plate {
-  border-radius: 16px; overflow: hidden; background: #121212;
-  aspect-ratio: 4 / 3;
-}
-.case-plate img { width: 100%; height: 100%; object-fit: cover; }
-
-.case-eyebrow {
-  display: flex; flex-wrap: wrap; gap: .5rem 1.4rem; align-items: baseline;
+.case-k, .cs-k {
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   font-size: 10.5px; letter-spacing: .2em; text-transform: uppercase;
-  color: rgba(237,234,230,.45);
+  color: rgba(237,234,230,.4);
 }
-.case-eyebrow em { font-style: normal; color: #FF9142; }
-.case-h1 { margin-top: 1rem; font-size: clamp(2.4rem, 6.5vw, 5rem); }
-.case-line {
-  margin-top: 1rem; max-width: 38ch;
-  font-size: clamp(15px, 1.5vw, 19px); line-height: 1.55;
-  color: rgba(237,234,230,.68);
-}
-.case-block { margin-top: clamp(2rem, 4vw, 3rem); }
-.case-k {
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 10.5px; letter-spacing: .2em; text-transform: uppercase;
-  color: rgba(237,234,230,.4); margin-bottom: .9rem;
-}
-.case-p { font-size: 15.5px; line-height: 1.7; color: rgba(237,234,230,.78); max-width: 46ch; }
-.case-list { display: grid; gap: .6rem; }
-.case-list li {
-  position: relative; padding-left: 1.15rem;
-  font-size: 15px; line-height: 1.55; color: rgba(237,234,230,.78);
-}
-.case-list li::before {
-  content: ''; position: absolute; left: 0; top: .6em;
-  width: 5px; height: 5px; border-radius: 50%; background: #FF5A1F;
-}
-.case-result { display: grid; gap: 1.1rem; }
-.case-result div { display: flex; align-items: baseline; gap: 1rem; }
-.case-result dt {
-  font-family: 'Syne', ui-sans-serif, sans-serif; font-weight: 800;
-  font-size: clamp(1.5rem, 3vw, 2.3rem); letter-spacing: -.03em;
-  color: #FF9142; min-width: 5ch;
-}
-.case-result dd {
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 10.5px; letter-spacing: .16em; text-transform: uppercase;
-  color: rgba(237,234,230,.5);
-}
+.case-h1 { font-size: clamp(2.4rem, 6.5vw, 5rem); }
+.case-line { max-width: 40ch; font-size: clamp(15px, 1.5vw, 19px); line-height: 1.55; color: rgba(237,234,230,.68); }
+
 .case-cta {
-  display: inline-flex; align-items: center; gap: .7rem;
-  margin-top: clamp(2.4rem, 5vw, 3.4rem);
+  display: inline-flex; align-items: center; gap: .7rem; align-self: flex-start;
+  margin-top: clamp(1.6rem, 4vw, 2.6rem);
   padding: .95rem 1.7rem; border-radius: 999px;
   background: #FF5A1F; color: #EDEAE6;
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
@@ -1502,78 +1460,171 @@
 .case-cta::after { content: '→'; }
 .case-cta:hover { background: #FF9142; color: #0A0A0A; transform: translateY(-2px); }
 
-/* the rest of the shoot */
-.case-roll {
-  display: grid; gap: clamp(1rem, 2.4vw, 2rem);
+/* ---- hero: full-bleed cover parallaxing under the overlaid title ---- */
+.cs-hero {
+  position: relative; height: 100vh; min-height: 600px;
+  display: flex; align-items: flex-end; overflow: hidden;
+}
+.cs-hero-media { position: absolute; inset: -15% 0; z-index: 0; }
+.cs-hero-img { width: 100%; height: 100%; object-fit: cover; will-change: transform; }
+.cs-hero-scrim {
+  position: absolute; inset: 0;
+  background: linear-gradient(180deg, rgba(10,10,10,.6) 0%, rgba(10,10,10,.12) 32%, rgba(10,10,10,.82) 100%);
+}
+.cs-hero-in {
+  position: relative; z-index: 2; width: 100%;
+  max-width: 1680px; margin-inline: auto;
+  padding: 0 var(--edge) clamp(2.6rem, 7vh, 5.5rem);
+}
+.cs-back {
+  display: inline-block; margin-bottom: clamp(1.2rem, 3vh, 2rem); text-decoration: none;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 11px; letter-spacing: .16em; text-transform: uppercase; color: rgba(237,234,230,.72);
+  transition: color .3s ease;
+}
+.cs-back:hover { color: #FF9142; }
+.cs-eyebrow {
+  display: flex; flex-wrap: wrap; gap: .5rem 1.4rem; margin-bottom: .9rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 11px; letter-spacing: .18em; text-transform: uppercase; color: rgba(237,234,230,.6);
+}
+.cs-eyebrow em { font-style: normal; color: #FF9142; }
+.cs-title {
+  font-family: 'Bricolage Grotesque', 'Syne', ui-sans-serif, sans-serif; font-weight: 800;
+  font-size: clamp(2.8rem, 10.5vw, 9rem); line-height: .9; letter-spacing: -.04em;
+  text-transform: uppercase; color: #F7F4EF;
+}
+.cs-mask { display: inline-block; overflow: hidden; vertical-align: bottom; padding-bottom: .04em; }
+.cs-word { display: inline-block; }
+.cs-tagline {
+  margin-top: 1.1rem; max-width: 46ch;
+  font-size: clamp(16px, 1.6vw, 20px); line-height: 1.5; color: rgba(237,234,230,.75);
+}
+.cs-cue { position: absolute; left: 50%; bottom: 2rem; z-index: 2; transform: translateX(-50%); }
+.cs-cue i {
+  display: block; width: 1px; height: 46px; margin: 0 auto;
+  background: linear-gradient(#FF5A1F, transparent); transform-origin: top;
+  animation: cs-cue 1.9s ease-in-out infinite;
+}
+@keyframes cs-cue { 0%,100% { transform: scaleY(.35); opacity: .35; } 50% { transform: scaleY(1); opacity: 1; } }
+
+/* ---- the read: sticky meta rail + big brief, list, results ---- */
+.cs-intro {
+  display: grid; gap: clamp(2.5rem, 5vw, 5rem);
+  padding: clamp(4rem, 10vh, 8rem) var(--edge);
+  max-width: 1680px; margin-inline: auto;
+}
+@media (min-width: 900px) {
+  .cs-intro { grid-template-columns: .78fr 1.22fr; align-items: start; }
+  .cs-meta { position: sticky; top: clamp(6rem, 12vh, 7rem); }
+}
+.cs-meta { display: flex; flex-direction: column; gap: 1.2rem; }
+.cs-meta-row { display: flex; flex-direction: column; gap: .3rem; padding-top: .9rem; border-top: 1px solid rgba(237,234,230,.12); }
+.cs-meta-k { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 10.5px; letter-spacing: .18em; text-transform: uppercase; color: rgba(237,234,230,.4); }
+.cs-meta-v { font-family: 'Syne', ui-sans-serif, sans-serif; font-weight: 700; font-size: 1.02rem; color: #EDEAE6; }
+
+.cs-read { display: flex; flex-direction: column; gap: clamp(2.4rem, 5vw, 3.8rem); }
+.cs-k { display: block; margin-bottom: 1rem; }
+.cs-lead {
+  font-family: 'Bricolage Grotesque', 'Syne', ui-sans-serif, sans-serif; font-weight: 700;
+  font-size: clamp(1.4rem, 2.7vw, 2.3rem); line-height: 1.38; letter-spacing: -.015em;
+  color: rgba(237,234,230,.92); max-width: 26ch;
+}
+.cs-list { display: grid; gap: .75rem; }
+.cs-list li { position: relative; padding-left: 1.35rem; font-size: 16px; line-height: 1.55; color: rgba(237,234,230,.78); }
+.cs-list li::before { content: ''; position: absolute; left: 0; top: .62em; width: 6px; height: 6px; border-radius: 50%; background: #FF5A1F; }
+.cs-result { display: grid; gap: 0; }
+.cs-result-row { display: flex; align-items: baseline; gap: 1.2rem; padding: 1.2rem 0; border-top: 1px solid rgba(237,234,230,.1); }
+.cs-result dt {
+  font-family: 'Bricolage Grotesque', 'Syne', ui-sans-serif, sans-serif; font-weight: 800;
+  font-size: clamp(2rem, 4.2vw, 3.4rem); letter-spacing: -.03em; color: #FF9142; min-width: 5ch;
+}
+.cs-result dd { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: rgba(237,234,230,.55); }
+
+/* ---- the roll: parallax frames, one wide every third ---- */
+.cs-roll {
+  display: grid; gap: clamp(1.4rem, 3vw, 2.6rem);
   padding: 0 var(--edge) clamp(4rem, 10vh, 8rem);
   max-width: 1680px; margin-inline: auto;
 }
-@media (min-width: 900px) { .case-roll { grid-template-columns: 1fr 1fr; } }
-.case-frame {
-  border-radius: 14px; overflow: hidden; background: #121212;
-  opacity: 0; transform: translateY(26px);
-  transition: opacity .7s ease, transform .8s cubic-bezier(.22,.8,.28,1);
+@media (min-width: 900px) {
+  .cs-roll { grid-template-columns: 1fr 1fr; }
+  .cs-frame.is-wide { grid-column: 1 / -1; }
 }
-.case-frame.shown { opacity: 1; transform: none; }
-.no-js .case-frame { opacity: 1; transform: none; }
-.case-frame img, .case-frame video { width: 100%; aspect-ratio: 4/3; object-fit: cover; }
-.case-frame figcaption {
-  display: flex; gap: .9rem; padding: .9rem 1.1rem 1.1rem;
+.cs-frame-media {
+  position: relative; border-radius: 16px; overflow: hidden; background: #121212;
+  aspect-ratio: 4 / 3;
+}
+.cs-frame.is-wide .cs-frame-media { aspect-ratio: 16 / 9; }
+.cs-frame-media [data-inner] {
+  position: absolute; inset: -15% 0 0; width: 100%; height: 130%;
+  object-fit: cover; will-change: transform;
+}
+.cs-frame figcaption {
+  display: flex; gap: .9rem; padding: .9rem .2rem;
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 10px; letter-spacing: .16em; text-transform: uppercase;
-  color: rgba(237,234,230,.45);
+  font-size: 10px; letter-spacing: .16em; text-transform: uppercase; color: rgba(237,234,230,.45);
 }
-.case-frame figcaption em { font-style: normal; color: #FF9142; }
+.cs-frame figcaption em { font-style: normal; color: #FF9142; }
 
-.case-step {
-  display: flex; flex-wrap: wrap; align-items: center; gap: 1.4rem;
-  padding: clamp(2rem, 5vh, 3.5rem) var(--edge) clamp(5rem, 12vh, 8rem);
-  border-top: 1px solid #1C1C1C;
+/* ---- next project: a full-bleed teaser ---- */
+.cs-next {
+  position: relative; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; text-align: center; text-decoration: none;
+  min-height: clamp(360px, 62vh, 640px); overflow: hidden;
+}
+.cs-next-media { position: absolute; inset: -15% 0; z-index: 0; }
+.cs-next-img { width: 100%; height: 100%; object-fit: cover; filter: brightness(.46) saturate(.92); will-change: transform; transition: filter .6s ease; }
+.cs-next:hover .cs-next-img { filter: brightness(.6) saturate(1); }
+.cs-next-scrim { position: absolute; inset: 0; background: radial-gradient(circle at 50% 50%, rgba(10,10,10,.35), rgba(10,10,10,.85)); }
+.cs-next-k { position: relative; z-index: 2; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; letter-spacing: .24em; text-transform: uppercase; color: rgba(237,234,230,.65); }
+.cs-next-t {
+  position: relative; z-index: 2; margin: .5rem 0 1.5rem;
+  font-family: 'Bricolage Grotesque', 'Syne', ui-sans-serif, sans-serif; font-weight: 800;
+  font-size: clamp(2.6rem, 9vw, 7rem); line-height: .92; letter-spacing: -.04em;
+  text-transform: uppercase; color: #F7F4EF;
+}
+.cs-next-go {
+  position: relative; z-index: 2; display: inline-flex; align-items: center; gap: .7rem;
+  padding: .85rem 1.7rem; border: 1px solid rgba(237,234,230,.4); border-radius: 999px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 11px; letter-spacing: .16em; text-transform: uppercase; color: #EDEAE6;
+  transition: background-color .3s ease, color .3s ease, border-color .3s ease;
+}
+.cs-next:hover .cs-next-go { background: #FF5A1F; border-color: #FF5A1F; color: #0A0A0A; }
+.cs-next-arrow { transition: transform .3s ease; }
+.cs-next:hover .cs-next-arrow { transform: translateX(5px); }
+
+/* ---- foot: previous + all work ---- */
+.cs-foot {
+  display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1.4rem;
+  padding: clamp(2.5rem, 6vh, 4rem) var(--edge) clamp(5rem, 12vh, 8rem);
   max-width: 1680px; margin-inline: auto;
 }
-.step-next { margin-left: auto; text-align: right; }
-.step-k {
-  display: block;
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 10px; letter-spacing: .2em; text-transform: uppercase;
-  color: rgba(237,234,230,.4);
+.cs-foot-link { text-decoration: none; }
+.cs-foot-k { display: block; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 10px; letter-spacing: .2em; text-transform: uppercase; color: rgba(237,234,230,.4); }
+.cs-foot-t { display: block; margin-top: .3rem; font-family: 'Bricolage Grotesque', 'Syne', ui-sans-serif, sans-serif; font-weight: 800; font-size: clamp(1.1rem, 2.4vw, 1.7rem); letter-spacing: -.02em; color: #EDEAE6; transition: color .3s ease; }
+.cs-foot-link:hover .cs-foot-t { color: #FF9142; }
+.cs-foot-all {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 10.5px; letter-spacing: .2em;
+  text-transform: uppercase; color: rgba(237,234,230,.5); text-decoration: none;
+  padding: .7rem 1.2rem; border: 1px solid #2A2A2A; border-radius: 999px; transition: border-color .3s ease, color .3s ease;
 }
-.step-t {
-  display: block; margin-top: .3rem;
-  font-family: 'Syne', ui-sans-serif, sans-serif; font-weight: 800;
-  font-size: clamp(1.05rem, 2.4vw, 1.7rem); letter-spacing: -.02em;
-}
-.step:hover .step-t { color: #FF9142; }
-.step-all {
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 10.5px; letter-spacing: .2em; text-transform: uppercase;
-  color: rgba(237,234,230,.5);
-  padding: .7rem 1.2rem; border: 1px solid #2A2A2A; border-radius: 999px;
-}
-.step-all:hover { border-color: #FF5A1F; color: #EDEAE6; }
+.cs-foot-all:hover { border-color: #FF5A1F; color: #EDEAE6; }
 
 /* ---- page transitions ----
-   Cross-document view transitions. A single, reliable move: the page you leave
-   shrinks back and blurs away, the page you arrive on expands up out of a soft
-   blur. No shared-element morph — that was what left a ghost of the old cover
-   sitting on the new page when a navigation was interrupted. The nav bar is
-   named so it holds still while the pages move under it. */
+   A branded aperture: the page you leave dims back while the page you arrive on
+   irises open from the centre — the same lens motif as the hero reveal. The nav
+   is named so it holds still while the pages move under it. */
 @view-transition { navigation: auto; }
 
-@keyframes vt-shrink {
-  to { opacity: 0; transform: scale(.92); filter: blur(6px); }
+@keyframes vt-dim { to { opacity: 0; transform: scale(.97); filter: blur(3px); } }
+@keyframes vt-iris {
+  from { clip-path: circle(0% at 50% 46%); }
+  to   { clip-path: circle(150% at 50% 46%); }
 }
-@keyframes vt-expand {
-  from { opacity: 0; transform: scale(1.08); filter: blur(6px); }
-}
-::view-transition-old(root) {
-  animation: vt-shrink .42s cubic-bezier(.4,0,.2,1) both;
-  transform-origin: 50% 42%;
-}
-::view-transition-new(root) {
-  animation: vt-expand .55s cubic-bezier(.16,1,.3,1) both;
-  transform-origin: 50% 42%;
-}
+::view-transition-old(root) { animation: vt-dim .4s cubic-bezier(.4,0,.2,1) both; transform-origin: 50% 46%; }
+::view-transition-new(root) { animation: vt-iris .7s cubic-bezier(.83,0,.17,1) both; }
 ::view-transition-old(nav), ::view-transition-new(nav) { animation: none; }
 
 @media (prefers-reduced-motion: reduce) {
