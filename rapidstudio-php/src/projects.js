@@ -24,6 +24,15 @@ if (!reduced) {
     el.style.transitionDelay = `${Math.min(i, 6) * 0.05}s`;
     io.observe(el);
   });
+
+  // each cover drifts inside its frame as the row scrolls past
+  document.querySelectorAll('.wx-media [data-inner]').forEach((el) => {
+    gsap.fromTo(el, { yPercent: -8 }, {
+      yPercent: 8, ease: 'none',
+      scrollTrigger: { trigger: el.closest('.wx-row') || el, start: 'top bottom', end: 'bottom top', scrub: true },
+    });
+  });
+  ScrollTrigger.refresh();
 } else {
   document.querySelectorAll('.reveal-sec').forEach((el) => el.classList.add('in'));
 }

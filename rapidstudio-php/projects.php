@@ -22,30 +22,32 @@ head_open('Work — RapidStudio',
 
   <?php if (!$count): ?>
     <p class="work-empty">Nothing published yet. Check back soon.</p>
-  <?php else: ?>
-    <ul class="work-grid">
+  <?php else: $tot = str_pad((string) $count, 2, '0', STR_PAD_LEFT); ?>
+    <div class="wx-list">
       <?php foreach ($projects as $i => $p):
-        $disc = array_values(array_filter(array_map('trim', explode(',', $p['disciplines'])))); ?>
-        <li class="wg-item reveal-sec">
-          <a class="wg-card" href="<?= e(url('/projects/' . $p['slug'])) ?>" aria-label="Open <?= e($p['client']) ?>">
-            <div class="wg-shot">
-              <img src="<?= e(url($p['cover'])) ?>" alt="<?= e($p['client'] . ', ' . $p['title']) ?>"
-                   <?= $i < 3 ? '' : 'loading="lazy"' ?> decoding="async">
-              <span class="wg-ref"><?= e($p['ref']) ?></span>
-              <span class="wg-go" aria-hidden="true">View project <em>&rarr;</em></span>
+        $disc = array_values(array_filter(array_map('trim', explode(',', $p['disciplines']))));
+        $num  = str_pad((string) ($i + 1), 2, '0', STR_PAD_LEFT); ?>
+        <a class="wx-row reveal-sec" href="<?= e(url('/projects/' . $p['slug'])) ?>" aria-label="Open <?= e($p['client']) ?>">
+          <div class="wx-media" data-frame>
+            <img data-inner src="<?= e(url($p['cover'])) ?>" alt="<?= e($p['client'] . ', ' . $p['title']) ?>"
+                 <?= $i < 3 ? '' : 'loading="lazy"' ?> decoding="async">
+            <span class="wx-tag"><?= e($p['ref']) ?></span>
+          </div>
+          <div class="wx-read">
+            <span class="wx-num"><?= $num ?><span class="dim"> / <?= $tot ?></span></span>
+            <h2 class="wx-title"><?= e($p['client']) ?></h2>
+            <p class="wx-line"><?= e($p['line'] ?: $p['title']) ?></p>
+            <?php if ($disc): ?>
+              <div class="wx-tags"><?php foreach (array_slice($disc, 0, 4) as $d): ?><span><?= e($d) ?></span><?php endforeach; ?></div>
+            <?php endif; ?>
+            <div class="wx-foot">
+              <span class="wx-year"><?= e($p['year']) ?></span>
+              <span class="wx-go">View project <em class="wx-arrow" aria-hidden="true">&rarr;</em></span>
             </div>
-            <div class="wg-foot">
-              <h2 class="wg-title"><?= e($p['client']) ?></h2>
-              <p class="wg-line"><?= e($p['line'] ?: $p['title']) ?></p>
-              <div class="wg-meta">
-                <span><?= e(implode(' · ', array_slice($disc, 0, 3))) ?></span>
-                <span><?= e($p['year']) ?></span>
-              </div>
-            </div>
-          </a>
-        </li>
+          </div>
+        </a>
       <?php endforeach; ?>
-    </ul>
+    </div>
   <?php endif; ?>
 
   <div class="work-back">
