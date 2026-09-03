@@ -89,7 +89,8 @@ ffmpeg -i your-raw-video.mp4 -c:v libx264 -crf 20 -preset slow -g 8 -keyint_min 
 
 ## How to preview it
 
-- Double-clicking `index.html` shows the still-image hero (browsers block video loading
-  from a double-clicked file, so this is expected and looks complete).
-- For the full scrolling video, run a tiny local server in this folder and open the link:
-  `python -m http.server` then visit `http://localhost:8000`.
+- Double-clicking `index.html` now plays the scrolling video in Chrome and Edge, using a
+  direct-file fallback for when the browser blocks the usual streamed load.
+- Safari is stricter about local files and may show the still hero on a double-click. The
+  fully reliable way, and how a real visitor sees it, is served over http: run
+  `python -m http.server` in this folder and open `http://localhost:8000`, or just deploy it.

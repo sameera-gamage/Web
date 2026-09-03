@@ -785,7 +785,23 @@ body.paused *,body.paused *::before,body.paused *::after{animation-play-state:pa
 
   /* ---------- blob loader with streamed ring ---------- */
   var started=false;
-  function startBlobFetch(){ if(started) return; started=true; loadHeroBlob().catch(failVideo); }
+  function startBlobFetch(){ if(started) return; started=true; loadHeroBlob().catch(useDirectSrc); }
+  function markVideoReady(){
+    requestSeek(heroProgress()*video.duration);
+    stage.classList.add('video-ready');
+    if(ring) ring.style.display='none';
+  }
+  /* Fallback for when fetch() is unavailable (opening index.html directly, as a file://
+     URL, blocks fetch) or the blob fetch fails: point the video straight at the file and
+     scrub that. Works on file:// in Chrome/Edge and on any host with byte-range support. */
+  function useDirectSrc(){
+    try{
+      video.src=VIDEO_URL;
+      video.load();
+      video.addEventListener('loadeddata', markVideoReady, {once:true});
+      setTimeout(function(){ if(!stage.classList.contains('video-ready')) failVideo(); }, 9000);
+    }catch(e){ failVideo(); }
+  }
   function initPoster(){
     var img=new Image();
     img.onload=function(){ poster.style.backgroundImage="url('"+POSTER_URL+"')"; poster.classList.add('show'); startBlobFetch(); };
@@ -814,11 +830,7 @@ body.paused *,body.paused *::before,body.paused *::after{animation-play-state:pa
     ringfill.setAttribute('stroke-dashoffset',0);
     video.src=URL.createObjectURL(new Blob(chunks,{type:'video/mp4'}));
     video.load();
-    video.addEventListener('canplay',function(){
-      requestSeek(heroProgress()*video.duration);
-      stage.classList.add('video-ready');
-      if(ring) ring.style.display='none';
-    },{once:true});
+    video.addEventListener('canplay', markVideoReady, {once:true});
   }
   function failVideo(){
     if(ring) ring.style.display='none';
