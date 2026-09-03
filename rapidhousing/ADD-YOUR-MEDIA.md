@@ -23,19 +23,41 @@ Use the **image I already generated as the starting frame** (image-to-video), so
 video begins exactly where the still image sits. Settings: **1080p, 6 seconds,
 standard mode, no audio.** Paste this as the motion prompt:
 
-> One continuous shot, no cuts. The camera descends straight down through the open
-> central void of a soaring modern concrete and glass atrium, gliding smoothly past
-> floor after floor of cantilevered balconies and thin steel railings, from the bright
-> skylight at the top down toward a warm, light-filled ground floor. The camera moves
-> steadily downward along the vertical center of the frame. The scene stays alive: fine
-> dust motes drift in the shafts of daylight, soft light shifts across the raw concrete
-> as the camera passes each level, faint haze moves through the void. The shot ends at
-> rest, settling level in a calm finished ground-floor space where warm amber daylight
-> pools on a polished concrete floor, bold architectural forms framing an open, composed
-> view with generous empty space above. No text, no logos, no lettering anywhere.
+> One continuous shot, no cuts, a single smooth camera move at a slow
+> and steady speed. The camera glides straight down through the tall open center of a
+> modern concrete and glass atrium, moving downward along the vertical middle of the frame
+> the whole time. Keep the architecture simple and solid: clean flat concrete walls and
+> large calm glass panels to the left and right, softened by haze and shafts of daylight.
+> Structures stay rigid and consistent, no morphing, no warping, no shifting or bending
+> shapes. The only motion is the steady downward glide of the camera and gentle living
+> atmosphere: dust motes drifting in the light, soft daylight slowly shifting across the
+> concrete, faint haze in the air. The shot ends at rest in a calm, light-filled ground
+> floor space, warm amber daylight pooling on a smooth floor, with open empty space in the
+> upper center of the frame. Cinematic, photorealistic. No text, no logos, no lettering anywhere.
 
-Tip: scrolling down should feel like going down, so keep the camera moving downward the
-whole time. If a version drifts or spins, re-roll with the same prompt.
+Why this version: the earlier prompt had "floor after floor of balconies and thin steel
+railings." Thin repeating railings are exactly the fine detail AI video warps and morphs
+when the camera moves past them, which is what breaks the middle of the shot. This version
+keeps the surfaces simple and solid and adds an explicit "no morphing, no warping," so the
+structure holds steady while light and haze carry the motion. Keep the move slow: fast
+camera moves make the model invent geometry and glitch.
+
+### If it still breaks in the middle, use this fallback
+
+Light and haze almost never break, because there is no hard structure to get wrong:
+
+> One continuous shot, no cuts. A slow, steady downward glide through a tall shaft of
+> daylight and soft haze inside a minimal concrete atrium. Mostly glowing light, drifting
+> dust, and smooth concrete surfaces sliding gently upward past the camera as it descends.
+> Simple bold forms, nothing intricate, nothing that bends or morphs. Ends resting in a
+> warm, softly glowing open space below. Cinematic, photorealistic. No text, no logos, no
+> lettering anywhere.
+
+Tips: keep it 6 seconds (a longer clip invents more and breaks more), and AI video varies
+per take, so if one roll warps, just roll again. You do not need it perfect: send me
+whatever take you get, even with a small wobble, and I can trim the clip to just the clean
+stretch. The site maps scrolling to progress, not to seconds, so a shorter clip costs
+nothing anywhere else.
 
 ### One optional step for the smoothest scrolling
 
