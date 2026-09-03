@@ -1,0 +1,3 @@
+# raw and review media should never ship
+review/
+*-raw.mp4
