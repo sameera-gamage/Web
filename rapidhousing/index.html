@@ -364,7 +364,7 @@ body.paused *,body.paused *::before,body.paused *::after{animation-play-state:pa
 <span id="top"></span>
 
 <!-- ============================ HERO ============================ -->
-<header class="hero" id="hero">
+<header class="hero">
   <div class="stage" id="stage">
 
     <!-- complete-without-media CSS atrium scene -->
@@ -600,8 +600,10 @@ body.paused *,body.paused *::before,body.paused *::after{animation-play-state:pa
   document.getElementById('yr').textContent=new Date().getFullYear();
 
   /* ---------- config ---------- */
-  var VIDEO_URL='assets/hero-scrub.mp4';
-  var VIDEO_BYTES=9000000;          /* fallback byte size when Content-Length is missing */
+  /* Prefer H.264 MP4 (plays in every real browser); fall back to VP9 WebM only where H.264 is unavailable. */
+  var CAN_MP4=document.createElement('video').canPlayType('video/mp4; codecs="avc1.42E01E"');
+  var VIDEO_URL=CAN_MP4?'assets/hero-scrub.mp4':'assets/hero-scrub.webm';
+  var VIDEO_BYTES=CAN_MP4?2708115:1469244;   /* fallback byte size when Content-Length is missing */
   var POSTER_URL='assets/hero-poster.jpg';
 
   /* ---------- build the CSS atrium (receding balconies + motes) ---------- */
@@ -697,7 +699,6 @@ body.paused *,body.paused *::before,body.paused *::after{animation-play-state:pa
   }
 
   /* ---------- hero scroll math ---------- */
-  var heroEl=document.getElementById('hero');
   function heroProgress(){
     var range=stage.parentElement.offsetHeight-window.innerHeight;
     if(range<=0) return 0;

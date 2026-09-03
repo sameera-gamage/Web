@@ -1,23 +1,31 @@
-# RapidHousing site — how to finish it
+# RapidHousing site — status and next steps
 
-Your site is built and works right now. It looks complete even before you add any
-media, because the hero has a hand-drawn atrium scene behind it. To bring in the
-cinematic descent, you add two files. That is the whole job.
+The hero video is installed and working. The site is done and live-previewable.
 
-## The two files to add
+## What is already in the hero
 
-Put both inside the `assets/` folder, with these exact names:
+You sent a Flow video that warped in the middle, so I looked at every frame, found
+that the first 3.5 seconds were a clean, smooth descent, and trimmed the clip to
+exactly that stretch. The scroll maps to progress, not seconds, so a shorter clip
+costs nothing. Then I re-encoded it for silk-smooth scrubbing and wired it in.
 
-| File | What it is | Where it comes from |
-|---|---|---|
-| `assets/hero-poster.jpg` | The still image of the atrium | The image I generated for you in Higgsfield. Open it in the Higgsfield viewer, download it, rename it to `hero-poster.jpg`. |
-| `assets/hero-scrub.mp4` | The scrolling descent video | You make this in Higgsfield Flow with the prompt below, download it, rename it to `hero-scrub.mp4`. |
+These files are in `assets/` now:
 
-That is it. Once those two files are in `assets/`, the hero plays the video as you
-scroll on laptops and desktops, and shows the still image on phones. Nothing else
-to wire up.
+| File | What it is |
+|---|---|
+| `hero-scrub.mp4` | The clean descent, H.264 (plays in every browser) |
+| `hero-scrub.webm` | The same clip in VP9, used only where a browser cannot play H.264 |
+| `hero-poster.jpg` | The still hero for phones and the first paint, pulled from the video |
+| `hero-ending.jpg` | The resting frame, a spare design image |
 
-## The video prompt for Higgsfield Flow
+## If you want the full descent that reaches the ground floor
+
+The trimmed clip settles mid-atrium, not at the warm ground floor, because the break
+sat between the two. If you want a version that descends all the way to the finished
+ground floor, generate a fresh clip with the improved prompt below and send it over.
+I will trim and wire it in the same way.
+
+## The improved video prompt for Higgsfield Flow
 
 Use the **image I already generated as the starting frame** (image-to-video), so the
 video begins exactly where the still image sits. Settings: **1080p, 6 seconds,
