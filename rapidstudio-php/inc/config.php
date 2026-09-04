@@ -37,7 +37,7 @@ $config = [
 
     // Set this to the folder the site is served from. '' when it is the domain
     // root, '/rapidstudio' when it sits in a subfolder of htdocs.
-    'base' => '/rapidstudiophp',
+    'base' => '/rapidstudio',
 ];
 
 $local = __DIR__ . '/config.local.php';
