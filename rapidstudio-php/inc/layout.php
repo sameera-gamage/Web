@@ -47,13 +47,16 @@ function nav_bar(string $here = 'index'): void
         ['k' => 'answers',  'label' => 'Answers', 'href' => url('/#answers')],
     ];
     ?>
-  <header class="nav">
+  <header class="nav" id="nav">
     <div class="nav-in">
       <a href="<?= e(url('/')) ?>" class="nav-mark" aria-label="RapidStudio, home">
         <span class="nav-dot" aria-hidden="true"></span>
         <span>Rapid<span class="nav-sep">&bull;</span>Studio</span>
       </a>
-      <nav class="nav-pill" aria-label="Primary">
+      <button class="nav-burger" id="nav-burger" type="button" aria-label="Menu" aria-expanded="false" aria-controls="nav-pill">
+        <span></span><span></span>
+      </button>
+      <nav class="nav-pill" id="nav-pill" aria-label="Primary">
         <?php foreach ($links as $i => $l): ?>
           <a href="<?= e($l['href']) ?>"
              class="nav-link<?= $here === $l['k'] ? ' is-here' : '' ?>"
@@ -66,6 +69,22 @@ function nav_bar(string $here = 'index'): void
       </nav>
     </div>
   </header>
+  <script>
+    (function () {
+      var nav = document.getElementById('nav'),
+          burger = document.getElementById('nav-burger'),
+          pill = document.getElementById('nav-pill');
+      if (!nav || !burger || !pill) return;
+      function set(open) {
+        nav.classList.toggle('nav-open', open);
+        burger.setAttribute('aria-expanded', open ? 'true' : 'false');
+      }
+      burger.addEventListener('click', function () { set(!nav.classList.contains('nav-open')); });
+      // a tap on any menu item closes the sheet
+      pill.addEventListener('click', function (e) { if (e.target.closest('a')) set(false); });
+      document.addEventListener('keydown', function (e) { if (e.key === 'Escape') set(false); });
+    })();
+  </script>
 <?php
 }
 

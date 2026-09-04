@@ -5,7 +5,11 @@
 @layer base {
   :root { --edge: clamp(20px, 5vw, 72px); }
 
-  html { -webkit-text-size-adjust: 100%; color-scheme: dark; }
+  /* clip horizontal overflow on the root scroller too — decorative bits (the
+     rotating seal, the hero smoke) sit partly off-canvas, and without this the
+     mobile layout viewport widens to fit them and the whole page zooms out.
+     `clip` (not `hidden`) keeps the sticky work reel working. */
+  html { -webkit-text-size-adjust: 100%; color-scheme: dark; overflow-x: clip; }
   body {
     @apply bg-ink text-chalk font-sans antialiased;
     overflow-x: hidden;
@@ -526,9 +530,25 @@
   view-transition-name: nav;
 }
 .nav-in {
+  position: relative;
   max-width: 1680px; margin-inline: auto;
   display: flex; align-items: center; justify-content: space-between; gap: 1rem;
 }
+
+/* hamburger — mobile only */
+.nav-burger {
+  display: none; pointer-events: auto;
+  width: 44px; height: 40px; padding: 0; cursor: pointer;
+  border-radius: 999px; border: 1px solid #2A2A2A; background: rgba(18,18,18,.72);
+  -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px);
+  flex-direction: column; align-items: center; justify-content: center; gap: 5px;
+}
+.nav-burger span {
+  display: block; width: 18px; height: 2px; border-radius: 2px; background: #EDEAE6;
+  transition: transform .3s ease, opacity .2s ease;
+}
+.nav.nav-open .nav-burger span:nth-child(1) { transform: translateY(3.5px) rotate(45deg); }
+.nav.nav-open .nav-burger span:nth-child(2) { transform: translateY(-3.5px) rotate(-45deg); }
 
 .nav-mark {
   pointer-events: auto;
@@ -592,11 +612,27 @@
 }
 .nav-cta:hover { transform: translateY(-1px); background: #FF9142; color: #0A0A0A; }
 
-@media (max-width: 600px) {
-  .nav-mark span:last-child { display: none; }
-  .nav-link { padding: .5rem .6rem; }
+/* ---- mobile nav: collapse the pill into a tap-to-open sheet ---- */
+@media (max-width: 760px) {
+  .nav-burger { display: inline-flex; }
   .nav-num { display: none; }
-  .nav-cta { padding: .6rem .9rem; }
+  .nav-pill {
+    position: absolute; top: calc(100% + 10px); right: 0;
+    flex-direction: column; align-items: stretch; gap: .15rem;
+    padding: .5rem; min-width: min(72vw, 260px);
+    background: rgba(14,14,14,.94);
+    box-shadow: 0 26px 60px -30px rgba(0,0,0,.9);
+    opacity: 0; transform: translateY(-8px) scale(.98); transform-origin: top right;
+    pointer-events: none; visibility: hidden;
+    transition: opacity .28s ease, transform .28s cubic-bezier(.22,.8,.28,1), visibility .28s;
+  }
+  .nav.nav-open .nav-pill { opacity: 1; transform: none; pointer-events: auto; visibility: visible; }
+  .nav-link { justify-content: flex-start; padding: .8rem 1rem; letter-spacing: .16em; }
+  .nav-link::before { display: none; }
+  .nav-cta { margin-left: 0; margin-top: .35rem; justify-content: center; padding: .85rem 1rem; }
+}
+@media (max-width: 400px) {
+  .nav-mark span:last-child { display: none; }
 }
 
 /* ---- the way in ----
