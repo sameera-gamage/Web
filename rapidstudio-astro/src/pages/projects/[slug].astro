@@ -1,0 +1,105 @@
+---
+import Base from '../../layouts/Base.astro';
+import Nav from '../../components/Nav.astro';
+import { projects, neighbours } from '../../data/projects.js';
+
+export function getStaticPaths() {
+  return projects.map((p) => ({ params: { slug: p.slug }, props: { p } }));
+}
+const { p } = Astro.props;
+const { prev, next } = neighbours(p.slug);
+---
+<Base
+  title={`${p.client} — RapidStudio`}
+  description={p.brief}
+>
+  <Nav here="projects" />
+
+  <main id="main" class="case">
+    <!--
+      The picture arrives from the list. It carries the same
+      view-transition-name, so the browser morphs the one you clicked into this
+      one rather than cross-fading two pages — it grows and settles into the
+      column, and the writing arrives around it.
+    -->
+    <div class="case-grid">
+      <div class="case-media">
+        <figure class="case-plate">
+          <img src={p.cover} alt={`${p.client}, ${p.title}`}
+               transition:name={`shot-${p.slug}`} decoding="async" />
+        </figure>
+      </div>
+
+      <div class="case-read">
+        <p class="case-eyebrow"><em>{p.n}</em><span>{p.disciplines.join(' · ')}</span><span>{p.year}</span></p>
+        <h1 class="case-h1" transition:name={`title-${p.slug}`}>{p.client}</h1>
+        <p class="case-line">{p.title} — {p.line}</p>
+
+        <div class="case-block">
+          <p class="case-k">The brief</p>
+          <p class="case-p">{p.brief}</p>
+        </div>
+
+        <div class="case-block">
+          <p class="case-k">What we did</p>
+          <ul class="case-list">{p.did.map((d) => <li>{d}</li>)}</ul>
+        </div>
+
+        <div class="case-block">
+          <p class="case-k">Where it landed</p>
+          <dl class="case-result">
+            {p.result.map(([n, l]) => <div><dt>{n}</dt><dd>{l}</dd></div>)}
+          </dl>
+        </div>
+
+        <a href="mailto:info@rapidsolutions.live" class="case-cta">Start a brief like this</a>
+      </div>
+    </div>
+
+    <!-- the rest of the shoot, stacked under the fold -->
+    <section class="case-roll" aria-label="More from this project">
+      {p.media.slice(1).map((m, i) => (
+        <figure class="case-frame rv">
+          {m.type === 'video' ? (
+            <video src={m.src} poster={m.poster} muted loop playsinline preload="none"></video>
+          ) : (
+            <img src={m.src} alt={m.cap} loading="lazy" decoding="async" />
+          )}
+          <figcaption><em>{String(i + 2).padStart(2, '0')}</em>{m.cap}</figcaption>
+        </figure>
+      ))}
+    </section>
+
+    <nav class="case-step" aria-label="Other projects">
+      <a href={`/projects/${prev.slug}`} class="step step-prev">
+        <span class="step-k">Previous</span>
+        <span class="step-t">{prev.client}</span>
+      </a>
+      <a href="/projects" class="step-all">All work</a>
+      <a href={`/projects/${next.slug}`} class="step step-next">
+        <span class="step-k">Next</span>
+        <span class="step-t">{next.client}</span>
+      </a>
+    </nav>
+  </main>
+
+  <script>
+    const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const show = () => document.querySelectorAll('.rv').forEach((el) => el.classList.add('shown'));
+    if (reduced) show();
+    else {
+      const io = new IntersectionObserver((es) => {
+        es.forEach((e) => { if (e.isIntersecting) { e.target.classList.add('shown'); io.unobserve(e.target); } });
+      }, { rootMargin: '0px 0px -12% 0px' });
+      document.querySelectorAll('.rv').forEach((el) => io.observe(el));
+      // clips only run while they are on screen
+      const vio = new IntersectionObserver((es) => {
+        es.forEach((e) => {
+          const v = e.target;
+          if (e.isIntersecting) { v.preload = 'auto'; v.play().catch(() => {}); } else v.pause();
+        });
+      }, { threshold: 0.25 });
+      document.querySelectorAll('.case-frame video').forEach((v) => vio.observe(v));
+    }
+  </script>
+</Base>

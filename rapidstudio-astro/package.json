@@ -1,0 +1,22 @@
+{
+  "name": "rapidstudio",
+  "type": "module",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "serve": "node scripts/serve.mjs"
+  },
+  "dependencies": {
+    "@astrojs/tailwind": "^5.1.4",
+    "astro": "^4.16.18",
+    "gsap": "^3.12.5",
+    "lenis": "^1.1.18",
+    "tailwindcss": "^3.4.17"
+  },
+  "devDependencies": {
+    "esbuild": "^0.28.2"
+  }
+}

@@ -1,0 +1,386 @@
+<?php
+declare(strict_types=1);
+require_once __DIR__ . '/inc/db.php';
+require_once __DIR__ . '/inc/layout.php';
+require_once __DIR__ . '/inc/auth.php';
+
+// start the session before any HTML is sent, so the form's CSRF token can be
+// issued without "headers already sent" warnings
+session_boot();
+
+$projects = all_projects();
+$count = count($projects);
+// the home reel shows at most five; the rest live on the full work page
+$FEATURED = 5;
+$featured = array_slice($projects, 0, $FEATURED);
+$fcount = count($featured);
+$more = $count > $FEATURED;
+$trades = ['Search', 'Paid media', 'Social', 'Brand', 'Film', 'Photography'];
+
+// what the aperture opens onto, and everything below it, lives on this one page
+$services = [
+    ['k' => 'Search',      't' => 'SEO & content that earns the click',        'd' => 'Technical fixes, pages worth ranking, and the writing to back them. We chase demand that already exists before we try to make more.'],
+    ['k' => 'Paid media',  't' => 'Ads that pay for themselves',                'd' => 'Google, Meta, TikTok. Built around a number you care about — a sale, a lead, a booking — not impressions nobody counts.'],
+    ['k' => 'Social',      't' => 'A feed people actually follow',              'd' => 'Planned, shot and posted in-house. One voice across every channel, so the brand sounds like one company, not five freelancers.'],
+    ['k' => 'Brand',       't' => 'Identity that holds up everywhere',         'd' => 'Logo, type, colour and the rules that keep them consistent — from a business card to a billboard to the app icon.'],
+    ['k' => 'Film',        't' => 'Video from script to final cut',            'd' => 'Concept, shoot and edit under one roof. Adverts, explainers, event films — delivered in every crop each platform wants.'],
+    ['k' => 'Photography', 't' => 'Stills that sell the thing',                'd' => 'Product, people and place. Lit and retouched so the picture does the work long before the caption has to.'],
+];
+
+$faqs = [
+    ['q' => 'Who owns the accounts and files when it’s over?',
+     'a' => 'You do — every one. Ad accounts, analytics, source files, raw footage: all in your name from day one. Walk away whenever you like and nothing leaves with us.'],
+    ['q' => 'Do you report on money, or on vanity numbers?',
+     'a' => 'Money. Reach and likes get a line at the bottom; the top of every report is leads, calls and revenue. If a channel isn’t paying its way, we say so and cut it.'],
+    ['q' => 'Do you use AI to make our work?',
+     'a' => 'As a tool, never as the author. It speeds up drafts and rough edits behind the scenes — a person still writes the words, shoots the film and signs it off. Nothing ships that we wouldn’t put our own name on.'],
+    ['q' => 'What if the first thing you make doesn’t land?',
+     'a' => 'We rework it. The first cut is a starting point, not a bill you’re stuck with — a revision is built into everything, and if a direction is plainly wrong we start over rather than defend it.'],
+    ['q' => 'We already have someone in-house — is that a problem?',
+     'a' => 'The opposite. We slot in around your marketer as the trades they can’t cover, hand work back cleanly, and make them look good. We’re here to add a room, not take a job.'],
+    ['q' => 'Is there anything you won’t do?',
+     'a' => 'Buy followers, run a channel we can’t measure, or tie you into a contract to keep you. If something isn’t right for your business we’ll talk you out of it — even when it’s work we’d be paid for.'],
+];
+
+$sent = ($_GET['sent'] ?? '') === '1';
+$err  = ($_GET['err'] ?? '') === '1';
+
+head_open(
+  'RapidStudio, an independent studio for search, media, film and stills',
+  'An independent studio running search, paid media, social, brand, film and photography for businesses that would rather hire one team than five.',
+  'index');
+?>
+<!--
+  ══ loader ══
+  The hero is a megabyte and a half of film. Without this the page shows a
+  poster, then jumps when the clip takes over, and nothing tells you it is
+  working. It holds on the wordmark with a real progress read and clears only
+  once the footage can actually be scrubbed.
+-->
+<div id="boot" class="boot">
+  <div class="boot-in">
+    <span class="boot-mark">Rapid<span class="text-flame">&bull;</span>Studio</span>
+    <span class="boot-iris" aria-hidden="true"><i id="boot-fill"></i></span>
+    <span class="boot-read"><em id="boot-pct">0</em>%<span class="boot-what" id="boot-what">loading the film</span></span>
+  </div>
+</div>
+
+<main id="main">
+  <!-- ══ the rig ══ -->
+  <section id="top" class="relative" style="height:300vh">
+    <div id="hero-bed" class="hero-bed" aria-hidden="true"></div>
+    <div id="hero-mat" class="hero-mat" aria-hidden="true"></div>
+    <div id="hero-frame" class="hero-frame bg-ink">
+      <div class="hero-stage absolute inset-0">
+        <video id="cam" class="hero-vid h-full w-full"
+               poster="<?= e(url('/assets/media/hero-poster.jpg')) ?>"
+               preload="none" muted playsinline disablepictureinpicture aria-hidden="true">
+          <source data-src="<?= e(url('/assets/media/hero-camera-720.webm')) ?>" type="video/webm">
+          <source data-src="<?= e(url('/assets/media/hero-camera-720.mp4')) ?>" type="video/mp4">
+        </video>
+      </div>
+
+      <div id="hero-smoke" class="hero-smoke pointer-events-none absolute inset-0">
+        <span class="smoke smoke-warm"></span>
+        <span class="smoke smoke-cool"></span>
+      </div>
+
+      <div class="pointer-events-none absolute inset-0 hero-vig"></div>
+      <div id="hero-scrim" class="hero-scrim pointer-events-none absolute inset-0"></div>
+      <div id="hero-well" class="hero-well pointer-events-none absolute inset-0 opacity-0"></div>
+
+      <div id="hero-a" class="hero-copy">
+        <div class="hero-copy-in">
+          <p class="label">Est. 2019 · Independent</p>
+          <h1 class="hero-h1">
+            <span class="block overflow-hidden"><span class="ln inline-block">Six trades.</span></span>
+            <span class="block overflow-hidden"><span class="ln inline-block text-flame">One room.</span></span>
+          </h1>
+          <p class="hero-sub">
+            Search, paid media, social, brand, film and stills. Run by the same
+            people, in the same building, on the same plan.
+          </p>
+        </div>
+      </div>
+
+      <div id="hero-m" class="hero-mid opacity-0">
+        <ul class="hero-trades">
+          <?php foreach ($trades as $i => $t): ?>
+            <li><span class="text-flame"><?= str_pad((string) ($i + 1), 2, '0', STR_PAD_LEFT) ?></span><?= e($t) ?></li>
+          <?php endforeach; ?>
+        </ul>
+      </div>
+
+      <div id="hero-b" class="hero-land opacity-0">
+        <div class="hero-land-in">
+          <p class="label">Now look properly</p>
+          <p class="hero-land-h">This is what we&nbsp;made.</p>
+        </div>
+      </div>
+
+      <div id="scroll-cue" class="hero-cue">
+        <span class="label">Scroll</span><span class="hero-cue-bar"></span>
+      </div>
+    </div>
+  </section>
+
+  <!--
+    ══ the reveal target ══
+    The hero's aperture opens onto this. It is pulled up under the hero card
+    (.gate-under) and covered until the hole is punched, so it must sit first.
+  -->
+  <section id="gate" class="gate gate-under">
+    <!-- cursor-lit glow over the constellation; canvas is injected behind this -->
+    <div class="gate-glow" aria-hidden="true"></div>
+
+    <div class="gate-say">
+      <span class="gate-edge" aria-hidden="true">Est. 2019 — Independent studio</span>
+      <span class="gate-ghost" aria-hidden="true"><?= str_pad((string) $count, 2, '0', STR_PAD_LEFT) ?></span>
+
+      <div class="gate-head">
+        <p class="gate-k"><span class="gate-k-dot"></span>Selected work — <?= str_pad((string) $count, 2, '0', STR_PAD_LEFT) ?> projects</p>
+        <h2 class="gate-h"><span>This is what</span><span>we made.</span></h2>
+        <p class="gate-p">
+          A handful of jobs, start to finish, with the numbers attached. Scroll
+          to move through them one at a time.
+        </p>
+      </div>
+
+      <!-- unique smooth-scrolling band that fills the open space -->
+      <div class="gate-marquee" aria-hidden="true">
+        <div class="gate-marquee-row">
+          <?php for ($r = 0; $r < 2; $r++): foreach ($trades as $t): ?>
+            <span class="gm-word"><?= e($t) ?></span><span class="gm-dot">&bull;</span>
+          <?php endforeach; endfor; ?>
+        </div>
+      </div>
+
+      <!-- rotating seal that also drives the page down into the work -->
+      <a href="#work" class="seal" aria-label="Scroll to the work">
+        <svg class="seal-ring" viewBox="0 0 120 120" aria-hidden="true">
+          <defs>
+            <path id="sealpath" d="M60,60 m-42,0 a42,42 0 1,1 84,0 a42,42 0 1,1 -84,0"></path>
+          </defs>
+          <text><textPath href="#sealpath" xlink:href="#sealpath">
+            Scroll to explore &bull; the selected work &bull;
+          </textPath></text>
+        </svg>
+        <span class="seal-core" aria-hidden="true">
+          <span class="seal-arrow">&darr;</span>
+        </span>
+      </a>
+    </div>
+  </section>
+
+  <?php if ($fcount): ?>
+  <!-- ══ the work — a vertical reel: title over the picture, meta beneath ══ -->
+  <section id="work" class="anchor"></section>
+  <section id="stack" class="reel-wrap">
+    <div class="reel-rail" id="reel-rail">
+      <?php foreach ($featured as $i => $p): ?>
+        <button class="reel-tick" data-tick="<?= $i ?>" aria-label="Go to <?= e($p['client']) ?>">
+          <span class="reel-tick-n"><?= str_pad((string) ($i + 1), 2, '0', STR_PAD_LEFT) ?></span>
+          <span class="reel-tick-bar" aria-hidden="true"></span>
+        </button>
+      <?php endforeach; ?>
+    </div>
+
+    <div class="reel" id="reel">
+      <div class="reel-stage" id="reel-stage">
+      <?php foreach ($featured as $i => $p):
+        $num  = sprintf('00.%02d', $i + 1);
+        $disc = strtoupper(implode(' + ', array_filter(array_map('trim', explode(',', (string) $p['disciplines'])))));
+        $href = url('/projects/' . $p['slug']);
+      ?>
+        <article class="reel-item" data-reel="<?= $i ?>"
+                 data-name="<?= e($p['client']) ?>" data-href="<?= e($href) ?>">
+          <div class="reel-card">
+            <div class="reel-frame">
+              <span class="reel-idx"><span class="reel-idx-line"></span><?= $num ?></span>
+              <a class="reel-shot" href="<?= e($href) ?>" aria-label="Open <?= e($p['client']) ?>">
+                <img class="reel-img" src="<?= e(url($p['cover'])) ?>"
+                     alt="<?= e($p['client'] . ', ' . $p['title']) ?>"
+                     <?= $i < 2 ? '' : 'loading="lazy"' ?> decoding="async">
+                <span class="reel-shade" aria-hidden="true"></span>
+              </a>
+              <a class="reel-headline" href="<?= e($href) ?>"><?= e($p['client']) ?></a>
+            </div>
+            <div class="reel-meta">
+              <div class="reel-meta-col">
+                <span><?= e($p['title'] ?: $p['client']) ?></span>
+                <?php if (trim((string) $p['line']) !== ''): ?><span class="dim"><?= e($p['line']) ?></span><?php endif; ?>
+              </div>
+              <div class="reel-meta-col reel-meta-r">
+                <span><?= e($disc !== '' ? $disc : 'ART DIRECTION + DESIGN') ?></span>
+                <span class="dim"><?= e($p['year']) ?></span>
+              </div>
+            </div>
+          </div>
+        </article>
+      <?php endforeach; ?>
+
+        <!-- the ONE fixed caption: held in place over the pile, its text rolled
+             out (down) and the next rolled in (up) as the active project changes.
+             It lives inside the pinned stage, so it holds its spot while the
+             cards slide and scrolls away cleanly when the reel ends. -->
+        <div class="reel-capwrap" aria-hidden="true">
+          <a class="reel-caption" id="reel-caption" href="#">
+            <span class="reel-caption-mask"><span class="reel-caption-line" id="reel-caption-line"></span></span>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <?php if ($more): ?>
+      <div class="work-more">
+        <a href="<?= e(url('/projects')) ?>" class="work-more-btn">
+          <span>View all <?= $count ?> projects</span>
+          <span class="work-more-x" aria-hidden="true">&rarr;</span>
+        </a>
+      </div>
+    <?php endif; ?>
+  </section>
+  <?php endif; ?>
+
+  <!-- ══ what we do all day ══ -->
+  <section id="do" class="sec sec-do reveal-sec">
+    <div class="sec-in">
+      <header class="sec-head">
+        <p class="sec-k">What we do all day</p>
+        <h2 class="sec-h">Six trades, and the<br>reason they sit together.</h2>
+        <p class="sec-lead">
+          Hire six agencies and you spend half your week keeping them in step.
+          Hire one room and the strategy, the words, the pictures and the media
+          buy already agree — because the people making them share a wall.
+        </p>
+      </header>
+
+      <!-- six trades, one room. Each panel is a wall; open one and the others
+           step aside. -->
+      <div class="rooms" id="rooms">
+        <?php foreach ($services as $i => $s): $n = str_pad((string) ($i + 1), 2, '0', STR_PAD_LEFT); ?>
+          <article class="room<?= $i === 0 ? ' is-open' : '' ?>" data-room="<?= $i ?>" tabindex="0">
+            <span class="room-num"><?= $n ?></span>
+            <span class="room-spine" aria-hidden="true"><?= e($s['k']) ?></span>
+            <div class="room-body">
+              <h3 class="room-k"><?= e($s['k']) ?></h3>
+              <p class="room-t"><?= e($s['t']) ?></p>
+              <p class="room-d"><?= e($s['d']) ?></p>
+              <span class="room-ghost" aria-hidden="true"><?= $n ?></span>
+            </div>
+          </article>
+        <?php endforeach; ?>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ straight answers — an interactive index: pick a question on the left,
+       the answer opens large on the right ══ -->
+  <section id="answers" class="sec sec-faq reveal-sec">
+    <div class="sec-in">
+      <?php $ftot = sprintf('%02d', count($faqs)); ?>
+      <header class="sec-head faq-head">
+        <p class="sec-k">Straight answers</p>
+        <h2 class="sec-h">The things you were about&nbsp;to&nbsp;email&nbsp;us.</h2>
+        <p class="sec-lead">No sales dance. Point at a question.</p>
+      </header>
+
+      <div class="qa" id="qa">
+        <div class="qa-list" role="tablist" aria-label="Questions">
+          <?php foreach ($faqs as $i => $f): ?>
+            <button class="qa-tab" type="button" role="tab" data-i="<?= $i ?>"
+                    id="qa-tab-<?= $i ?>" aria-controls="qa-panel-<?= $i ?>">
+              <span class="qa-n"><?= sprintf('%02d', $i + 1) ?></span>
+              <span class="qa-q"><?= e($f['q']) ?></span>
+              <span class="qa-go" aria-hidden="true">&rarr;</span>
+            </button>
+          <?php endforeach; ?>
+        </div>
+
+        <div class="qa-stage">
+          <?php foreach ($faqs as $i => $f): ?>
+            <article class="qa-panel" id="qa-panel-<?= $i ?>" role="tabpanel"
+                     aria-labelledby="qa-tab-<?= $i ?>" data-i="<?= $i ?>">
+              <span class="qa-count"><?= sprintf('%02d', $i + 1) ?><span class="dim"> / <?= $ftot ?></span></span>
+              <h3 class="qa-panel-q"><?= e($f['q']) ?></h3>
+              <p class="qa-panel-a"><?= e($f['a']) ?></p>
+            </article>
+          <?php endforeach; ?>
+          <a class="qa-more" href="<?= e(url('/#say')) ?>">Still wondering? <span>Ask us straight &rarr;</span></a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ let's connect — the form unfolds from the button ══ -->
+  <section id="say" class="sec sec-say">
+    <div class="connect<?= ($sent || $err) ? ' is-open' : '' ?>" id="connect">
+      <!-- resting face -->
+      <div class="connect-face">
+        <p class="connect-k">Got a project in mind?</p>
+        <h2 class="connect-h">Let&rsquo;s connect</h2>
+        <button type="button" class="connect-btn" id="connect-open" aria-label="Write a message">
+          <span>Write a<br>message</span>
+        </button>
+      </div>
+
+      <!-- the brief, written as a short note rather than a stack of fields -->
+      <form class="connect-form note" method="post" action="<?= e(url('/contact.php')) ?>">
+        <?= csrf_field() ?>
+        <div class="note-top">
+          <button type="button" class="connect-close" id="connect-close" aria-label="Close">&larr; back</button>
+          <span class="note-eyebrow">New brief</span>
+        </div>
+
+        <?php if ($sent): ?>
+          <p class="say-note say-ok">Got it — thanks. We&rsquo;ll be in touch within a working day.</p>
+        <?php elseif ($err): ?>
+          <p class="say-note say-bad">Please add your name, a valid email and a short message.</p>
+        <?php endif; ?>
+
+        <div class="say-hp" aria-hidden="true">
+          <label>Website <input type="text" name="website" tabindex="-1" autocomplete="off"></label>
+        </div>
+
+        <div class="note-body">
+          <p class="note-line">Hi RapidStudio, I&rsquo;m
+            <input class="note-in" name="name" required autocomplete="name" placeholder="your name">
+            &mdash; reach me at
+            <input class="note-in note-in-wide" type="email" name="email" required autocomplete="email" placeholder="you@company.com">.</p>
+
+          <p class="note-line note-chips-line">I&rsquo;m after&nbsp;
+            <span class="note-chips">
+              <?php foreach ($trades as $t): ?>
+                <label class="chip">
+                  <input type="checkbox" name="services[]" value="<?= e($t) ?>">
+                  <span><?= e($t) ?></span>
+                </label>
+              <?php endforeach; ?>
+            </span>
+          </p>
+
+          <p class="note-line note-line-msg">Here&rsquo;s the gist &mdash;</p>
+          <textarea class="note-area" name="message" rows="3" required
+                    placeholder="A line or two about the project, the goal, and when you'd like it live."></textarea>
+        </div>
+
+        <div class="note-send-row">
+          <button type="submit" class="say-send"><span>Send the brief</span><span class="say-arrow" aria-hidden="true">&rarr;</span></button>
+          <span class="note-reassure">A real person reads this &mdash; reply within a working day.</span>
+        </div>
+      </form>
+
+      <!-- social bar — this doubles as the page footer -->
+      <footer class="connect-foot">
+        <a class="connect-mail" href="mailto:info@rapidsolutions.live">info@rapidsolutions.live</a>
+        <div class="connect-social">
+          <a href="#" rel="noopener">Instagram</a>
+          <a href="#" rel="noopener">LinkedIn</a>
+          <a href="mailto:info@rapidsolutions.live">Email</a>
+        </div>
+        <p class="connect-copy">&copy; <?= date('Y') ?> RapidStudio &bull; Built in-house</p>
+      </footer>
+    </div>
+  </section>
+</main>
+<?php foot_close('home.js'); ?>
