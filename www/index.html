@@ -43,6 +43,28 @@
     --shadow:0 1px 2px rgba(16,24,40,.04), 0 2px 6px rgba(16,24,40,.05);
     --sidebar-w:230px;
   }
+  [data-theme="dark"]{
+    --bg:#0f131a;
+    --surface:#1a1f29;
+    --surface-2:#151b24;
+    --border:#2a3140;
+    --text:#e6e9f0;
+    --text-dim:#9aa4b5;
+    --text-faint:#6b7688;
+    --primary:#6d86ff;
+    --primary-dim:#232b45;
+    --primary-dark:#8398ff;
+    --success:#2bb583;
+    --success-dim:#12331f;
+    --danger:#f06a6a;
+    --danger-dim:#3a1f22;
+    --warning:#e0a637;
+    --warning-dim:#3a2f16;
+    --shadow:0 1px 2px rgba(0,0,0,.3), 0 2px 6px rgba(0,0,0,.35);
+  }
+  [data-theme="dark"] .topbar{ background:rgba(15,19,26,.9); }
+  [data-theme="dark"] .toast{ background:#2a3140; color:#fff; }
+  [data-theme="dark"] .banner{ background:var(--warning-dim); border-color:#5a4a1e; color:#e6c877; }
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;}
   body{
@@ -206,6 +228,26 @@
   .empty-state{
     text-align:center;padding:30px 10px;color:var(--text-faint);font-size:13px;
   }
+
+  /* ---------- Global search ---------- */
+  .search-box{position:relative;}
+  .search-box input{width:170px;}
+  @media(max-width:600px){.search-box input{width:120px;}}
+  .search-results{
+    position:absolute;top:calc(100% + 6px);right:0;width:300px;max-width:80vw;
+    background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
+    box-shadow:0 6px 20px rgba(0,0,0,.15);z-index:30;max-height:340px;overflow-y:auto;padding:6px;
+  }
+  .search-results .sr-item{
+    display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:var(--radius-sm);cursor:pointer;
+  }
+  .search-results .sr-item:hover{background:var(--surface-2);}
+  .search-results .sr-type{
+    font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;
+    color:var(--text-faint);flex-shrink:0;width:64px;
+  }
+  .search-results .sr-text{font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .search-results .sr-empty{padding:12px;color:var(--text-faint);font-size:12.5px;text-align:center;}
 
   .toast-wrap{
     position:fixed;bottom:20px;right:20px;z-index:100;
@@ -389,7 +431,12 @@
           <div class="sub" id="topSub"></div>
         </div>
       </div>
-      <div style="display:flex;gap:8px;">
+      <div style="display:flex;gap:8px;align-items:center;">
+        <div class="search-box">
+          <input type="text" id="globalSearch" placeholder="Search…" autocomplete="off">
+          <div class="search-results" id="searchResults" hidden></div>
+        </div>
+        <button class="btn btn-icon" id="themeBtn" title="Toggle dark mode" aria-label="Toggle dark mode">🌙</button>
         <button class="btn" id="exportQuickBtn">Export data</button>
       </div>
     </header>
@@ -1611,6 +1658,10 @@ function renderAnalytics(){
     });
     return;
   }
+  // Tint chart text/gridlines to match the current theme.
+  const cs = getComputedStyle(document.body);
+  Chart.defaults.color = (cs.getPropertyValue('--text-dim') || '#6b7280').trim();
+  Chart.defaults.borderColor = (cs.getPropertyValue('--border') || '#e3e6ee').trim();
   const t = todayISO();
 
   // Tasks completed last 14 days
@@ -1709,6 +1760,77 @@ document.getElementById('resetBtn').addEventListener('click', ()=>{
     renderAll();
   }
 });
+
+/* ===================== Theme (dark mode) ===================== */
+const THEME_KEY = 'timeflow_theme';
+function applyTheme(theme){
+  document.documentElement.setAttribute('data-theme', theme);
+  document.getElementById('themeBtn').textContent = theme==='dark' ? '☀️' : '🌙';
+}
+function initTheme(){
+  let saved = null;
+  try{ saved = localStorage.getItem(THEME_KEY); }catch(e){}
+  const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+  applyTheme(saved || (prefersDark ? 'dark' : 'light'));
+}
+document.getElementById('themeBtn').addEventListener('click', ()=>{
+  const next = document.documentElement.getAttribute('data-theme')==='dark' ? 'light' : 'dark';
+  applyTheme(next);
+  try{ localStorage.setItem(THEME_KEY, next); }catch(e){}
+  if(currentView==='analytics') renderAnalytics(); // re-tint chart text/grid
+});
+initTheme();
+
+/* ===================== Global search ===================== */
+const searchInput = document.getElementById('globalSearch');
+const searchResultsEl = document.getElementById('searchResults');
+function runSearch(){
+  const q = searchInput.value.trim().toLowerCase();
+  if(!q){ searchResultsEl.hidden = true; searchResultsEl.innerHTML=''; return; }
+  const hits = [];
+  const add = (type,label,view)=>hits.push({type,label,view});
+  state.tasks.forEach(t=>{ if((t.title+' '+(t.notes||'')).toLowerCase().includes(q)) add('Task', t.title, 'tasks'); });
+  state.appointments.forEach(a=>{ if((a.title+' '+(a.location||'')).toLowerCase().includes(q)) add('Appt', a.title, 'appointments'); });
+  state.reminders.forEach(r=>{ if(r.text.toLowerCase().includes(q)) add('Reminder', r.text, 'notes'); });
+  state.notes.forEach(n=>{ if(n.text.toLowerCase().includes(q)) add('Note', n.text, 'notes'); });
+  state.goals.forEach(g=>{ if(g.title.toLowerCase().includes(q)) add('Goal', g.title, 'habits'); });
+  state.habits.forEach(h=>{ if(h.name.toLowerCase().includes(q)) add('Habit', h.name, 'habits'); });
+  state.blocks.forEach(b=>{ if(b.label.toLowerCase().includes(q)) add('Block', b.label, 'schedule'); });
+  searchResultsEl.hidden = false;
+  if(hits.length===0){ searchResultsEl.innerHTML = '<div class="sr-empty">No matches</div>'; return; }
+  searchResultsEl.innerHTML = hits.slice(0,10).map(h=>`
+    <div class="sr-item" data-view="${h.view}">
+      <span class="sr-type">${h.type}</span>
+      <span class="sr-text">${escapeHtml(h.label)}</span>
+    </div>`).join('');
+  searchResultsEl.querySelectorAll('.sr-item').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      switchView(el.dataset.view);
+      searchInput.value=''; searchResultsEl.hidden = true; searchResultsEl.innerHTML='';
+    });
+  });
+}
+searchInput.addEventListener('input', runSearch);
+searchInput.addEventListener('focus', runSearch);
+searchInput.addEventListener('keydown', e=>{ if(e.key==='Escape'){ searchInput.value=''; searchResultsEl.hidden = true; } });
+document.addEventListener('click', e=>{ if(!e.target.closest('.search-box')) searchResultsEl.hidden = true; });
+
+/* ===================== Reminder alerts (while the app is open) ===================== */
+const alertedReminders = new Set();
+// Mark already-overdue reminders as seen so opening the app doesn't spam old ones.
+state.reminders.forEach(r=>{ if(r.done || isPastDateTime(r.date, r.time)) alertedReminders.add(r.id); });
+function checkDueReminders(){
+  state.reminders.forEach(r=>{
+    if(r.done || alertedReminders.has(r.id)) return;
+    if(isPastDateTime(r.date, r.time)){
+      alertedReminders.add(r.id);
+      toast('⏰ Reminder: ' + r.text);
+      beep();
+    }
+  });
+  updateBadges();
+}
+setInterval(checkDueReminders, 30000);
 
 /* ===================== Init ===================== */
 document.getElementById('taskDue').value = todayISO();
