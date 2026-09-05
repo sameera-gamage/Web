@@ -13,5 +13,8 @@ xcuserdata/
 # macOS
 .DS_Store
 
+# Generated deploy bundle (rebuild with: cd www && zip -r ../timeflow-web.zip .)
+timeflow-web.zip
+
 # Logs
 npm-debug.log*
