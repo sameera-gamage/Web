@@ -1,0 +1,17 @@
+# Dependencies
+node_modules/
+
+# Capacitor native project — generated on your Mac with `npx cap add ios`.
+# Xcode build output and CocoaPods artifacts should not be committed.
+/ios/App/Pods/
+/ios/App/build/
+/ios/App/App/public/
+DerivedData/
+*.xcuserstate
+xcuserdata/
+
+# macOS
+.DS_Store
+
+# Logs
+npm-debug.log*

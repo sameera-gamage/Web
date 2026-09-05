@@ -1,0 +1,9 @@
+{
+  "appId": "live.rapidsolutions.timeflow",
+  "appName": "TimeFlow",
+  "webDir": "www",
+  "ios": {
+    "contentInset": "always"
+  },
+  "backgroundColor": "#f5f6fa"
+}

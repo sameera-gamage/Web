@@ -1,0 +1,21 @@
+{
+  "name": "timeflow",
+  "version": "1.0.0",
+  "private": true,
+  "description": "TimeFlow — personal time manager, packaged as a native iOS app with Capacitor.",
+  "scripts": {
+    "copy:chart": "node scripts/copy-chart.js",
+    "postinstall": "node scripts/copy-chart.js",
+    "sync": "cap sync",
+    "ios": "cap open ios"
+  },
+  "dependencies": {
+    "@capacitor/app": "^6.0.0",
+    "@capacitor/core": "^6.1.2",
+    "@capacitor/ios": "^6.1.2",
+    "chart.js": "3.9.1"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^6.1.2"
+  }
+}
