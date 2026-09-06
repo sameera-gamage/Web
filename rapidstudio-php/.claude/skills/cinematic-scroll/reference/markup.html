@@ -1,0 +1,81 @@
+<!--
+  markup.html — the structure the reference JS modules bind to (by id/class).
+  Copy this skeleton and fill it with your content/loop. IDs marked * are read
+  by the JS and must match.
+-->
+
+<!-- NAV (shared on every page). The inline script gives every page the mobile
+     sheet without touching the JS bundles. -->
+<header class="nav" id="nav">                                <!-- * -->
+  <a href="/" class="nav-mark">Brand</a>
+  <button class="nav-burger" id="nav-burger" type="button"    <!-- * -->
+          aria-label="Menu" aria-expanded="false" aria-controls="nav-pill"><span></span><span></span></button>
+  <nav class="nav-pill" id="nav-pill">                        <!-- * -->
+    <a href="/">Home</a><a href="/#work">Work</a><a href="/#say">Contact</a>
+  </nav>
+</header>
+<script>
+(function(){var n=document.getElementById('nav'),b=document.getElementById('nav-burger'),p=document.getElementById('nav-pill');
+if(!n||!b||!p)return;function s(o){n.classList.toggle('nav-open',o);b.setAttribute('aria-expanded',o?'true':'false');}
+b.addEventListener('click',function(){s(!n.classList.contains('nav-open'));});
+p.addEventListener('click',function(e){if(e.target.closest('a'))s(false);});
+document.addEventListener('keydown',function(e){if(e.key==='Escape')s(false);});})();
+</script>
+
+<main id="main">
+
+  <!-- HERO: 300vh pinned stage; the video is scrubbed by scroll -->
+  <section id="top">                                          <!-- * -->
+    <div id="hero-bed" class="hero-bed"></div>                <!-- * (ink behind card) -->
+    <div id="hero-mat" class="hero-mat"></div>                <!-- * (inset frame) -->
+    <div id="hero-frame" class="hero-frame">                  <!-- * -->
+      <video id="cam" class="hero-vid"                        <!-- * -->
+             poster="/media/hero-poster.jpg" preload="none" muted playsinline
+             disablepictureinpicture aria-hidden="true">
+        <source data-src="/media/hero-720.webm" type="video/webm"> <!-- data-src: rig sets real src, picks 480 on small screens -->
+        <source data-src="/media/hero-720.mp4"  type="video/mp4">
+      </video>
+      <!-- overlays the hero controller fades via paintCopy(): give them ids and
+           map them inside hero.js — e.g. #hero-a (opening copy), #hero-scrim,
+           #hero-smoke, #hero-well, #scroll-cue -->
+      <div id="hero-a" class="hero-copy"><h1><span class="ln">Line one</span><span class="ln">Line two</span></h1></div>
+      <span id="scroll-cue">Scroll</span>
+    </div>
+  </section>
+
+  <!-- optional loader; hero.js clears #boot when the clip can scrub -->
+  <div id="boot" class="boot"><span id="boot-fill"></span><em id="boot-pct">0</em><span id="boot-what"></span></div>
+
+  <!-- REEL: sticky pile driven by scroll -->
+  <section id="stack" class="reel-wrap">
+    <div class="reel-rail" id="reel-rail">                    <!-- * right-edge nav -->
+      <button class="reel-tick" data-tick="0"><span class="reel-tick-n">01</span><span class="reel-tick-bar"></span></button>
+      <!-- one .reel-tick per project -->
+    </div>
+    <div class="reel" id="reel">                              <!-- * -->
+      <div class="reel-stage" id="reel-stage">                <!-- * -->
+        <!-- one .reel-item per project; data-name/data-href feed the caption -->
+        <article class="reel-item" data-reel="0" data-name="Project One" data-href="/projects/one">
+          <div class="reel-card">
+            <div class="reel-frame">
+              <a class="reel-shot" href="/projects/one"><img class="reel-img" src="/media/one.jpg" alt=""></a>
+              <a class="reel-headline" href="/projects/one">Project One</a> <!-- shown in the no-JS/mobile list -->
+            </div>
+            <div class="reel-meta"><span>Discipline</span><span>2025</span></div>
+            <span class="reel-dim"></span>                   <!-- * depth-dim overlay -->
+          </div>
+        </article>
+        <!-- fixed caption held over the pile; its text rolls on project change -->
+        <div class="reel-capwrap">
+          <a class="reel-caption" id="reel-caption" href="#">
+            <span class="reel-caption-mask"><span class="reel-caption-line" id="reel-caption-line"></span></span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- your other sections … -->
+</main>
+
+<script type="module" src="/assets/boot.js"></script>

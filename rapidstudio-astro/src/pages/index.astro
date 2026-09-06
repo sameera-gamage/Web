@@ -1,0 +1,421 @@
+---
+import Base from '../layouts/Base.astro';
+import Nav from '../components/Nav.astro';
+import { projects } from '../data/projects.js';
+const first = projects[0];
+
+// the six trades, ticked past during the hero's turn
+const trades = ['Search', 'Paid media', 'Social', 'Brand', 'Film', 'Photography'];
+---
+
+<Base
+  title="RapidStudio, an independent studio for search, media, film and stills"
+  description="An independent studio running search, paid media, social, brand, film and photography for businesses that would rather hire one team than five."
+>
+  <!--
+    ══ loader ══
+    The hero is a megabyte and a half of film; without this the page shows a
+    poster, then jumps when the clip takes over, and nothing tells you it is
+    working. So: hold on the wordmark with a real progress read, and clear only
+    once the footage can actually be scrubbed. It renders as an aperture closing
+    down — the same shape the hero is about to open.
+  -->
+  <div id="boot" class="boot">
+    <div class="boot-in">
+      <span class="boot-mark">Rapid<span class="text-flame">•</span>Studio</span>
+      <span class="boot-iris" aria-hidden="true"><i id="boot-fill"></i></span>
+      <span class="boot-read"><em id="boot-pct">0</em>%<span class="boot-what" id="boot-what">loading the film</span></span>
+    </div>
+  </div>
+
+  <Nav here="index" />
+
+  <main id="main">
+
+    <!-- ══ the rig ══ -->
+    <section id="top" class="relative" style="height:300vh">
+      <!--
+        Once the card is masked, whatever sits behind it shows through the hole
+        — and above the work section that is the bone page. This is an ink bed
+        under the card and under the work section, faded in just before the
+        aperture opens, so the hole never lets the paper through.
+      -->
+      <div id="hero-bed" class="hero-bed" aria-hidden="true"></div>
+      <div id="hero-mat" class="hero-mat" aria-hidden="true"></div>
+      <div id="hero-frame" class="hero-frame bg-ink">
+        <!--
+          Real footage, not a drawing. Scroll scrubs it: the camera turns to
+          face you, then the iris opens. preload="none" keeps the megabyte off
+          the critical path — the rig asks for it once it knows the viewport.
+        -->
+        <div class="hero-stage absolute inset-0">
+        <video
+          id="cam"
+          class="hero-vid h-full w-full"
+          poster="/hero-poster.jpg"
+          preload="none"
+          muted
+          playsinline
+          disablepictureinpicture
+          aria-hidden="true"
+        >
+          {/* VP9 first: smaller, and it covers the Chromium builds that ship
+              without the H.264 decoder. H.264 carries Safari and the rest.
+
+              The URLs are held in data-src so the browser cannot start on them
+              during parse: preload="none" is only a hint, and Chrome was
+              speculatively pulling the 720 file on phones before the rig had
+              chosen the 480 one. Nothing is fetched until start() picks. */}
+          <source data-src="/hero-camera-720.webm" type="video/webm" />
+          <source data-src="/hero-camera-720.mp4" type="video/mp4" />
+        </video>
+        </div>
+
+        <!--
+          Smoke. The plate has haze baked in but it is frozen, so while the rig
+          is parked at the top two slow drifting fields ride over it — warm off
+          the key on the right, cool off the rim on the left. They screen in, so
+          they only ever add light, and they retire once the scrub takes over
+          and the real footage has motion of its own.
+        -->
+        <div id="hero-smoke" class="hero-smoke pointer-events-none absolute inset-0">
+          <span class="smoke smoke-warm"></span>
+          <span class="smoke smoke-cool"></span>
+        </div>
+
+        <!-- corners pulled down so the copy always has something to sit on -->
+        <div class="pointer-events-none absolute inset-0 bg-[radial-gradient(115%_85%_at_50%_45%,transparent_35%,rgba(10,10,10,.72)_100%)]"></div>
+        <div id="hero-scrim" class="hero-scrim pointer-events-none absolute inset-0"></div>
+
+        <!-- Inside the barrel. Not flat black: a little of the key light still
+             reaches down the tube, which gives the dive somewhere to land and
+             the bone section below something to emerge from. -->
+        <div id="hero-well" class="hero-well pointer-events-none absolute inset-0 opacity-0"></div>
+
+        <!-- opening frame: top-aligned on phones so the rig sits clear below it -->
+        <div id="hero-a" class="pointer-events-none absolute inset-0 flex items-start pt-[19vh] md:items-center md:pt-0">
+          <div class="edge w-full max-w-edge md:pt-16">
+            <div class="max-w-[min(92vw,42rem)]">
+              <p class="label mb-6 text-chalk/60">Est. 2019 · Independent</p>
+              <h1 class="whitespace-nowrap text-chalk text-[clamp(2.6rem,7.6vw,6.6rem)]">
+                <span class="block overflow-hidden pb-[0.06em]"><span class="ln inline-block">Six trades.</span></span>
+                <span class="block overflow-hidden pb-[0.06em]"><span class="ln inline-block text-flame">One room.</span></span>
+              </h1>
+              <p class="mt-7 max-w-[32ch] text-[16px] leading-relaxed text-chalk/70">
+                Search, paid media, social, brand, film and stills. Run by the same
+                people, in the same building, on the same plan.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- middle frame: the turn is long and the footage is dark there, so the
+             six trades tick past while the camera comes round -->
+        <div id="hero-m" class="pointer-events-none absolute inset-x-0 bottom-[13vh] opacity-0">
+          <div class="edge w-full max-w-edge">
+            <ul class="flex flex-wrap gap-x-7 gap-y-2 font-mono text-[11px] uppercase tracking-[0.22em] text-chalk/70">
+              {trades.map((t, i) => (
+                <li class="flex items-center gap-2.5">
+                  <span class="text-flame">{String(i + 1).padStart(2, '0')}</span>{t}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+
+        <!-- landing frame, arrives as the aperture clears -->
+        <div id="hero-b" class="pointer-events-none absolute inset-0 flex items-end opacity-0">
+          <div class="edge w-full max-w-edge pb-[12vh]">
+            <p class="label mb-5 text-chalk/70">Now look properly</p>
+            <p class="max-w-[18ch] font-display text-[clamp(2rem,5.5vw,4.5rem)] font-extrabold leading-[0.95] text-chalk">
+              This is what we&nbsp;made.
+            </p>
+          </div>
+        </div>
+
+        <div id="scroll-cue" class="absolute bottom-8 right-[var(--edge)] flex items-center gap-3">
+          <span class="label text-chalk/50">Scroll</span>
+          <span class="block h-10 w-px bg-chalk/30"></span>
+        </div>
+      </div>
+    </section>
+
+    <!--
+      ══ the way in ══
+      The aperture opens onto this, not onto a list. It is one link: the first
+      project's picture, already carrying the view-transition name it will keep
+      on the other side, so clicking it grows THAT picture into the project page
+      rather than cutting between two screens.
+    -->
+    <!--
+      ══ the way in ══
+      Two beats, and the split is structural rather than decorative. The first
+      screen is what the hero's aperture opens onto, so it is pulled up under the
+      hero (.gate-under) and the hero card covers it until the hole is punched —
+      which means nothing in it can be clicked. So the link lives in the second
+      screen, below the card's reach.
+    -->
+    <section id="gate" class="gate gate-under">
+      <div class="gate-say">
+        <p class="gate-k">Six trades, one room</p>
+        <h2 class="gate-h">
+          <span>Everything we</span>
+          <span>have made.</span>
+        </h2>
+      </div>
+
+      <div class="gate-do">
+        <p class="gate-p">
+          Search, paid media, social, brand, film and stills. Run by the same
+          people, in the same building, on the same plan. Six jobs below, start
+          to finish, with the numbers attached.
+        </p>
+
+        <a href="/projects" class="gate-go">
+          <span class="gate-go-plate">
+            <img src={first.cover} alt="" aria-hidden="true"
+                 transition:name={`shot-${first.slug}`} loading="lazy" decoding="async" />
+          </span>
+          <span class="gate-go-t">
+            <em>Open the work</em>
+            <b>{String(projects.length).padStart(2, '0')} projects</b>
+          </span>
+          <span class="gate-go-x" aria-hidden="true">→</span>
+        </a>
+      </div>
+    </section>
+
+    <footer class="foot">
+      <p class="foot-k">Got something stuck?</p>
+      <a href="mailto:info@rapidsolutions.live" class="foot-mail">info@rapidsolutions.live</a>
+      <p class="foot-c">© 2026 RapidStudio · Built in-house</p>
+    </footer>
+  </main>
+
+  <script>
+    import Lenis from 'lenis';
+    import { gsap } from 'gsap';
+    import { ScrollTrigger } from 'gsap/ScrollTrigger';
+    import { createHeroVideo } from '../scripts/heroVideo.js';
+
+    gsap.registerPlugin(ScrollTrigger);
+
+    const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    /* ---- Lenis, wired into ScrollTrigger's clock ---- */
+    if (!reduced) {
+      const lenis = new Lenis({ duration: 1.05, smoothWheel: true });
+      window.__lenis = lenis;   // so the case study can pause the page behind it
+      lenis.on('scroll', ScrollTrigger.update);
+      gsap.ticker.add((t) => lenis.raf(t * 1000));
+      gsap.ticker.lagSmoothing(0);
+      document.querySelectorAll('a[href^="#"]').forEach((a) => {
+        a.addEventListener('click', (e) => {
+          const el = document.querySelector(a.getAttribute('href'));
+          if (!el) return;
+          e.preventDefault();
+          lenis.scrollTo(el, { offset: -10 });
+        });
+      });
+    }
+
+    /* ---- loader ----
+       A real read, not a fake timer: fonts, then how much of the hero clip has
+       actually arrived. It clears when the footage can be scrubbed, and it has
+       a hard ceiling so a stalled network can never lock anyone out. */
+    const boot = document.getElementById('boot');
+    function runBoot(vid, onClear) {
+      if (!boot) { onClear && onClear(); return () => {}; }
+      const fill = document.getElementById('boot-fill');
+      const pct = document.getElementById('boot-pct');
+      const what = document.getElementById('boot-what');
+      let shown = 0, done = false, raf = 0;
+
+      const finish = () => {
+        if (done) return;
+        done = true;
+        cancelAnimationFrame(raf);
+        fill.style.setProperty('--fill', '100%');
+        pct.textContent = '100';
+        what.textContent = 'ready';
+        setTimeout(() => {
+          boot.classList.add('is-done');
+          document.body.style.overflow = '';
+          // the entrance runs WITH the curtain, not after it, so the camera is
+          // already moving by the time anyone can see it
+          onClear && onClear();
+          setTimeout(() => { boot.hidden = true; }, 750);
+        }, 260);
+      };
+
+      const real = () => {
+        let v = 0.12;
+        if (document.fonts && document.fonts.status === 'loaded') v += 0.18;
+        if (vid) {
+          if (vid.readyState >= 1) v += 0.12;
+          try {
+            if (vid.buffered.length && vid.duration) {
+              v += 0.58 * Math.min(1, vid.buffered.end(vid.buffered.length - 1) / vid.duration);
+            }
+          } catch {}
+        }
+        return Math.min(1, v);
+      };
+
+      const tick = () => {
+        // ease toward the true figure so the number never jumps or stalls dead
+        shown += (real() - shown) * 0.06;
+        const n = Math.min(99, Math.round(shown * 100));
+        fill.style.setProperty('--fill', `${n}%`);
+        pct.textContent = String(n);
+        if (!done) raf = requestAnimationFrame(tick);
+      };
+
+      document.body.style.overflow = 'hidden';
+      scrollTo(0, 0);
+      raf = requestAnimationFrame(tick);
+      // canplaythrough is the honest signal that scrubbing will not stutter
+      if (vid) vid.addEventListener('canplaythrough', finish, { once: true });
+      setTimeout(finish, 7000);
+      return finish;
+    }
+
+    /* ---- the camera rig ---- */
+    const video = document.getElementById('cam');
+    if (video) {
+      const heroA = document.getElementById('hero-a');
+      const heroM = document.getElementById('hero-m');
+      const heroB = document.getElementById('hero-b');
+      const scrim = document.getElementById('hero-scrim');
+      const cue = document.getElementById('scroll-cue');
+      const span = (a, b, x) => Math.min(1, Math.max(0, (x - a) / (b - a)));
+      const ease = (a, b, x) => { const u = span(a, b, x); return u * u * (3 - 2 * u); };
+
+      // One source of truth. The scroll progress drives the footage AND every
+      // overlay, so the copy can never drift out of step with the picture.
+      //
+      // Where the beats fall in the clip:
+      //   0.00 - 0.50  the body turns, bringing the lens round to face us
+      //   0.50 - 0.62  square on, the iris still closed
+      //   0.62 - 1.00  the blades retract and the aperture opens
+      const smoke = document.getElementById('hero-smoke');
+      const bedEl = document.getElementById('hero-bed');
+      const matEl = document.getElementById('hero-mat');
+      const well = document.getElementById('hero-well');
+      const frame = document.getElementById('hero-frame');
+
+      const set = (el, prop, v, key) => { if (state[key] !== v) { el.style[prop] = v; state[key] = v; } };
+      const state = {};
+
+      function paintCopy(v) {
+        const a = 1 - ease(0.06, 0.30, v);   // opening copy leaves as the turn starts
+        const m = ease(0.32, 0.44, v) * (1 - ease(0.58, 0.68, v));  // trades, over the turn
+        const b = ease(0.70, 0.85, v) * (1 - ease(0.86, 0.92, v));  // lands on the open iris, gone before the hole opens
+        const c = 1 - span(0, 0.08, v);      // scroll cue
+        const s = 1 - 0.75 * ease(0.10, 0.45, v);  // scrim lifts off the footage
+        const sm = 1 - ease(0.05, 0.26, v);  // smoke retires once the plate moves
+
+        // The tail, in order: we accelerate into the glass, the barrel goes
+        // dark around us, and then the far end opens from the middle and the
+        // work is on the other side of it.
+        const dive = ease(0.78, 0.97, v);
+        const k = 1 + 6.2 * dive * dive;
+        const w = ease(0.84, 0.93, v) * (1 - 0.35 * ease(0.94, 1, v));  // inside the barrel
+        const open = ease(0.84, 0.95, v);    // card -> full bleed
+        const rev = ease(0.90, 1, v);        // the aperture opens onto the next section
+        const bed = ease(0.76, 0.88, v);     // ink behind the card, before the hole
+
+        set(heroA, 'opacity', a, 'a');
+        set(heroA, 'transform', `translateY(${((1 - a) * -40).toFixed(1)}px)`, 'at');
+        set(heroM, 'opacity', m, 'm');
+        set(heroM, 'transform', `translateY(${((1 - m) * 18).toFixed(1)}px)`, 'mt');
+        set(heroB, 'opacity', b, 'b');
+        set(heroB, 'transform', `translateY(${((1 - b) * 30).toFixed(1)}px)`, 'bt');
+        set(cue, 'opacity', c, 'c');
+        set(scrim, 'opacity', s, 's');
+        set(smoke, 'opacity', sm, 'sm');
+        set(well, 'opacity', w, 'w');
+        set(bedEl, 'opacity', bed, 'bed');
+        set(matEl, 'opacity', 1 - open, 'mat');
+
+        if (state.k !== k) { rig.push(k); state.k = k; }
+        if (state.sm2 !== sm) { rig.setFloat(sm); state.sm2 = sm; }
+
+        // The reveal. A hole is punched in the card at the lens centre and grown
+        // until it clears the corners; the work section sits directly behind, so
+        // what comes through the hole IS the next section rather than a picture
+        // of it. The mask is only attached while it is doing something — a mask
+        // forces its own compositing pass, and there is no reason to pay for it
+        // through the other 90% of the scroll.
+        if (state.r !== rev) {
+          if (rev <= 0.0001) {
+            set(frame, 'webkitMaskImage', '', 'mk');
+            set(frame, 'maskImage', '', 'mk2');
+          } else {
+            const R = (rev * rev * 0.55 + rev * 0.45) * HOLE;   // slow open, then away
+            const soft = Math.max(2, R * 0.10);
+            const g = `radial-gradient(circle at var(--lens-x) var(--lens-y),` +
+                      ` transparent 0 ${(R - soft).toFixed(1)}px, #000 ${R.toFixed(1)}px)`;
+            set(frame, 'webkitMaskImage', g, 'mk');
+            set(frame, 'maskImage', g, 'mk2');
+          }
+          state.r = rev;
+        }
+        if (state.o !== open) {
+          // Growing the card by scale rather than by shrinking its margins: the
+          // margins would relayout the video — and so re-derive its object-fit
+          // crop — on every scroll frame. The card is inset by the same amount
+          // on all four sides, so scaling from the centre by exactly
+          // viewport/(viewport - 2*inset) lands its edges on the viewport edges.
+          set(frame, 'transform', `translateZ(0) scale(${(1 + (SX - 1) * open).toFixed(4)}, ${(1 + (SY - 1) * open).toFixed(4)})`, 'ft');
+          set(frame, 'borderRadius', `${(BASE_RADIUS * (1 - open)).toFixed(1)}px`, 'fr');
+          state.o = open;
+        }
+      }
+      const readPx = (n) => parseFloat(getComputedStyle(document.documentElement).getPropertyValue(n)) || 0;
+      let BASE_INSET = 12, BASE_RADIUS = 26, SX = 1, SY = 1, HOLE = 1200;
+      function measureFrame() {
+        BASE_INSET = readPx('--hero-inset') || 12;
+        BASE_RADIUS = readPx('--hero-radius') || 26;
+        SX = innerWidth / Math.max(1, innerWidth - BASE_INSET * 2);
+        SY = innerHeight / Math.max(1, innerHeight - BASE_INSET * 2);
+        // far enough that the hole has cleared the furthest corner from the lens
+        HOLE = Math.hypot(innerWidth, innerHeight) * 1.05;
+      }
+      measureFrame();
+
+      const rig = createHeroVideo(video);
+
+      if (reduced) {
+        // no pin, no scrub, no drift: the poster frame is the hero and the copy sits
+        heroA.style.opacity = 1;
+        heroB.style.opacity = 0;
+        scrim.style.opacity = 1;
+        smoke.style.opacity = 0;
+        bedEl.style.opacity = 0;
+        matEl.style.opacity = 0;
+        runBoot(null, null)();    // nothing to wait for, so do not make anyone wait
+      } else {
+        let progress = 0;
+        const bootDone = runBoot(video, () => {
+          rig.intro();
+          gsap.from('.ln', { yPercent: 115, duration: 1.15, ease: 'expo.out', stagger: 0.09 });
+        });
+        rig.start();
+        // if the clip cannot be fetched at all, the page must still open
+        video.addEventListener('error', () => bootDone(), { once: true });
+        ScrollTrigger.create({
+          trigger: '#top',
+          start: 'top top',
+          end: 'bottom bottom',
+          scrub: true,
+          onUpdate: (self) => { progress = self.progress; rig.seek(progress); paintCopy(progress); },
+        });
+        paintCopy(0);
+        // the full-bleed scale is derived from the viewport, so it has to be
+        // re-derived when the viewport changes — and repainted where we stand
+        addEventListener('resize', () => { measureFrame(); state.o = -1; paintCopy(progress); });
+      }
+    }
+  </script>
+</Base>

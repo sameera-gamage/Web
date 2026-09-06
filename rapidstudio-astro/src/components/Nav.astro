@@ -1,0 +1,28 @@
+---
+// One nav for every page. `here` marks the current section so the rig can show
+// where you are without a second source of truth.
+const { here = 'index' } = Astro.props;
+const links = [
+  { k: 'index',    label: 'Studio',   href: '/' },
+  { k: 'projects', label: 'Projects', href: '/projects' },
+];
+---
+<header class="nav" transition:persist="nav">
+  <div class="nav-in">
+    <a href="/" class="nav-mark" aria-label="RapidStudio, home">
+      <span class="nav-dot" aria-hidden="true"></span>
+      <span>Rapid<span class="nav-sep">•</span>Studio</span>
+    </a>
+
+    <nav class="nav-pill" aria-label="Primary">
+      {links.map((l, i) => (
+        <a href={l.href} class:list={['nav-link', here === l.k && 'is-here']}
+           aria-current={here === l.k ? 'page' : undefined}>
+          <span class="nav-num">{String(i + 1).padStart(2, '0')}</span>
+          <span>{l.label}</span>
+        </a>
+      ))}
+      <a href="mailto:info@rapidsolutions.live" class="nav-cta">Start a brief</a>
+    </nav>
+  </div>
+</header>
