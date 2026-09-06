@@ -12,12 +12,24 @@ function engine(canvas, measure, reduced, isVisible) {
   const dpr = Math.min(devicePixelRatio || 1, 2);
   let w = 1, h = 1, ox = 0, oy = 0;
 
+  // a spatial grid so linking only ever compares nearby particles instead of
+  // every pair — keeps the dense look affordable (O(n) instead of O(n²))
+  const CELL = 138;                     // == LINK, so any link spans adjacent cells
+  let cols = 1, rows = 1, grid = [[]];
+  function buildGrid() {
+    cols = Math.max(1, Math.ceil(w / CELL));
+    rows = Math.max(1, Math.ceil(h / CELL));
+    grid = new Array(cols * rows);
+    for (let i = 0; i < grid.length; i++) grid[i] = [];
+  }
+
   function resize() {
     const m = measure();
     w = m.w; h = m.h; ox = m.ox; oy = m.oy;
     canvas.width = Math.max(1, w * dpr);
     canvas.height = Math.max(1, h * dpr);
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    buildGrid();
   }
   resize();
   addEventListener('resize', resize, { passive: true });
@@ -47,6 +59,17 @@ function engine(canvas, measure, reduced, isVisible) {
       accent,
       drift: Math.random() * Math.PI * 2,
     });
+  }
+
+  // bin one linked pair by how close (= how bright) it is
+  function link(a, b) {
+    const dx = a.x - b.x, dy = a.y - b.y;
+    const d = dx * dx + dy * dy;
+    if (d >= LINK2) return;
+    const t = 1 - Math.sqrt(d) / LINK;              // 0 far … 1 touching
+    let bi = (t * BUCKETS) | 0; if (bi >= BUCKETS) bi = BUCKETS - 1;
+    const arr = bucket[bi];
+    arr.push(a.x, a.y, b.x, b.y);
   }
 
   function frame() {
@@ -86,20 +109,33 @@ function engine(canvas, measure, reduced, isVisible) {
       if (sp > MAX) { p.vx = (p.vx / sp) * MAX; p.vy = (p.vy / sp) * MAX; }
       p.x += p.vx; p.y += p.vy;
     }
-    // ---- links: bin every segment by how close (=how bright) it is ----
+    // ---- links, via the spatial grid: only compare nearby particles ----
     for (let b = 0; b < BUCKETS; b++) bucket[b].length = 0;
     const n = particles.length;
+    for (let c = 0; c < grid.length; c++) grid[c].length = 0;
     for (let i = 0; i < n; i++) {
-      const a = particles[i];
-      for (let j = i + 1; j < n; j++) {
-        const b = particles[j];
-        const dx = a.x - b.x, dy = a.y - b.y;
-        const d = dx * dx + dy * dy;
-        if (d < LINK2) {
-          const t = 1 - Math.sqrt(d) / LINK;          // 0 far … 1 touching
-          let bi = (t * BUCKETS) | 0; if (bi >= BUCKETS) bi = BUCKETS - 1;
-          const arr = bucket[bi];
-          arr.push(a.x, a.y, b.x, b.y);
+      const p = particles[i];
+      let cx = (p.x / CELL) | 0, cy = (p.y / CELL) | 0;
+      if (cx < 0) cx = 0; else if (cx >= cols) cx = cols - 1;
+      if (cy < 0) cy = 0; else if (cy >= rows) cy = rows - 1;
+      grid[cy * cols + cx].push(i);
+    }
+    // each pair once: own cell (j>i) plus four forward-neighbour cells
+    const NB = [[1, 0], [-1, 1], [0, 1], [1, 1]];
+    for (let cy = 0; cy < rows; cy++) {
+      for (let cx = 0; cx < cols; cx++) {
+        const cell = grid[cy * cols + cx];
+        for (let a = 0; a < cell.length; a++) {
+          const A = particles[cell[a]];
+          // within the same cell
+          for (let b = a + 1; b < cell.length; b++) link(A, particles[cell[b]]);
+          // forward neighbours
+          for (let k = 0; k < 4; k++) {
+            const nx = cx + NB[k][0], ny = cy + NB[k][1];
+            if (nx < 0 || nx >= cols || ny < 0 || ny >= rows) continue;
+            const other = grid[ny * cols + nx];
+            for (let b = 0; b < other.length; b++) link(A, particles[other[b]]);
+          }
         }
       }
     }

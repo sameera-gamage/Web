@@ -10,7 +10,7 @@ const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
 mountParticles(reduced);
 
 if (!reduced) {
-  const lenis = new Lenis({ duration: 1.05, smoothWheel: true, wheelMultiplier: 0.9 });
+  const lenis = new Lenis({ lerp: 0.09, wheelMultiplier: 1, smoothWheel: true, syncTouch: true });
   lenis.on('scroll', ScrollTrigger.update);
   gsap.ticker.add((t) => lenis.raf(t * 1000));
   gsap.ticker.lagSmoothing(0);
