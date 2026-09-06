@@ -24,8 +24,14 @@ function engine(canvas, measure, reduced, isVisible) {
   addEventListener('scroll', () => { const m = measure(); ox = m.ox; oy = m.oy; }, { passive: true });
 
   const COUNT = Math.min(500, Math.max(180, Math.round((w * h) / 2700)));
-  const LINK = 138, MOUSE_R = 320;
+  const LINK = 138, LINK2 = LINK * LINK, MOUSE_R = 320, TWO_PI = Math.PI * 2;
   const particles = [];
+
+  // links are drawn in a few fixed alpha buckets so the whole field costs a
+  // handful of stroke() calls a frame instead of one per linked pair — the
+  // difference between a smooth 60fps and a shaky one when the field is dense
+  const BUCKETS = 6;
+  const bucket = Array.from({ length: BUCKETS }, () => []);
 
   let mx = -9999, my = -9999, lmx = -9999, lmy = -9999;
   addEventListener('pointermove', (e) => { mx = e.clientX - ox; my = e.clientY - oy; }, { passive: true });
@@ -80,26 +86,43 @@ function engine(canvas, measure, reduced, isVisible) {
       if (sp > MAX) { p.vx = (p.vx / sp) * MAX; p.vy = (p.vy / sp) * MAX; }
       p.x += p.vx; p.y += p.vy;
     }
-    for (let i = 0; i < particles.length; i++) {
-      for (let j = i + 1; j < particles.length; j++) {
-        const a = particles[i], b = particles[j];
+    // ---- links: bin every segment by how close (=how bright) it is ----
+    for (let b = 0; b < BUCKETS; b++) bucket[b].length = 0;
+    const n = particles.length;
+    for (let i = 0; i < n; i++) {
+      const a = particles[i];
+      for (let j = i + 1; j < n; j++) {
+        const b = particles[j];
         const dx = a.x - b.x, dy = a.y - b.y;
         const d = dx * dx + dy * dy;
-        if (d < LINK * LINK) {
-          const alpha = (1 - Math.sqrt(d) / LINK) * 0.11;
-          ctx.beginPath();
-          ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y);
-          ctx.strokeStyle = `rgba(255,90,31,${alpha.toFixed(3)})`;
-          ctx.lineWidth = 0.6; ctx.stroke();
+        if (d < LINK2) {
+          const t = 1 - Math.sqrt(d) / LINK;          // 0 far … 1 touching
+          let bi = (t * BUCKETS) | 0; if (bi >= BUCKETS) bi = BUCKETS - 1;
+          const arr = bucket[bi];
+          arr.push(a.x, a.y, b.x, b.y);
         }
       }
     }
-    for (const p of particles) {
+    ctx.lineWidth = 0.6;
+    for (let bi = 0; bi < BUCKETS; bi++) {
+      const arr = bucket[bi];
+      if (!arr.length) continue;
+      ctx.strokeStyle = `rgba(255,90,31,${(((bi + 0.5) / BUCKETS) * 0.13).toFixed(3)})`;
       ctx.beginPath();
-      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-      ctx.fillStyle = p.accent ? 'rgba(255,90,31,0.55)' : 'rgba(255,255,255,0.18)';
-      ctx.fill();
+      for (let k = 0; k < arr.length; k += 4) { ctx.moveTo(arr[k], arr[k + 1]); ctx.lineTo(arr[k + 2], arr[k + 3]); }
+      ctx.stroke();
     }
+
+    // ---- dots: two passes, one fill each ----
+    ctx.fillStyle = 'rgba(255,255,255,0.18)';
+    ctx.beginPath();
+    for (const p of particles) { if (p.accent) continue; ctx.moveTo(p.x + p.r, p.y); ctx.arc(p.x, p.y, p.r, 0, TWO_PI); }
+    ctx.fill();
+    ctx.fillStyle = 'rgba(255,90,31,0.55)';
+    ctx.beginPath();
+    for (const p of particles) { if (!p.accent) continue; ctx.moveTo(p.x + p.r, p.y); ctx.arc(p.x, p.y, p.r, 0, TWO_PI); }
+    ctx.fill();
+
     schedule();
   }
 

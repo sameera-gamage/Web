@@ -198,10 +198,7 @@ export function mountHero({ gsap, ScrollTrigger, createHeroVideo, reduced }) {
         trigger: '#top',
         start: 'top top',
         end: 'bottom bottom',
-        // ease the whole hero timeline toward the scroll rather than snapping to
-        // it, so the copy, the camera dive and the aperture glide instead of
-        // stepping with every wheel notch
-        scrub: 0.6,
+        scrub: true,
         onUpdate: (self) => { progress = self.progress; rig.seek(progress); paintCopy(progress); },
       });
       paintCopy(0);
