@@ -1,0 +1,94 @@
+/* ===========================================================================
+   cinematic-scroll — the CSS the JS modules depend on. Colours/spacing are
+   placeholders; the structure and the performance-critical rules are the point.
+   =========================================================================== */
+
+:root { --edge: clamp(20px, 5vw, 72px); --hero-inset: 12px; --hero-radius: 26px; }
+
+/* COMMANDMENT 7: clip horizontal overflow on the ROOT scroller with `clip`
+   (not hidden) — decorative bleed otherwise widens the mobile layout viewport
+   and the page zooms out. `clip` keeps position:sticky working; hidden breaks it. */
+html { overflow-x: clip; color-scheme: dark; -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: #0A0A0A; color: #EDEAE6; overflow-x: clip;
+       font-family: ui-sans-serif, system-ui, sans-serif; }
+img, video { display: block; max-width: 100%; }
+
+/* ---- background particle field (mountParticles) ---- */
+/* the <canvas> is created by JS as position:fixed; inset:0; z-index:-1 */
+
+/* ---- HERO: a 300vh pinned stage, video scrubbed by scroll ---- */
+#top { position: relative; height: 300vh; }
+.hero-frame {           /* the card that holds the video; sticky = pinned */
+  position: sticky; top: var(--hero-inset);
+  height: calc(100vh - var(--hero-inset) * 2);
+  margin-inline: var(--hero-inset);
+  border-radius: var(--hero-radius); overflow: hidden;
+  transform: translateZ(0); z-index: 41;        /* own GPU layer */
+}
+.hero-vid { width: 100%; height: 100%; object-fit: cover; will-change: transform; background: #0A0A0A; }
+/* a fixed inset frame that fades as the card goes full-bleed */
+.hero-mat { position: fixed; inset: 0; z-index: 42; pointer-events: none;
+  border: var(--hero-inset) solid #0A0A0A;
+  border-radius: calc(var(--hero-radius) + var(--hero-inset)); }
+/* ink behind the card during the reveal; fades so the field shows through */
+.hero-bed { position: sticky; top: 0; height: 100vh; margin-bottom: -100vh;
+  background: #0A0A0A; opacity: 0; pointer-events: none; }
+.hero-copy { position: absolute; inset: 0; display: flex; align-items: center; pointer-events: none; }
+
+/* ---- REEL: sticky pile, cards driven straight from scroll (mountStack) ---- */
+.reel { position: relative; }                    /* tall track; JS sets its height */
+.reel-item { position: relative; padding: 6vh 0; } /* fallback (no-JS / mobile): a list */
+.reel.is-live { }                                /* JS adds is-live on desktop+motion */
+.reel.is-live .reel-stage { position: sticky; top: 0; height: 100vh; }
+.reel.is-live .reel-item {
+  position: absolute; inset: 0; padding: 0;
+  display: flex; align-items: center; justify-content: center;
+  will-change: transform, opacity;
+}
+.reel.is-live .reel-card { position: relative; will-change: transform; transform-origin: 50% 50%; }
+.reel-frame { position: relative; width: min(64vw, 980px); max-width: 92vw; }
+.reel-shot { position: relative; aspect-ratio: 16/10; border-radius: 18px; overflow: hidden; background: #111; }
+.reel-img  { position: absolute; inset: -12% 0 0; width: 100%; height: 130%; object-fit: cover; will-change: transform; }
+/* COMMANDMENT 1: depth-dim with an OVERLAY opacity, never filter:brightness() */
+.reel-dim  { display: none; }
+.reel.is-live .reel-dim { display: block; position: absolute; inset: 0; z-index: 7;
+  background: #070707; opacity: 0; pointer-events: none; will-change: opacity; }
+/* the fixed caption sits over the pile (mountStack rolls its text) */
+.reel-caption-mask { display: block; overflow: hidden; }
+.reel-caption-line { display: block; white-space: nowrap; will-change: transform; }
+
+/* right-edge nav (ticks) — shown only while the reel owns the screen */
+.reel-rail { position: fixed; right: 2vw; top: 50%; transform: translateY(-50%);
+  z-index: 45; opacity: 0; pointer-events: none; transition: opacity .4s ease; }
+.reel-rail.show { opacity: 1; pointer-events: auto; }
+
+/* ---- APERTURE page transition (cross-document View Transitions) ---- */
+@view-transition { navigation: auto; }
+@keyframes vt-dim  { to   { opacity: 0; transform: scale(.97); filter: blur(3px); } }
+@keyframes vt-iris { from { clip-path: circle(0% at 50% 46%); }
+                     to   { clip-path: circle(150% at 50% 46%); } }
+::view-transition-old(root) { animation: vt-dim .4s cubic-bezier(.4,0,.2,1) both; }
+::view-transition-new(root) { animation: vt-iris .7s cubic-bezier(.83,0,.17,1) both; }
+::view-transition-old(nav), ::view-transition-new(nav) { animation: none; }
+.nav { view-transition-name: nav; }
+
+/* ---- mobile nav: collapse a link pill into a tap-to-open sheet ---- */
+.nav-burger { display: none; }
+@media (max-width: 760px) {
+  .nav-burger { display: inline-flex; }
+  .nav-pill {
+    position: absolute; top: calc(100% + 10px); right: 0;
+    flex-direction: column; align-items: stretch;
+    background: rgba(14,14,14,.94); border-radius: 16px; padding: .5rem;
+    opacity: 0; transform: translateY(-8px) scale(.98); transform-origin: top right;
+    pointer-events: none; visibility: hidden;
+    transition: opacity .28s ease, transform .28s cubic-bezier(.22,.8,.28,1), visibility .28s;
+  }
+  .nav.nav-open .nav-pill { opacity: 1; transform: none; pointer-events: auto; visibility: visible; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #top { height: 100vh !important; }
+  .hero-mat, .reel-rail { display: none; }
+  ::view-transition-old(root), ::view-transition-new(root) { animation: none; }
+}
