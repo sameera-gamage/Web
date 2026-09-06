@@ -25,6 +25,7 @@ export function mountStack({ gsap, ScrollTrigger, reduced }) {
   const items = [...stage.querySelectorAll('.reel-item')];
   const cards = items.map((it) => it.querySelector('.reel-card'));
   const imgs = items.map((it) => it.querySelector('.reel-img'));
+  const dims = items.map((it) => it.querySelector('.reel-dim'));
   const ticks = [...document.querySelectorAll('.reel-tick')];
   const rail = document.getElementById('reel-rail');
   const caption = document.getElementById('reel-caption');
@@ -119,7 +120,8 @@ export function mountStack({ gsap, ScrollTrigger, reduced }) {
       it.style.visibility = vis ? 'visible' : 'hidden';
       it.style.zIndex = String(i);
       base[i].y = y; base[i].s = scale;
-      if (cards[i]) cards[i].style.filter = `brightness(${bright.toFixed(3)})`;
+      // darken receding cards with an overlay (cheap) rather than a filter
+      if (dims[i]) dims[i].style.opacity = (1 - bright).toFixed(3);
     }
   }
 
@@ -149,15 +151,22 @@ export function mountStack({ gsap, ScrollTrigger, reduced }) {
   const pos = () => Math.max(0, Math.min(N - 1, (scrollY - reelTop()) / step()));
 
   // ---- one rAF loop while the reel is on screen: track scroll, paint, parallax ----
-  let running = false, raf = 0;
+  // Only touch the DOM when something actually moved (the scroll shifted or the
+  // cursor tilt is still easing). At rest it writes nothing, so there is no
+  // continuous repaint of the pile — that idle cost is what made desktop stutter.
+  let running = false, raf = 0, lastP = -1;
   function loop() {
-    const rawTop = scrollY - reelTop();
     const p = pos();
-    computePile(p);
-    setActive(Math.round(p));
-    render();
-    const inReel = rawTop > -innerHeight * 0.5 && rawTop < (N - 1) * step() + innerHeight * 0.5;
-    rail && rail.classList.toggle('show', inReel);
+    const tiltMoving = Math.abs(tgX - curX) > 0.0015 || Math.abs(tgY - curY) > 0.0015;
+    if (p !== lastP || tiltMoving) {
+      lastP = p;
+      computePile(p);
+      setActive(Math.round(p));
+      render();
+      const rawTop = scrollY - reelTop();
+      const inReel = rawTop > -innerHeight * 0.5 && rawTop < (N - 1) * step() + innerHeight * 0.5;
+      rail && rail.classList.toggle('show', inReel);
+    }
     if (running) raf = requestAnimationFrame(loop);
   }
   function start() { if (!running) { running = true; raf = requestAnimationFrame(loop); } }

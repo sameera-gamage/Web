@@ -215,6 +215,7 @@ head_open(
                 <span class="dim"><?= e($p['year']) ?></span>
               </div>
             </div>
+            <span class="reel-dim" aria-hidden="true"></span>
           </div>
         </article>
       <?php endforeach; ?>

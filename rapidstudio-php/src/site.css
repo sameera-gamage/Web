@@ -444,7 +444,15 @@
   will-change: transform, opacity;
 }
 .reel.is-live .reel-card {
-  will-change: transform, filter; transform-origin: 50% 50%;
+  position: relative;
+  will-change: transform; transform-origin: 50% 50%;
+}
+/* depth dimming as a compositor-cheap overlay opacity, not a per-frame CSS
+   filter (filters force an expensive re-render pass every frame) */
+.reel-dim { display: none; }
+.reel.is-live .reel-dim {
+  display: block; position: absolute; inset: 0; z-index: 7;
+  background: #070707; opacity: 0; pointer-events: none; will-change: opacity;
 }
 /* the picture drifts inside its frame for the cursor parallax (JS drives it);
    the frame clips the slight overscale so no edges show */
