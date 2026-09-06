@@ -52,14 +52,21 @@ export function createHeroVideo(video, opts = {}) {
     pump();
   });
 
-  function tick() {
+  // Ease playback time toward the target with a time-based rate, so the footage
+  // travels at the same smooth speed whether the display runs at 60, 120 or
+  // 144Hz (a fixed per-frame fraction eases faster on high-refresh screens and
+  // reads as steppier there).
+  let lastTs = 0;
+  function tick(ts) {
     if (!running) return;
+    const dt = lastTs ? Math.min(0.05, (ts - lastTs) / 1000) : 1 / 60;
+    lastTs = ts;
     const gap = target - shown;
     if (Math.abs(gap) < EPS / 2) {
       shown = target;
-      running = false;
+      running = false; lastTs = 0;
     } else {
-      shown += gap * 0.22;
+      shown += gap * (1 - Math.exp(-11 * dt));   // ≈ smooth exponential glide
       requestAnimationFrame(tick);
     }
     pump();
