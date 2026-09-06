@@ -11,7 +11,12 @@ import { mountParticles } from './particles.js';
 gsap.registerPlugin(ScrollTrigger);
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-mountParticles(reduced);
+// the fixed field sits behind everything, but the hero (a 300vh pinned stage)
+// covers it with its ink card for almost the whole hero scroll — so idle the
+// field there and hand that frame budget to the video, which needs it to scrub
+// smoothly. It wakes as the aperture opens onto the work below.
+const heroTop = document.getElementById('top');
+mountParticles(reduced, () => !heroTop || scrollY > heroTop.offsetHeight - innerHeight * 1.5);
 
 // the gate now lets the page-wide particle field read straight through (the
 // hero bed clears as the aperture opens), so it only needs its cursor-lit glow

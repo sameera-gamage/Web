@@ -164,9 +164,11 @@ export function createHeroVideo(video, opts = {}) {
   let floatAmp = 1, floating = false;
   function floatTick(now) {
     if (!floating) return;
-    fx = Math.sin(now / 4300) * 6 * floatAmp;
-    fy = Math.cos(now / 5900) * 4 * floatAmp;
-    fs = 1 + 0.013 * (1 + Math.sin(now / 6100)) * floatAmp;
+    // a slow breath about the lens only — no pixel translation, which is what
+    // made a near-static frame read as a shake. A gentle scale on the
+    // transform-origin barely moves anything yet keeps the plate alive.
+    fx = 0; fy = 0;
+    fs = 1 + 0.009 * (1 + Math.sin(now / 7200)) * floatAmp;
     applyTransform();
     requestAnimationFrame(floatTick);
   }

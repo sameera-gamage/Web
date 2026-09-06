@@ -138,7 +138,7 @@ function engine(canvas, measure, reduced, isVisible) {
   schedule();
 }
 
-export function mountParticles(reduced) {
+export function mountParticles(reduced, isVisible) {
   if (reduced) return;
   const canvas = document.createElement('canvas');
   Object.assign(canvas.style, {
@@ -146,7 +146,9 @@ export function mountParticles(reduced) {
     pointerEvents: 'none', zIndex: '-1',
   });
   document.body.prepend(canvas);
-  engine(canvas, () => ({ w: innerWidth, h: innerHeight, ox: 0, oy: 0 }), reduced);
+  // isVisible lets the caller idle the field where it can't be seen (e.g. behind
+  // the hero), so the video has the whole frame budget to scrub smoothly there.
+  engine(canvas, () => ({ w: innerWidth, h: innerHeight, ox: 0, oy: 0 }), reduced, isVisible);
 }
 
 export function mountField(el, reduced) {
