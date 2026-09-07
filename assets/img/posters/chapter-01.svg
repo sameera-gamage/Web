@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" width="1600" height="1000" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="sky1" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0F0F11"/>
+      <stop offset="0.5" stop-color="#1a1712"/>
+      <stop offset="0.72" stop-color="#3a2c1a"/>
+      <stop offset="0.86" stop-color="#C1955C"/>
+      <stop offset="1" stop-color="#e7c188"/>
+    </linearGradient>
+    <radialGradient id="sun1" cx="0.7" cy="0.86" r="0.5">
+      <stop offset="0" stop-color="#f6dca6" stop-opacity="0.9"/>
+      <stop offset="0.4" stop-color="#D8AF71" stop-opacity="0.4"/>
+      <stop offset="1" stop-color="#D8AF71" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="land1" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#151310"/>
+      <stop offset="1" stop-color="#0d0c0a"/>
+    </linearGradient>
+  </defs>
+  <rect width="1600" height="1000" fill="url(#sky1)"/>
+  <rect width="1600" height="1000" fill="url(#sun1)"/>
+  <!-- sea line -->
+  <rect y="720" width="1600" height="70" fill="#5b4a30" opacity="0.5"/>
+  <rect y="722" width="1600" height="3" fill="#e7c188" opacity="0.55"/>
+  <!-- coastal plot -->
+  <path d="M0 790 L1600 760 L1600 1000 L0 1000 Z" fill="url(#land1)"/>
+  <path d="M0 790 L1600 760" stroke="#C1955C" stroke-opacity="0.25" stroke-width="2"/>
+  <!-- faint plot outline sweeping across the earth -->
+  <path d="M420 900 L1080 858 L1180 940 L520 986 Z" fill="none" stroke="#C1955C" stroke-opacity="0.35" stroke-width="1.5"/>
+</svg>

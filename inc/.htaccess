@@ -1,0 +1,2 @@
+# Never serve PHP includes or config directly
+Require all denied

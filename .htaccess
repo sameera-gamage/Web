@@ -1,0 +1,25 @@
+# Excello — Apache config (XAMPP / shared hosting)
+
+# Pretty defaults
+DirectoryIndex index.php
+Options -Indexes
+
+# Don't serve dotfiles / VCS / build tooling
+<FilesMatch "^\.">
+  Require all denied
+</FilesMatch>
+RedirectMatch 404 /\.git
+RedirectMatch 404 /\.build-tools
+
+# Cache static assets (Apache serves byte-range natively, so future
+# scroll-scrub videos stream and seek correctly with no extra config)
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresByType image/svg+xml "access plus 7 days"
+  ExpiresByType image/jpeg    "access plus 7 days"
+  ExpiresByType image/png     "access plus 7 days"
+  ExpiresByType image/webp    "access plus 7 days"
+  ExpiresByType text/css      "access plus 7 days"
+  ExpiresByType application/javascript "access plus 7 days"
+  ExpiresByType video/mp4     "access plus 30 days"
+</IfModule>

@@ -1,0 +1,5 @@
+# Admin/CMS image uploads (keep the repo light; posters + your chapter files are tracked)
+assets/img/upload-*
+# OS noise
+.DS_Store
+Thumbs.db

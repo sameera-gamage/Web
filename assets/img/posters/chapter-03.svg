@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" width="1600" height="1000" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="sky3" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#20160c"/>
+      <stop offset="0.4" stop-color="#3a2814"/>
+      <stop offset="0.7" stop-color="#C1955C"/>
+      <stop offset="1" stop-color="#efce93"/>
+    </linearGradient>
+    <linearGradient id="vol3" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2a2620"/>
+      <stop offset="1" stop-color="#14120f"/>
+    </linearGradient>
+    <linearGradient id="pool3" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#3f6f7a"/>
+      <stop offset="1" stop-color="#22434a"/>
+    </linearGradient>
+  </defs>
+  <rect width="1600" height="1000" fill="url(#sky3)"/>
+  <!-- golden-hour haze -->
+  <rect width="1600" height="1000" fill="#D8AF71" opacity="0.06"/>
+  <!-- ground -->
+  <rect y="640" width="1600" height="360" fill="#171310"/>
+  <!-- villa massing volumes -->
+  <g>
+    <rect x="180" y="470" width="360" height="220" fill="url(#vol3)"/>
+    <rect x="180" y="470" width="360" height="14" fill="#8a6a3d"/>
+    <rect x="560" y="520" width="300" height="170" fill="url(#vol3)"/>
+    <rect x="560" y="520" width="300" height="12" fill="#7a5d35"/>
+    <rect x="1040" y="440" width="380" height="250" fill="url(#vol3)"/>
+    <rect x="1040" y="440" width="380" height="14" fill="#8a6a3d"/>
+    <!-- warm window light -->
+    <rect x="1080" y="520" width="90" height="120" fill="#e7c188" opacity="0.5"/>
+    <rect x="1210" y="520" width="90" height="120" fill="#e7c188" opacity="0.35"/>
+    <rect x="220" y="540" width="80" height="110" fill="#e7c188" opacity="0.3"/>
+  </g>
+  <!-- pool -->
+  <path d="M600 720 L1000 720 L1040 860 L560 860 Z" fill="url(#pool3)" opacity="0.9"/>
+  <path d="M600 720 L1000 720" stroke="#bfe3ea" stroke-opacity="0.4" stroke-width="2"/>
+  <!-- palm silhouettes -->
+  <g fill="#0c0a08">
+    <rect x="120" y="360" width="8" height="320"/>
+    <path d="M124 360 q-60 -30 -110 -10 q60 -6 110 20 q60 -34 118 -12 q-58 -2 -118 2z"/>
+    <rect x="1490" y="330" width="9" height="360"/>
+    <path d="M1494 330 q-70 -34 -130 -10 q70 -6 130 22 q70 -38 138 -14 q-66 -2 -138 2z"/>
+  </g>
+</svg>

@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" width="1600" height="1000" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="bg2" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0F0F11"/>
+      <stop offset="0.6" stop-color="#111319"/>
+      <stop offset="1" stop-color="#0b0c10"/>
+    </linearGradient>
+    <radialGradient id="glow2" cx="0.5" cy="0.62" r="0.6">
+      <stop offset="0" stop-color="#C1955C" stop-opacity="0.28"/>
+      <stop offset="1" stop-color="#C1955C" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="1600" height="1000" fill="url(#bg2)"/>
+  <rect width="1600" height="1000" fill="url(#glow2)"/>
+  <!-- perspective ground grid -->
+  <g stroke="#7ea3c9" stroke-opacity="0.22" stroke-width="1">
+    <line x1="800" y1="500" x2="-200" y2="1000"/>
+    <line x1="800" y1="500" x2="180" y2="1000"/>
+    <line x1="800" y1="500" x2="560" y2="1000"/>
+    <line x1="800" y1="500" x2="800" y2="1000"/>
+    <line x1="800" y1="500" x2="1040" y2="1000"/>
+    <line x1="800" y1="500" x2="1420" y2="1000"/>
+    <line x1="800" y1="500" x2="1800" y2="1000"/>
+    <line x1="0" y1="620" x2="1600" y2="620"/>
+    <line x1="0" y1="720" x2="1600" y2="720"/>
+    <line x1="0" y1="860" x2="1600" y2="860"/>
+  </g>
+  <!-- glowing building footprint rising into a wireframe volume -->
+  <g stroke="#D8AF71" fill="none" stroke-width="2" stroke-opacity="0.85">
+    <path d="M560 760 L1040 760 L1160 700 L680 700 Z"/>
+    <path d="M560 760 L560 560 L680 500 L680 700"/>
+    <path d="M1040 760 L1040 560 L1160 500 L1160 700"/>
+    <path d="M560 560 L1040 560 L1160 500 M680 500 L1160 500"/>
+    <path d="M1040 560 L1040 760 M680 700 L680 500"/>
+  </g>
+  <g stroke="#C1955C" stroke-opacity="0.4" stroke-width="1">
+    <rect x="620" y="600" width="120" height="90" fill="none"/>
+    <rect x="820" y="600" width="150" height="90" fill="none"/>
+  </g>
+</svg>
