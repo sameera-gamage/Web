@@ -5,62 +5,43 @@ $page_desc  = 'The land-to-handover lifecycle, service by service. Everything un
 require __DIR__ . '/inc/head.php';
 require __DIR__ . '/inc/nav.php';
 
-$services = [
-  ['Land &amp; Real Estate', 'We find and read the plot before you commit: setbacks, soil, access, services, and the honest cost of building on it.'],
-  ['Architecture', 'Homes and buildings designed around how you live and work, drawn to be built, not just to be admired.'],
-  ['Interior Design', 'The inside and the outside drawn by one hand, in one language, so nothing feels bolted on.'],
-  ['Construction', 'Our own site teams build what we drew, on one contract, to the drawing, on the schedule.'],
-  ['Project Management', 'One schedule, one budget, one person who answers the phone. We hold the whole thing together.'],
-  ['Branding', 'For developments and hospitality projects that need a name, a mark, and a story to sell.'],
-];
-
-$timeline = [
-  ['01', 'Land', 'Feasibility, survey, and the real cost to build.'],
-  ['02', 'Design', 'Architecture and interiors, drawn together.'],
-  ['03', 'Engineering', 'Structure and services, tested in-house.'],
-  ['04', 'Construction', 'Our teams build it, one contract.'],
-  ['05', 'Handover', 'The keys, and a home that works.'],
+$stages = [
+  ['01', 'Land & Real Estate', 'We find and read the plot before you commit: setbacks, soil, access, services, and the honest cost of building on it. The right piece of land is the first design decision.'],
+  ['02', 'Architecture', 'Homes and buildings designed around how you live and work, drawn to be built, not just to be admired. Every line is checked against how it will actually stand.'],
+  ['03', 'Interior Design', 'The inside and the outside drawn by one hand, in one language, so nothing feels bolted on. Materials, light, and furniture planned with the architecture, not after it.'],
+  ['04', 'Engineering', 'Structure and services designed in-house and tested against the design before the ground is broken, so what we draw is what we can pour.'],
+  ['05', 'Construction', 'Our own site teams build what we drew, on one contract, to the drawing, on the schedule. One team on site means one standard held.'],
+  ['06', 'Project Management', 'One schedule, one budget, one person who answers the phone. We hold the whole thing together, from the first survey to the day you get the keys.'],
 ];
 ?>
 <main>
   <section class="page-hero">
+    <div class="orbs">
+      <span class="orb" style="width:300px;height:300px;left:-40px;top:20%"></span>
+      <span class="orb" style="width:180px;height:180px;right:8%;top:12%;animation-duration:22s"></span>
+    </div>
     <div class="wrap">
       <p class="eyebrow reveal">Everything under one roof</p>
-      <h1 class="display reveal d1">One team, every stage.</h1>
+      <h1 class="display reveal d1">One team,<br>every stage.</h1>
       <p class="lead muted reveal d2" style="max-width:54ch;margin-top:1rem">From the land purchase to the front door, the same team carries your project. No handoffs, no gaps, no one to blame but us.</p>
     </div>
   </section>
 
-  <section class="section" style="padding-top:0">
+  <section class="section" style="padding-top:clamp(1rem,3vw,3rem)">
     <div class="wrap">
-      <div class="grid-3">
-        <?php foreach ($services as $i => $s): ?>
-          <div class="card reveal d<?= ($i % 3) + 1 ?>">
-            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6"/></svg>
-            <h3><?= $s[0] ?></h3>
-            <p><?= e($s[1]) ?></p>
+      <div class="tl" id="lifecycle">
+        <span class="tl-line"></span>
+        <?php foreach ($stages as $s): ?>
+          <div class="tl-item reveal">
+            <div class="tl-num"><?= e($s[0]) ?> — Stage</div>
+            <h3><?= e($s[1]) ?></h3>
+            <p><?= e($s[2]) ?></p>
           </div>
         <?php endforeach; ?>
       </div>
-    </div>
-  </section>
 
-  <section class="band alt section">
-    <div class="wrap">
-      <div class="section-head reveal">
-        <p class="eyebrow">The lifecycle</p>
-        <h2>Land to handover, in five moves.</h2>
-      </div>
-      <div class="process reveal">
-        <?php foreach ($timeline as $t): ?>
-          <div class="process-step">
-            <div class="process-num"><?= e($t[0]) ?></div>
-            <div><h3><?= e($t[1]) ?></h3><p><?= e($t[2]) ?></p></div>
-          </div>
-        <?php endforeach; ?>
-      </div>
-      <div class="center reveal" style="margin-top:2.6rem">
-        <a class="btn" href="<?= url('contact.php') ?>">Start your project</a>
+      <div class="center reveal" style="margin-top:clamp(3rem,6vw,5rem)">
+        <a class="btn btn-lg" href="<?= url('contact.php') ?>">Start your project</a>
       </div>
     </div>
   </section>

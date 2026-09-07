@@ -12,6 +12,7 @@ require __DIR__ . '/inc/nav.php';
 ?>
 <main>
   <section class="page-hero">
+    <div class="orbs"><span class="orb" style="width:320px;height:320px;right:2%;top:8%"></span></div>
     <div class="wrap">
       <p class="eyebrow reveal">Selected work</p>
       <h1 class="display reveal d1">Projects, land to keys.</h1>
@@ -27,19 +28,21 @@ require __DIR__ . '/inc/nav.php';
         <?php endforeach; ?>
       </div>
 
-      <div class="project-grid">
-        <?php foreach ($projects as $p): ?>
-          <article class="project reveal<?= $p['featured'] ? ' is-lead' : '' ?>" data-type="<?= e($p['type']) ?>" id="p<?= (int)$p['id'] ?>">
-            <a class="tile" href="<?= url('contact.php') ?>?about=<?= rawurlencode($p['title']) ?>">
-              <?php if ($p['featured']): ?><span class="tag-lead">Lead development</span><?php endif; ?>
-              <img class="tile-img" data-parallax="0.04" src="<?= cover_src($p['cover']) ?>" alt="<?= e($p['title']) ?>" loading="lazy">
-              <div class="tile-body">
-                <span class="tile-type"><?= e(ucfirst($p['type'])) ?></span>
-                <h3 class="tile-title"><?= e($p['title']) ?></h3>
-                <p class="tile-meta"><?= e($p['location']) ?> · <?= e($p['status']) ?></p>
-                <?php if (!empty($p['excerpt'])): ?><p class="tile-meta" style="margin-top:.5rem;color:var(--muted)"><?= e($p['excerpt']) ?></p><?php endif; ?>
-              </div>
+      <div class="prows">
+        <?php foreach ($projects as $i => $p): ?>
+          <article class="prow<?= $i % 2 ? ' rev' : '' ?> reveal" data-type="<?= e($p['type']) ?>" id="p<?= (int)$p['id'] ?>">
+            <a class="prow-media" data-cursor="View" href="<?= url('contact.php') ?>?about=<?= rawurlencode($p['title']) ?>">
+              <img data-parallax="0.05" src="<?= cover_src($p['cover']) ?>" alt="<?= e($p['title']) ?>" loading="lazy">
             </a>
+            <div>
+              <div class="prow-num"><?= str_pad((string)($i + 1), 2, '0', STR_PAD_LEFT) ?></div>
+              <?php if ($p['featured']): ?><span class="prow-lead-tag">Lead development</span><?php endif; ?>
+              <div class="prow-type"><?= e(ucfirst($p['type'])) ?></div>
+              <h2><?= e($p['title']) ?></h2>
+              <p class="prow-meta"><?= e($p['location']) ?> · <?= e($p['status']) ?></p>
+              <?php if (!empty($p['excerpt'])): ?><p class="muted" style="max-width:48ch"><?= e($p['excerpt']) ?></p><?php endif; ?>
+              <p style="margin-top:1.2rem"><a class="btn btn-ghost" href="<?= url('contact.php') ?>?about=<?= rawurlencode($p['title']) ?>">Enquire about this</a></p>
+            </div>
           </article>
         <?php endforeach; ?>
       </div>

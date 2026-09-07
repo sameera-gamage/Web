@@ -2,10 +2,6 @@
 require_once __DIR__ . '/inc/db.php';
 require_once __DIR__ . '/inc/helpers.php';
 
-$featured = db()->query(
-    "SELECT * FROM projects ORDER BY featured DESC, sort_order ASC LIMIT 6"
-)->fetchAll();
-
 $page_title = 'From the ground to the keys';
 $page_desc  = 'Excello is a design-build firm in Mount Lavinia that carries a project the whole way: land, design, engineering, construction, handover.';
 require __DIR__ . '/inc/head.php';
@@ -37,17 +33,27 @@ chapter(1, 'Chapter 01 — The land', 'From the ground<br><em>to the keys.</em>'
     'It starts with the land. An aerial descent onto a bare coastal plot, where a sweep of light draws the plan across the earth.', true);
 ?>
 
-<!-- ===== Manifesto + figures (modern, original) ===== -->
-<section class="manifesto">
+<!-- ===== MIDDLE 1 : the line — land to handover, drawn as you arrive ===== -->
+<section class="lineup">
+  <div class="orbs">
+    <span class="orb" style="width:340px;height:340px;left:-60px;top:10%"></span>
+    <span class="orb" style="width:220px;height:220px;right:4%;bottom:8%;animation-duration:22s"></span>
+  </div>
   <div class="wrap">
-    <p class="eyebrow reveal">Why Excello</p>
-    <p class="manifesto-lead reveal">Most projects break in the gaps between the architect, the engineer, and the builder. <span class="hl">We hold all three</span>, so nothing falls through.</p>
-    <p class="manifesto-body reveal d1">One team carries your project from the plot you buy to the door you open. One contract. One line of accountability. A finished home, not a to-do list.</p>
-    <div class="stats reveal d1">
-      <div class="stat"><div class="fig">5</div><div class="lbl">Stages, one team — land to handover</div></div>
-      <div class="stat"><div class="fig">6</div><div class="lbl">Disciplines in-house</div></div>
-      <div class="stat"><div class="fig">1</div><div class="lbl">Contract, one point of contact</div></div>
-      <div class="stat"><div class="fig">0</div><div class="lbl">Gaps to fall through</div></div>
+    <p class="eyebrow reveal">One line of accountability</p>
+    <h2 class="lineup-head reveal">Most projects break in the gaps. <span style="color:var(--bronze-hi)">We hold the line</span> from land to handover.</h2>
+    <div class="stageline reveal" id="stageline">
+      <span class="stbar"></span>
+      <div class="nodes">
+        <?php
+        $stages = [['01','Land'],['02','Design'],['03','Engineering'],['04','Construction'],['05','Handover']];
+        foreach ($stages as $s): ?>
+          <div class="node">
+            <span class="node-dot"></span>
+            <div><div class="node-num"><?= e($s[0]) ?></div><div class="node-name"><?= e($s[1]) ?></div></div>
+          </div>
+        <?php endforeach; ?>
+      </div>
     </div>
   </div>
 </section>
@@ -55,7 +61,7 @@ chapter(1, 'Chapter 01 — The land', 'From the ground<br><em>to the keys.</em>'
 <?php chapter(2, 'Chapter 02 — The plan rises', 'We shape it before we<br>pour a single stone.',
     'The flat plan rises into a clean model as the camera cranes from above to a low angle.'); ?>
 
-<!-- ===== Discipline marquee + approach list (modern, original) ===== -->
+<!-- ===== MIDDLE 2 : floating discipline cards + marquee ===== -->
 <div class="marquee" aria-hidden="true">
   <div class="marquee-row">
     <?php $disc = ['Land &amp; Real Estate','Architecture','Interior Design','Construction','Project Management','Branding'];
@@ -63,29 +69,33 @@ chapter(1, 'Chapter 01 — The land', 'From the ground<br><em>to the keys.</em>'
   </div>
 </div>
 
-<section class="approach section">
+<section class="floatsec">
+  <div class="orbs"><span class="orb" style="width:300px;height:300px;right:-40px;top:20%;animation-duration:20s"></span></div>
   <div class="wrap">
     <div class="section-head reveal">
       <p class="eyebrow">Everything under one roof</p>
       <h2>One team, every stage.</h2>
     </div>
-    <div class="approach-list">
+    <div class="float-cards">
       <?php
-      $items = [
-        ['01', 'Land &amp; Real Estate', 'We read the plot before you commit: setbacks, soil, access, and the honest cost to build.'],
-        ['02', 'Architecture', 'Homes designed around how you live, drawn to be built, not just admired.'],
-        ['03', 'Interior Design', 'The inside and outside drawn by one hand, in one language.'],
-        ['04', 'Construction', 'Our own teams build what we drew, on one contract, to the drawing.'],
-        ['05', 'Project Management', 'One schedule, one budget, one person who answers the phone.'],
-        ['06', 'Branding', 'For the developments and hospitality projects that need an identity.'],
+      $cards = [
+        ['01','Land &amp; Real Estate','We read the plot before you commit: setbacks, soil, access, and the honest cost to build.'],
+        ['02','Architecture','Homes designed around how you live, drawn to be built, not just admired.'],
+        ['03','Interior Design','The inside and outside drawn by one hand, in one language.'],
+        ['04','Construction','Our own teams build what we drew, on one contract, to the drawing.'],
+        ['05','Project Management','One schedule, one budget, one person who answers the phone.'],
+        ['06','Branding','For the developments and hospitality projects that need an identity.'],
       ];
-      foreach ($items as $it): ?>
-        <div class="approach-item reveal">
-          <span class="approach-num"><?= e($it[0]) ?></span>
-          <span class="approach-name"><?= $it[1] ?></span>
-          <span class="approach-desc"><?= e($it[2]) ?></span>
+      foreach ($cards as $c): ?>
+        <div class="float-card reveal">
+          <div class="fc-num"><?= e($c[0]) ?></div>
+          <h3><?= $c[1] ?></h3>
+          <p><?= e($c[2]) ?></p>
         </div>
       <?php endforeach; ?>
+    </div>
+    <div class="reveal" style="margin-top:2.6rem">
+      <a class="btn btn-ghost" href="<?= url('services.php') ?>">See the lifecycle</a>
     </div>
   </div>
 </section>
@@ -93,44 +103,21 @@ chapter(1, 'Chapter 01 — The land', 'From the ground<br><em>to the keys.</em>'
 <?php chapter(3, 'Chapter 03 — It becomes real', 'Design, engineering,<br>construction. <em>One team.</em>',
     'A wave of light sweeps the model and materials appear: timber, concrete, glass, water, a golden-hour sky.'); ?>
 
-<!-- ===== Selected work — draggable showcase slider (modern, original) ===== -->
-<section class="showcase">
+<!-- ===== MIDDLE 3 : kinetic promise (replaces the slider) ===== -->
+<section class="promise">
+  <div class="orbs">
+    <span class="orb" style="width:260px;height:260px;left:8%;top:16%"></span>
+    <span class="orb" style="width:180px;height:180px;right:12%;top:30%;animation-duration:24s"></span>
+    <span class="orb" style="width:120px;height:120px;left:22%;bottom:14%;animation-duration:19s"></span>
+  </div>
   <div class="wrap">
-    <div class="showcase-head">
-      <div class="reveal">
-        <p class="eyebrow">Selected work</p>
-        <h2>The work, land to keys.</h2>
-      </div>
-      <div class="slider-nav reveal d1">
-        <span class="slider-hint">Drag, or</span>
-        <button class="slider-btn" data-dir="-1" aria-label="Previous">
-          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M15 5l-7 7 7 7"/></svg>
-        </button>
-        <button class="slider-btn" data-dir="1" aria-label="Next">
-          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 5l7 7-7 7"/></svg>
-        </button>
-      </div>
+    <p class="eyebrow reveal">The promise</p>
+    <div class="promise-big reveal">
+      <span class="row">A finished home.</span>
+      <span class="row"><em>Not a to-do list.</em></span>
     </div>
-  </div>
-
-  <div class="slider" id="workSlider">
-    <div class="slider-track">
-      <?php foreach ($featured as $p): ?>
-        <a class="slide" href="<?= url('projects.php') ?>#p<?= (int)$p['id'] ?>">
-          <?php if ($p['featured']): ?><span class="slide-tag">Lead development</span><?php endif; ?>
-          <img class="slide-img" data-slide-parallax src="<?= cover_src($p['cover']) ?>" alt="<?= e($p['title']) ?>" loading="lazy">
-          <div class="slide-body">
-            <span class="slide-type"><?= e(ucfirst($p['type'])) ?></span>
-            <h3 class="slide-title"><?= e($p['title']) ?></h3>
-            <p class="slide-meta"><?= e($p['location']) ?> · <?= e($p['status']) ?></p>
-          </div>
-        </a>
-      <?php endforeach; ?>
-    </div>
-  </div>
-
-  <div class="wrap" style="margin-top:2.6rem">
-    <a class="btn btn-ghost reveal" href="<?= url('projects.php') ?>">All projects</a>
+    <p class="promise-sub reveal d1">When one team owns land, design, engineering, and construction, the keys arrive with nothing left undone.</p>
+    <a class="btn btn-lg reveal d1" href="<?= url('projects.php') ?>">See the work</a>
   </div>
 </section>
 

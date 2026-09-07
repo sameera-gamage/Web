@@ -106,7 +106,7 @@
   requestAnimationFrame(paint);
 
   /* ---------- reveal on scroll ---------- */
-  var revealEls = document.querySelectorAll('.reveal');
+  var revealEls = document.querySelectorAll('.reveal, .tl');   // .tl triggers its line draw
   if ('IntersectionObserver' in window && !reduced) {
     var io = new IntersectionObserver(function (entries) {
       entries.forEach(function (en) { if (en.isIntersecting) { en.target.classList.add('in'); io.unobserve(en.target); } });
@@ -171,7 +171,7 @@
   /* ---------- project filters (projects page) ---------- */
   var filterBar = document.querySelector('.filters');
   if (filterBar) {
-    var tiles = [].slice.call(document.querySelectorAll('.project'));
+    var tiles = [].slice.call(document.querySelectorAll('.project, .prow'));
     filterBar.addEventListener('click', function (e) {
       var btn = e.target.closest('.filter'); if (!btn) return;
       filterBar.querySelectorAll('.filter').forEach(function (b) { b.classList.remove('is-on'); });
@@ -179,6 +179,36 @@
       var want = btn.getAttribute('data-filter');
       tiles.forEach(function (t) { t.classList.toggle('is-hidden', !(want === 'all' || t.getAttribute('data-type') === want)); });
     });
+  }
+
+  /* ---------- custom cursor (desktop, fine pointer) ---------- */
+  if (matchMedia('(pointer:fine)').matches && !reduced) {
+    var docEl = document.documentElement;
+    docEl.classList.add('has-cursor');
+    var dot = document.createElement('div'); dot.className = 'cursor-dot';
+    var ring = document.createElement('div'); ring.className = 'cursor-ring';
+    var label = document.createElement('div'); label.className = 'cursor-label';
+    document.body.appendChild(dot); document.body.appendChild(ring); document.body.appendChild(label);
+
+    var mx = innerWidth / 2, my = innerHeight / 2, rx = mx, ry = my;
+    addEventListener('pointermove', function (e) {
+      mx = e.clientX; my = e.clientY;
+      dot.style.transform = 'translate3d(' + mx + 'px,' + my + 'px,0) translate(-50%,-50%)';
+      label.style.transform = 'translate3d(' + mx + 'px,' + (my + 44) + 'px,0) translate(-50%,-50%)';
+      var t = e.target.closest('a,button,.tile,.prow-media,.float-card,.slider-btn,[data-cursor]');
+      ring.classList.toggle('hover', !!t && !t.hasAttribute('data-cursor'));
+      var media = t && t.hasAttribute('data-cursor');
+      ring.classList.toggle('media', !!media);
+      if (media) { label.textContent = t.getAttribute('data-cursor') || 'View'; label.classList.add('show'); }
+      else { label.classList.remove('show'); }
+    }, { passive: true });
+    addEventListener('pointerdown', function () { ring.style.opacity = '.5'; });
+    addEventListener('pointerup', function () { ring.style.opacity = '1'; });
+    (function ring_raf() {
+      rx += (mx - rx) * 0.18; ry += (my - ry) * 0.18;
+      ring.style.transform = 'translate3d(' + rx.toFixed(2) + 'px,' + ry.toFixed(2) + 'px,0) translate(-50%,-50%)';
+      requestAnimationFrame(ring_raf);
+    })();
   }
 
   /* ---------- cost calculator (insights page) ---------- */
