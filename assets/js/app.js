@@ -45,7 +45,7 @@
 
   /* ---- preloader ---- */
   var pre = $('.preloader');
-  function boot() { reveals(); heroIn(); kinetic(); heroParallax(); lines(); navOverHero(); carousels(); if (window.ScrollTrigger) ScrollTrigger.refresh(); }
+  function boot() { reveals(); heroIn(); kinetic(); heroParallax(); lines(); navOverHero(); carousels(); parallax(); voyage(); routeDraw(); petals(); if (window.ScrollTrigger) ScrollTrigger.refresh(); }
   if (pre && motion) {
     gsap.timeline({ onComplete: function () { pre.style.display = 'none'; ScrollTrigger.refresh(); } })
       .to('.pl-bar', { width: '100%', duration: .8, ease: 'power1.inOut' })
@@ -139,6 +139,63 @@
         count.textContent = Math.min(slides.length, i + 1);
       }, { passive: true });
     });
+  }
+
+  /* ---- generic parallax (origins, gulls, inner pages) ---- */
+  function parallax() {
+    if (!motion) return;
+    $$('[data-parallax]').forEach(function (el) {
+      var sp = parseFloat(el.getAttribute('data-parallax')) || 0.1;
+      var host = el.closest('.origin-media, .voyage, .prow-media, .feature-media, .person-photo') || el;
+      gsap.fromTo(el, { yPercent: -sp * 60 }, { yPercent: sp * 60, ease: 'none',
+        scrollTrigger: { trigger: host, start: 'top bottom', end: 'bottom top', scrub: true } });
+    });
+  }
+
+  /* ---- the materials voyage: ship + truck sail across on scroll ---- */
+  function voyage() {
+    if (!motion) return;
+    var v = $('#voyage');
+    if (v) {
+      var ship = $('[data-ship]', v), wake = $('[data-wake]', v);
+      if (ship) gsap.fromTo(ship, { x: '-32vw' }, { x: '112vw', ease: 'none', scrollTrigger: { trigger: v, start: 'top bottom', end: 'bottom top', scrub: 1 } });
+      if (wake) gsap.fromTo(wake, { x: '-60vw' }, { x: '86vw', ease: 'none', scrollTrigger: { trigger: v, start: 'top bottom', end: 'bottom top', scrub: 1 } });
+    }
+    var br = $('#byroad');
+    if (br) { var truck = $('[data-truck]', br);
+      if (truck) gsap.fromTo(truck, { x: '-30vw' }, { x: '114vw', ease: 'none', scrollTrigger: { trigger: br, start: 'top bottom', end: 'bottom top', scrub: 1 } }); }
+  }
+
+  /* ---- the route: draw the line, sail a marker along it ---- */
+  function routeDraw() {
+    if (!motion) return;
+    var line = document.getElementById('routeLine'), marker = document.getElementById('routeMarker');
+    if (!line || !line.getTotalLength) return;
+    var len = line.getTotalLength();
+    line.style.strokeDasharray = len; line.style.strokeDashoffset = len;
+    var s = line.getPointAtLength(0);
+    if (marker) marker.setAttribute('transform', 'translate(' + s.x + ',' + s.y + ')');
+    ScrollTrigger.create({ trigger: '#route', start: 'top 68%', end: 'bottom 55%', scrub: 1,
+      onUpdate: function (self) {
+        var p = self.progress; line.style.strokeDashoffset = len * (1 - p);
+        if (marker) { var pt = line.getPointAtLength(len * p); marker.setAttribute('transform', 'translate(' + pt.x + ',' + pt.y + ')'); }
+      } });
+  }
+
+  /* ---- SURPRISE: bougainvillea petals fall when the promise arrives ---- */
+  function petals() {
+    var host = $('#petals'); if (!host || !motion) return;
+    ScrollTrigger.create({ trigger: '#promise', start: 'top 60%', once: true, onEnter: function () {
+      for (var i = 0; i < 20; i++) {
+        var el = document.createElement('span'); el.className = 'petal'; host.appendChild(el);
+        gsap.set(el, { left: (Math.random() * 100) + '%', top: '-8%', opacity: 0, scale: 0.7 + Math.random() * 0.7 });
+        gsap.to(el, { y: '116vh', x: (Math.random() * 180 - 90), rotation: Math.random() * 720 - 360,
+          duration: 4 + Math.random() * 3.5, ease: 'none', delay: Math.random() * 2.4,
+          onComplete: function () { var t = this.targets()[0]; if (t) t.remove(); } });
+        gsap.to(el, { opacity: 1, duration: 0.8, delay: Math.random() * 2.4 });
+        gsap.to(el, { opacity: 0, duration: 1.4, delay: 3.6 + Math.random() * 2.2 });
+      }
+    } });
   }
 
   /* ---- project filters ---- */

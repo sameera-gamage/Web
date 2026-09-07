@@ -76,6 +76,75 @@ require __DIR__ . '/inc/head.php';
   </div>
 </section>
 
+<!-- ============ THE MATERIALS JOURNEY ============ -->
+<div class="kinetic panel-cream"><div class="kw outline" data-kinetic="-16">THE JOURNEY OF MATERIALS — THE JOURNEY OF MATERIALS —</div></div>
+
+<section class="section panel-cream">
+  <div class="wrap">
+    <div class="shead rv rv-up"><p class="eyebrow">The materials</p><h2>Every material<br>has an origin.</h2>
+      <p class="lead muted" style="margin-top:1rem;max-width:44ch">We choose where each thing comes from: the mill, the quarry, the mill-cut glass. The right material is the difference between a house and a home that lasts.</p></div>
+    <div class="sourced-grid">
+      <?php
+      $orig = [
+        ['Timber','ph/timber.svg','Cut and seasoned, then joined by hand.'],
+        ['Stone & marble','ph/quarry.svg','Quarried in blocks, faced on site.'],
+        ['Steel & glass','ph/detail.svg','Milled to the millimetre, glazed for the sea.'],
+      ];
+      foreach ($orig as $o): ?>
+        <article class="origin">
+          <div class="origin-media clip-b"><img data-parallax="0.06" src="<?= asset('img/'.$o[1]) ?>" alt="<?= e($o[0]) ?>"></div>
+          <h3 class="rv rv-up"><?= e($o[0]) ?></h3>
+          <p class="rv rv-up"><?= e($o[2]) ?></p>
+        </article>
+      <?php endforeach; ?>
+    </div>
+  </div>
+</section>
+
+<!-- BY SEA — a cargo ship sails across as you scroll (surprise) -->
+<section class="voyage" id="voyage">
+  <div class="voyage-copy">
+    <p class="eyebrow rv rv-up">By sea</p>
+    <h2 class="rv rv-up">It arrives by sea.</h2>
+    <p class="lead muted rv rv-up" style="max-width:40ch;margin:1rem auto 0">Container by container, across the Indian Ocean to the Port of Colombo.</p>
+  </div>
+  <div class="wake" data-wake></div>
+  <div class="ship" data-ship><div class="bob"><img src="<?= ph('ship-sprite.svg') ?>" alt="A cargo ship"></div></div>
+  <span class="gull" style="top:22vh;left:18vw" data-parallax="0.2">✒</span>
+  <span class="gull" style="top:28vh;left:70vw" data-parallax="0.3">✒</span>
+  <div class="voyage-sea"></div>
+</section>
+
+<!-- THE ROUTE — a line draws from the port to Mount Lavinia, a marker sails it -->
+<section class="section panel-sky-2 route" id="route">
+  <div class="wrap">
+    <div class="shead center rv rv-up" style="margin-inline:auto"><p class="eyebrow">The route</p><h2>Port of Colombo to Mount&nbsp;Lavinia.</h2></div>
+    <svg viewBox="0 0 1000 420" role="img" aria-label="Route from the port to the site">
+      <path class="coast" d="M0,120 C220,90 300,180 480,150 C680,118 820,210 1000,150 L1000,420 L0,420 Z"/>
+      <path class="route-path" id="routeDash" d="M235,120 C360,150 300,250 560,300 C700,326 760,300 815,320"/>
+      <path class="route-solid" id="routeLine" d="M235,120 C360,150 300,250 560,300 C700,326 760,300 815,320"/>
+      <g class="route-marker" id="routeMarker" transform="translate(235,120)"><circle r="9" class="pin"/><circle r="16" class="pin-ring"/></g>
+      <g><circle cx="235" cy="120" r="7" class="pin"/><circle cx="235" cy="120" r="14" class="pin-ring"/>
+         <text x="235" y="96" text-anchor="middle" class="rlabel">Port of Colombo</text></g>
+      <g><circle cx="815" cy="320" r="7" class="pin"/><circle cx="815" cy="320" r="14" class="pin-ring"/>
+         <text x="815" y="360" text-anchor="middle" class="rlabel">Mount Lavinia</text>
+         <text x="815" y="382" text-anchor="middle" class="rsub">the site</text></g>
+    </svg>
+  </div>
+</section>
+
+<!-- BY ROAD — a truck drives the last stretch -->
+<section class="byroad" id="byroad">
+  <div class="byroad-copy">
+    <p class="eyebrow rv rv-up">By road</p>
+    <h2 class="rv rv-up">Then by road, to the site.</h2>
+    <p class="lead muted rv rv-up" style="max-width:38ch;margin:1rem auto 0">Down the coast road, past the palms, to the plot where it all began.</p>
+  </div>
+  <div class="byroad-land"></div>
+  <div class="byroad-road"></div>
+  <div class="truck" data-truck><div class="bob"><img src="<?= ph('truck-sprite.svg') ?>" alt="A delivery truck"></div></div>
+</section>
+
 <!-- ============ KINETIC BAND ============ -->
 <div class="kinetic panel-ink"><div class="kw" data-kinetic="18">BRICK BY BRICK · <span class="outline">BRICK BY BRICK</span> · BRICK BY BRICK ·</div></div>
 
@@ -169,8 +238,9 @@ require __DIR__ . '/inc/head.php';
 </section>
 
 <!-- ============ BIG STATEMENT (ink) ============ -->
-<section class="section panel-ink center" style="overflow:hidden;position:relative">
+<section class="section panel-ink center" id="promise" style="overflow:hidden;position:relative">
   <?= flower('tl') ?><?= flower('br') ?>
+  <div class="petals" id="petals" aria-hidden="true"></div>
   <div class="wrap">
     <span class="script rv rv-up" style="font-size:clamp(2rem,5vw,3.4rem);color:var(--gold-hi)">the promise</span>
     <h2 class="rv rv-up" style="color:var(--cream);font-size:clamp(2.4rem,7vw,5.4rem);margin:.4rem 0 1.4rem">A finished home.<br>Not a to-do list.</h2>
