@@ -3,141 +3,138 @@ require_once __DIR__ . '/inc/db.php';
 require_once __DIR__ . '/inc/helpers.php';
 
 $featured = db()->query(
-    "SELECT * FROM projects WHERE featured = 1 OR sort_order <= 4 ORDER BY featured DESC, sort_order ASC LIMIT 4"
+    "SELECT * FROM projects ORDER BY featured DESC, sort_order ASC LIMIT 6"
 )->fetchAll();
 
 $page_title = 'From the ground to the keys';
 $page_desc  = 'Excello is a design-build firm in Mount Lavinia that carries a project the whole way: land, design, engineering, construction, handover.';
 require __DIR__ . '/inc/head.php';
-require __DIR__ . '/inc/nav.php';
+?>
+<div class="progress" id="progress"></div>
+<?php require __DIR__ . '/inc/nav.php'; ?>
 
-/* the four film chapters */
-$chapters = [
-  1 => ['idx' => 'Chapter 01', 'title' => 'It starts with the land.',
-        'sub' => 'An aerial descent onto a bare coastal plot. A sweep of light draws the plan across the earth.'],
-  2 => ['idx' => 'Chapter 02', 'title' => 'We shape it before we pour a single stone.',
-        'sub' => 'The flat plan rises into a clean model as the camera cranes from above to a low angle.'],
-  3 => ['idx' => 'Chapter 03', 'title' => 'Design, engineering, construction. One team.',
-        'sub' => 'A wave of light sweeps the model and materials appear: timber, concrete, glass, water, a golden sky.'],
-  4 => ['idx' => 'Chapter 04', 'title' => 'Then we hand you the keys.',
-        'sub' => 'The door opens and the camera glides inside, resting on the ocean through the glass.'],
-];
-
-function render_chapter(int $n, array $c, bool $intro = false): void { ?>
-  <section class="chapter" id="ch<?= $n ?>">
+<?php
+/* one continuous film; chapter 01 doubles as the opening hero */
+function chapter(int $n, string $index, string $title, string $sub, bool $hero = false): void { ?>
+  <section class="chapter<?= $hero ? ' is-hero' : '' ?>" id="ch<?= $n ?>">
     <div class="chapter-stage">
-      <div class="chapter-media"><?= film_media($n, $c['title']) ?></div>
-      <?php if ($intro): ?>
-        <div class="film-intro">
-          <p class="eyebrow"><?= e(SITE_NAME) ?> · Mount Lavinia</p>
-          <h1 class="display">From the ground<br><em>to the keys.</em></h1>
-        </div>
-        <div class="scroll-cue"><span class="line"></span>Scroll to begin</div>
-      <?php endif; ?>
+      <div class="chapter-media"><?= film_media($n, strip_tags($title)) ?></div>
       <div class="chapter-copy">
         <div class="wrap">
-          <span class="chapter-index"><?= e($c['idx']) ?></span>
-          <h2 class="chapter-title"><?= e($c['title']) ?></h2>
-          <p class="chapter-sub"><?= e($c['sub']) ?></p>
+          <span class="chapter-index"><?= e($index) ?></span>
+          <?php if ($hero): ?><h1 class="chapter-title"><?= $title ?></h1>
+          <?php else: ?><h2 class="chapter-title"><?= $title ?></h2><?php endif; ?>
+          <p class="chapter-sub"><?= e($sub) ?></p>
         </div>
       </div>
+      <?php if ($hero): ?><div class="scroll-cue"><span class="line"></span>Scroll to begin</div><?php endif; ?>
     </div>
   </section>
 <?php }
 
-render_chapter(1, $chapters[1], true);
+/* ---- CH 01 : the land (hero) ---- */
+chapter(1, 'Chapter 01 — The land', 'From the ground<br><em>to the keys.</em>',
+    'It starts with the land. An aerial descent onto a bare coastal plot, where a sweep of light draws the plan across the earth.', true);
 ?>
 
-<!-- ===== Our process (from the current site) ===== -->
-<section class="band section" id="process">
+<!-- ===== Manifesto + figures (modern, original) ===== -->
+<section class="manifesto">
+  <div class="wrap">
+    <p class="eyebrow reveal">Why Excello</p>
+    <p class="manifesto-lead reveal">Most projects break in the gaps between the architect, the engineer, and the builder. <span class="hl">We hold all three</span>, so nothing falls through.</p>
+    <p class="manifesto-body reveal d1">One team carries your project from the plot you buy to the door you open. One contract. One line of accountability. A finished home, not a to-do list.</p>
+    <div class="stats reveal d1">
+      <div class="stat"><div class="fig">5</div><div class="lbl">Stages, one team — land to handover</div></div>
+      <div class="stat"><div class="fig">6</div><div class="lbl">Disciplines in-house</div></div>
+      <div class="stat"><div class="fig">1</div><div class="lbl">Contract, one point of contact</div></div>
+      <div class="stat"><div class="fig">0</div><div class="lbl">Gaps to fall through</div></div>
+    </div>
+  </div>
+</section>
+
+<?php chapter(2, 'Chapter 02 — The plan rises', 'We shape it before we<br>pour a single stone.',
+    'The flat plan rises into a clean model as the camera cranes from above to a low angle.'); ?>
+
+<!-- ===== Discipline marquee + approach list (modern, original) ===== -->
+<div class="marquee" aria-hidden="true">
+  <div class="marquee-row">
+    <?php $disc = ['Land &amp; Real Estate','Architecture','Interior Design','Construction','Project Management','Branding'];
+    for ($k = 0; $k < 2; $k++) foreach ($disc as $d) echo '<span class="marquee-item">' . $d . '</span>'; ?>
+  </div>
+</div>
+
+<section class="approach section">
   <div class="wrap">
     <div class="section-head reveal">
-      <p class="eyebrow">Our process</p>
-      <h2>One line of accountability, land to handover.</h2>
-      <p class="lead muted">Most projects break in the gaps between the architect, the engineer, and the builder. We hold all three, so the story never drops between hands.</p>
+      <p class="eyebrow">Everything under one roof</p>
+      <h2>One team, every stage.</h2>
     </div>
-    <div class="process reveal">
+    <div class="approach-list">
       <?php
-      $steps = [
-        ['01', 'Land & feasibility', 'We read the plot before you commit: setbacks, soil, access, and what it will really cost to build.'],
-        ['02', 'Design', 'Architecture and interiors drawn together, so the home you picture is the home that gets built.'],
-        ['03', 'Engineering', 'Structure and services designed in-house, tested against the design before the ground is broken.'],
-        ['04', 'Construction', 'Our own site teams build what we drew. One contract, one point of contact, no finger-pointing.'],
-        ['05', 'Handover', 'A finished home, not a to-do list. We hand you the keys and everything works.'],
+      $items = [
+        ['01', 'Land &amp; Real Estate', 'We read the plot before you commit: setbacks, soil, access, and the honest cost to build.'],
+        ['02', 'Architecture', 'Homes designed around how you live, drawn to be built, not just admired.'],
+        ['03', 'Interior Design', 'The inside and outside drawn by one hand, in one language.'],
+        ['04', 'Construction', 'Our own teams build what we drew, on one contract, to the drawing.'],
+        ['05', 'Project Management', 'One schedule, one budget, one person who answers the phone.'],
+        ['06', 'Branding', 'For the developments and hospitality projects that need an identity.'],
       ];
-      foreach ($steps as $s): ?>
-        <div class="process-step">
-          <div class="process-num"><?= e($s[0]) ?></div>
-          <div><h3><?= e($s[1]) ?></h3><p><?= e($s[2]) ?></p></div>
+      foreach ($items as $it): ?>
+        <div class="approach-item reveal">
+          <span class="approach-num"><?= e($it[0]) ?></span>
+          <span class="approach-name"><?= $it[1] ?></span>
+          <span class="approach-desc"><?= e($it[2]) ?></span>
         </div>
       <?php endforeach; ?>
     </div>
   </div>
 </section>
 
-<?php render_chapter(2, $chapters[2]); ?>
+<?php chapter(3, 'Chapter 03 — It becomes real', 'Design, engineering,<br>construction. <em>One team.</em>',
+    'A wave of light sweeps the model and materials appear: timber, concrete, glass, water, a golden-hour sky.'); ?>
 
-<!-- ===== What we do (from the current site) ===== -->
-<section class="band alt section" id="what-we-do">
+<!-- ===== Selected work — draggable showcase slider (modern, original) ===== -->
+<section class="showcase">
   <div class="wrap">
-    <div class="section-head center reveal">
-      <p class="eyebrow">What we do</p>
-      <h2>Everything under one roof.</h2>
+    <div class="showcase-head">
+      <div class="reveal">
+        <p class="eyebrow">Selected work</p>
+        <h2>The work, land to keys.</h2>
+      </div>
+      <div class="slider-nav reveal d1">
+        <span class="slider-hint">Drag, or</span>
+        <button class="slider-btn" data-dir="-1" aria-label="Previous">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M15 5l-7 7 7 7"/></svg>
+        </button>
+        <button class="slider-btn" data-dir="1" aria-label="Next">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 5l7 7-7 7"/></svg>
+        </button>
+      </div>
     </div>
-    <div class="grid-3">
-      <?php
-      $svc = [
-        ['Land &amp; Real Estate', 'Finding, reading, and securing the right plot, coast to city.'],
-        ['Architecture', 'Homes and buildings designed around how you actually live and work.'],
-        ['Interior Design', 'The inside drawn with the outside, one hand, one language.'],
-        ['Construction', 'Our own teams build it, on one contract, to the drawing.'],
-        ['Project Management', 'One schedule, one budget, one person who answers the phone.'],
-        ['Branding', 'For the developments and hospitality projects that need an identity.'],
-      ];
-      foreach ($svc as $i => $s): ?>
-        <div class="card reveal d<?= ($i % 3) + 1 ?>">
-          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6"/></svg>
-          <h3><?= $s[0] ?></h3>
-          <p><?= e($s[1]) ?></p>
-        </div>
+  </div>
+
+  <div class="slider" id="workSlider">
+    <div class="slider-track">
+      <?php foreach ($featured as $p): ?>
+        <a class="slide" href="<?= url('projects.php') ?>#p<?= (int)$p['id'] ?>">
+          <?php if ($p['featured']): ?><span class="slide-tag">Lead development</span><?php endif; ?>
+          <img class="slide-img" data-slide-parallax src="<?= cover_src($p['cover']) ?>" alt="<?= e($p['title']) ?>" loading="lazy">
+          <div class="slide-body">
+            <span class="slide-type"><?= e(ucfirst($p['type'])) ?></span>
+            <h3 class="slide-title"><?= e($p['title']) ?></h3>
+            <p class="slide-meta"><?= e($p['location']) ?> · <?= e($p['status']) ?></p>
+          </div>
+        </a>
       <?php endforeach; ?>
     </div>
-    <div class="center reveal" style="margin-top:2.6rem">
-      <a class="btn btn-ghost" href="<?= url('services.php') ?>">See the full lifecycle</a>
-    </div>
+  </div>
+
+  <div class="wrap" style="margin-top:2.6rem">
+    <a class="btn btn-ghost reveal" href="<?= url('projects.php') ?>">All projects</a>
   </div>
 </section>
 
-<?php render_chapter(3, $chapters[3]); ?>
-
-<!-- ===== Selected Projects (from the current site) ===== -->
-<section class="band section" id="projects">
-  <div class="wrap">
-    <div class="section-head reveal">
-      <p class="eyebrow">Selected projects</p>
-      <h2>The work, land to keys.</h2>
-    </div>
-    <div class="project-grid">
-      <?php foreach ($featured as $i => $p): ?>
-        <article class="project reveal<?= $p['featured'] ? ' is-lead' : '' ?>" data-type="<?= e($p['type']) ?>">
-          <a class="tile" href="<?= url('projects.php') ?>#p<?= (int)$p['id'] ?>">
-            <?php if ($p['featured']): ?><span class="tag-lead">Lead development</span><?php endif; ?>
-            <img class="tile-img" src="<?= cover_src($p['cover']) ?>" alt="<?= e($p['title']) ?>" loading="lazy">
-            <div class="tile-body">
-              <span class="tile-type"><?= e(ucfirst($p['type'])) ?></span>
-              <h3 class="tile-title"><?= e($p['title']) ?></h3>
-              <p class="tile-meta"><?= e($p['location']) ?> · <?= e($p['status']) ?></p>
-            </div>
-          </a>
-        </article>
-      <?php endforeach; ?>
-    </div>
-    <div class="center reveal" style="margin-top:2.6rem">
-      <a class="btn btn-ghost" href="<?= url('projects.php') ?>">All projects</a>
-    </div>
-  </div>
-</section>
-
-<?php render_chapter(4, $chapters[4]); ?>
+<?php chapter(4, 'Chapter 04 — The handover', 'Then we hand<br>you the <em>keys.</em>',
+    'The door opens and the camera glides inside, resting on the ocean through the glass.'); ?>
 
 <?php require __DIR__ . '/inc/footer.php'; ?>

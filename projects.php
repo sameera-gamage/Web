@@ -32,7 +32,7 @@ require __DIR__ . '/inc/nav.php';
           <article class="project reveal<?= $p['featured'] ? ' is-lead' : '' ?>" data-type="<?= e($p['type']) ?>" id="p<?= (int)$p['id'] ?>">
             <a class="tile" href="<?= url('contact.php') ?>?about=<?= rawurlencode($p['title']) ?>">
               <?php if ($p['featured']): ?><span class="tag-lead">Lead development</span><?php endif; ?>
-              <img class="tile-img" src="<?= cover_src($p['cover']) ?>" alt="<?= e($p['title']) ?>" loading="lazy">
+              <img class="tile-img" data-parallax="0.04" src="<?= cover_src($p['cover']) ?>" alt="<?= e($p['title']) ?>" loading="lazy">
               <div class="tile-body">
                 <span class="tile-type"><?= e(ucfirst($p['type'])) ?></span>
                 <h3 class="tile-title"><?= e($p['title']) ?></h3>
