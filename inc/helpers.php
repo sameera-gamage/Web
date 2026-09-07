@@ -35,6 +35,15 @@ function cover_src(string $cover, string $fallback = 'chapter-04.jpg'): string
     return asset('img/posters/chapter-04.svg');
 }
 
+/* Placeholder image from the light Mediterranean set (assets/img/ph/). */
+function ph(string $name): string { return asset('img/ph/' . $name); }
+
+/* A bougainvillea corner overlay. $pos = tl|tr|bl|br */
+function flower(string $pos): string
+{
+    return '<img class="flower ' . e($pos) . '" src="' . ph('flower-corner.svg') . '" alt="" aria-hidden="true">';
+}
+
 /* Current page slug for nav highlighting. */
 function current_page(): string
 {
