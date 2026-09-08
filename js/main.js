@@ -210,25 +210,48 @@ function initHeroVideo() {
     if (p && typeof p.then === 'function') p.then(() => video.pause()).catch(() => {});
   }
 
+  function onVideoReady() {
+    duration = video.duration || 0;
+    prime();
+    requestSeek(Math.min(duration - 0.03, Math.max(0, latestP * duration)));
+  }
+
   /* Fetched as a Blob rather than left to the browser's native Range
-     requests: some hosts (this one included, under Python's dev server)
-     answer a Range request with a plain 200 instead of 206, and Chrome
-     aborts the video load outright rather than falling back. A Blob works
-     against any host. The poster is already on screen, so this loads
-     quietly behind it and the video fades in the moment it's ready. */
+     requests: some hosts (Python's dev server among them) answer a Range
+     request with a plain 200 instead of 206, and Chrome aborts the video
+     load outright rather than falling back. A Blob works against any host.
+     The poster is already on screen, so this loads quietly behind it and
+     the video fades in the moment it's ready.
+
+     `fetch` itself throws on file:// (opening index.html straight off disk),
+     so that case skips the Blob step entirely and assigns the URL directly —
+     there's no HTTP Range involved when the browser is just reading a local
+     file, so plain `src` seeking already works there. */
   function startVideo() {
-    const url = innerWidth < 700 ? 'video/hero-480.mp4' : 'video/hero-720.mp4';
-    fetch(url)
-      .then((res) => { if (!res.ok) throw new Error('hero video ' + res.status); return res.blob(); })
-      .then((blob) => {
-        video.addEventListener('loadedmetadata', () => {
-          duration = video.duration || 0;
-          prime();
-          requestSeek(Math.min(duration - 0.03, Math.max(0, latestP * duration)));
-        }, { once: true });
-        video.src = URL.createObjectURL(blob);
-      })
-      .catch(() => { video.style.display = 'none'; });
+    const primaryUrl = innerWidth < 700 ? 'video/hero-480.mp4' : 'video/hero-720.mp4';
+    const fallbackUrl = 'video/hero-480.mp4';
+
+    if (location.protocol === 'file:') {
+      video.addEventListener('loadedmetadata', onVideoReady, { once: true });
+      video.addEventListener('error', () => { video.style.display = 'none'; }, { once: true });
+      video.preload = 'auto';
+      video.src = primaryUrl;
+      video.load();
+    } else {
+      const load = (url, isFallback) => fetch(url)
+        .then((res) => { if (!res.ok) throw new Error('hero video ' + res.status); return res.blob(); })
+        .then((blob) => {
+          video.addEventListener('loadedmetadata', onVideoReady, { once: true });
+          video.preload = 'auto';
+          video.src = URL.createObjectURL(blob);
+          video.load();
+        })
+        .catch((err) => {
+          if (!isFallback && url !== fallbackUrl) return load(fallbackUrl, true);
+          video.style.display = 'none';
+        });
+      load(primaryUrl, false);
+    }
     addEventListener('pointerdown', prime, { once: true, passive: true });
     addEventListener('touchstart', prime, { once: true, passive: true });
   }
