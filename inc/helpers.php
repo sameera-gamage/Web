@@ -38,6 +38,9 @@ function cover_src(string $cover, string $fallback = 'chapter-04.jpg'): string
 /* Placeholder image from the light Mediterranean set (assets/img/ph/). */
 function ph(string $name): string { return asset('img/ph/' . $name); }
 
+/* Real (AI-enhanced) project photo from assets/img/real/. */
+function rimg(string $name): string { return asset('img/real/' . $name); }
+
 /* A bougainvillea corner overlay. $pos = tl|tr|bl|br */
 function flower(string $pos): string
 {

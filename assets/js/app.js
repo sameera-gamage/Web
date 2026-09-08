@@ -11,12 +11,13 @@
   var $  = function (s, c) { return (c || document).querySelector(s); };
   var $$ = function (s, c) { return [].slice.call((c || document).querySelectorAll(s)); };
   if (window.gsap && window.ScrollTrigger) gsap.registerPlugin(ScrollTrigger);
+  if (window.gsap) gsap.config({ nullTargetWarn: false });
   if (reduced || !desktop) document.documentElement.classList.add('is-static');
 
-  /* ---- Lenis + GSAP ticker ---- */
+  /* ---- Lenis + GSAP ticker (tuned for a smooth, weighted feel) ---- */
   var lenis = null;
   if (!reduced && window.Lenis) {
-    lenis = new Lenis({ lerp: 0.09, wheelMultiplier: 1, smoothWheel: true, touchMultiplier: 1.4 });
+    lenis = new Lenis({ lerp: 0.075, wheelMultiplier: 0.95, smoothWheel: true, touchMultiplier: 1.5 });
     if (window.ScrollTrigger) lenis.on('scroll', ScrollTrigger.update);
     gsap.ticker.add(function (t) { lenis.raf(t * 1000); });
     gsap.ticker.lagSmoothing(0);
