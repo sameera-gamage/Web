@@ -46,7 +46,30 @@
 
   /* ---- preloader ---- */
   var pre = $('.preloader');
-  function boot() { reveals(); kinetic(); vfilm(); lines(); navOverHero(); carousels(); parallax(); petals(); if (window.ScrollTrigger) ScrollTrigger.refresh(); }
+  function boot() { reveals(); heroIn(); heroParallax(); kinetic(); playInView(); vbands(); lines(); navOverHero(); carousels(); parallax(); petals(); if (window.ScrollTrigger) ScrollTrigger.refresh(); }
+
+  /* play videos only while on screen — keeps the smooth scroll buttery */
+  function playInView() {
+    $$('.hero-media video, .vband video').forEach(function (v) {
+      v.muted = true;
+      if ('IntersectionObserver' in window) {
+        new IntersectionObserver(function (es) { es.forEach(function (e) {
+          if (e.isIntersecting) { var p = v.play && v.play(); if (p && p.catch) p.catch(function () {}); } else v.pause();
+        }); }, { threshold: 0.12 }).observe(v);
+      } else { var p = v.play && v.play(); if (p && p.catch) p.catch(function () {}); }
+    });
+  }
+
+  /* full-bleed video moments: caption rise + gentle parallax */
+  function vbands() {
+    if (!motion) return;
+    $$('.vband').forEach(function (b) {
+      var v = $('video', b);
+      if (v) gsap.fromTo(v, { yPercent: -5, scale: 1.08 }, { yPercent: 5, scale: 1.14, ease: 'none', scrollTrigger: { trigger: b, start: 'top bottom', end: 'bottom top', scrub: true } });
+      var cap = $('.vband-cap', b);
+      if (cap) gsap.from(cap.children, { y: 46, opacity: 0, duration: 1.1, stagger: .14, ease: 'power3.out', scrollTrigger: { trigger: b, start: 'top 62%' } });
+    });
+  }
   if (pre && motion) {
     gsap.timeline({ onComplete: function () { pre.style.display = 'none'; ScrollTrigger.refresh(); } })
       .to('.pl-bar', { width: '100%', duration: .8, ease: 'power1.inOut' })
