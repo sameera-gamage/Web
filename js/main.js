@@ -384,11 +384,16 @@ initConsultForm();
 initReveals();
 initAmbient();
 
-preloadFrames().then(() => {
+let revealed = false;
+function revealSite() {
+  if (revealed) return;
+  revealed = true;
   loaderEl.setAttribute('data-done', 'true');
   loaderEl.setAttribute('aria-hidden', 'true');
   playHeroEntrance();
   ScrollTrigger.refresh();
-});
+}
+preloadFrames().then(revealSite);
+setTimeout(revealSite, 15000);
 
 addEventListener('error', () => {}, true);
