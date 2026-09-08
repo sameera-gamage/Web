@@ -136,7 +136,7 @@ function initNavChrome() {
 }
 
 /* ---------------------------------------------------------------------
-   5. Hero entrance
+   5. Hero — pinned, scroll-scrubbed, all-intra video + cloud-bank exit
 --------------------------------------------------------------------- */
 function playHeroEntrance() {
   const tl = gsap.timeline({ defaults: { ease: 'power4.out' } });
@@ -146,6 +146,139 @@ function playHeroEntrance() {
     }), '-=0.7');
   gsap.to('#hero-compass', {
     rotate: 8, duration: 6, ease: 'sine.inOut', yoyo: true, repeat: -1,
+  });
+}
+
+const CLOUDS = [
+  { start: 0.42, end: 0.76 },
+  { start: 0.48, end: 0.82 },
+  { start: 0.54, end: 0.88 },
+  { start: 0.60, end: 0.94 },
+  { start: 0.66, end: 1.00 },
+];
+
+function initHeroVideo() {
+  const video = document.getElementById('hero-video');
+  const clouds = [...document.querySelectorAll('.cloud')];
+  const cloudWash = document.getElementById('hero-cloud-wash');
+  const heroInner = document.getElementById('hero-inner');
+  const scrollCue = document.getElementById('hero-scroll-cue');
+  const compass = document.getElementById('hero-compass');
+
+  const smoothstep = (p, e0, e1) => {
+    const t = Math.min(1, Math.max(0, (p - e0) / (e1 - e0)));
+    return t * t * (3 - 2 * t);
+  };
+
+  /* ---- queued, eased seek: GOP-1 (all-intra) footage means every seek
+     decodes exactly one frame, so this stays smooth even scrubbed fast ---- */
+  let duration = 0, target = 0, shown = 0, seekBusy = false, pendingTime = null;
+  let rafId = null, lastTick = 0;
+
+  function requestSeek(t) {
+    if (!duration) return;
+    if (seekBusy) { pendingTime = t; return; }
+    seekBusy = true;
+    try { video.currentTime = t; } catch { seekBusy = false; }
+  }
+  video.addEventListener('seeked', () => {
+    seekBusy = false;
+    if (pendingTime !== null) { const t = pendingTime; pendingTime = null; requestSeek(t); }
+  });
+  video.addEventListener('error', () => { seekBusy = false; pendingTime = null; video.style.display = 'none'; });
+
+  function tick(now) {
+    const dt = Math.min(100, now - (lastTick || now));
+    lastTick = now;
+    const k = 0.18;
+    shown += (target - shown) * (1 - Math.pow(1 - k, dt / 16.667));
+    if (Math.abs(target - shown) < 0.01) { shown = target; rafId = null; lastTick = 0; }
+    else rafId = requestAnimationFrame(tick);
+    requestSeek(Math.min(duration - 0.03, Math.max(0, shown)));
+  }
+
+  function seek(t) {
+    target = t;
+    if (rafId === null) rafId = requestAnimationFrame(tick);
+  }
+
+  let primed = false;
+  function prime() {
+    if (primed) return;
+    primed = true;
+    const p = video.play();
+    if (p && typeof p.then === 'function') p.then(() => video.pause()).catch(() => {});
+  }
+
+  /* Fetched as a Blob rather than left to the browser's native Range
+     requests: some hosts (this one included, under Python's dev server)
+     answer a Range request with a plain 200 instead of 206, and Chrome
+     aborts the video load outright rather than falling back. A Blob works
+     against any host. The poster is already on screen, so this loads
+     quietly behind it and the video fades in the moment it's ready. */
+  function startVideo() {
+    const url = innerWidth < 700 ? 'video/hero-480.mp4' : 'video/hero-720.mp4';
+    fetch(url)
+      .then((res) => { if (!res.ok) throw new Error('hero video ' + res.status); return res.blob(); })
+      .then((blob) => {
+        video.addEventListener('loadedmetadata', () => {
+          duration = video.duration || 0;
+          prime();
+          requestSeek(Math.min(duration - 0.03, Math.max(0, latestP * duration)));
+        }, { once: true });
+        video.src = URL.createObjectURL(blob);
+      })
+      .catch(() => { video.style.display = 'none'; });
+    addEventListener('pointerdown', prime, { once: true, passive: true });
+    addEventListener('touchstart', prime, { once: true, passive: true });
+  }
+  let latestP = 0;
+  startVideo();
+
+  /* idle breath while parked at the very top: a slow scale about the frame
+     centre only, never a pixel translation, so a near-static plate never reads
+     as a shake (see the reference recipe this pipeline is built from) */
+  let breathing = false;
+  function breathTick(now) {
+    if (!breathing) return;
+    video.style.transform = `scale(${(1.03 + 0.012 * (1 + Math.sin(now / 3400))).toFixed(4)})`;
+    requestAnimationFrame(breathTick);
+  }
+  function setBreath(on) {
+    if (on && !breathing) { breathing = true; requestAnimationFrame(breathTick); }
+    else if (!on && breathing) { breathing = false; video.style.transform = 'scale(1.03)'; }
+  }
+
+  let lastProgress = -1;
+  function paint(p) {
+    latestP = p;
+    if (Math.abs(p - lastProgress) < 0.0015) return;
+    lastProgress = p;
+
+    seek(p * (duration || 0));
+    setBreath(!reduceMotion && p < 0.04);
+
+    const contentOp = 1 - smoothstep(p, 0.02, 0.4);
+    heroInner.style.opacity = String(contentOp);
+    heroInner.style.transform = `translateY(${(-40 * (1 - contentOp)).toFixed(1)}px)`;
+
+    const chromeOp = 1 - smoothstep(p, 0, 0.14);
+    scrollCue.style.opacity = String(chromeOp);
+    compass.style.opacity = String(chromeOp * 0.7);
+
+    clouds.forEach((cloud, i) => {
+      const { start, end } = CLOUDS[i];
+      const k = smoothstep(p, start, end);
+      cloud.style.opacity = String(k);
+      cloud.style.transform = `translateY(${(10 - 10 * k).toFixed(2)}vh) scale(${(0.72 + 0.46 * k).toFixed(3)})`;
+    });
+    cloudWash.style.opacity = String(smoothstep(p, 0.56, 1));
+  }
+
+  paint(0);
+  ScrollTrigger.create({
+    trigger: '#hero-pin', start: 'top top', end: 'bottom bottom', scrub: true,
+    onUpdate: (self) => paint(self.progress),
   });
 }
 
@@ -376,6 +509,7 @@ document.getElementById('year').textContent = new Date().getFullYear();
 
 initNavChrome();
 initCursor();
+initHeroVideo();
 initPhilosophy();
 initJourney();
 initDevelopments();
