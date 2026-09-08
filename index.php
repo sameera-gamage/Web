@@ -19,7 +19,24 @@ function vband(int $n, string $eyebrow, string $title, string $num): void { ?>
   </section>
 <?php }
 ?>
-<div class="preloader" aria-hidden="true"><div class="pl-word">EXCELLO</div><div class="pl-bar"></div></div>
+<div class="loader" id="loader" aria-hidden="true">
+  <div class="lpanels"><span class="lpanel"></span><span class="lpanel"></span><span class="lpanel"></span><span class="lpanel"></span><span class="lpanel"></span><span class="lpanel"></span></div>
+  <div class="lcontent">
+    <svg class="lbuild" viewBox="0 0 120 220">
+      <path class="ldraw" d="M30 210 L30 30 L90 30 L90 210"/>
+      <path class="ldraw" d="M26 210 L98 210"/>
+      <path class="ldraw" d="M30 70 L90 70"/><path class="ldraw" d="M30 110 L90 110"/><path class="ldraw" d="M30 150 L90 150"/><path class="ldraw" d="M30 190 L90 190"/>
+      <path class="ldraw" d="M90 52 L104 58 L104 80 L90 86"/><path class="ldraw" d="M90 92 L104 98 L104 120 L90 126"/><path class="ldraw" d="M90 132 L104 138 L104 160 L90 166"/>
+      <path class="ldraw" d="M24 30 L96 30"/>
+      <rect class="lglow" x="40" y="118" width="14" height="24"/><rect class="lglow" x="62" y="158" width="14" height="24"/>
+    </svg>
+    <div class="lword"><span>E</span><span>X</span><span>C</span><span>E</span><span>L</span><span>L</span><span>O</span></div>
+    <div class="lsub">from the ground to the keys</div>
+  </div>
+  <div class="llabel">Loading the story</div>
+  <div class="lcount"><span id="loadNum">0</span><i>%</i></div>
+  <div class="lbar" id="loadBar"></div>
+</div>
 <?php require __DIR__ . '/inc/nav.php'; ?>
 
 <main>
