@@ -287,9 +287,11 @@ const CLOUDS = [
 ];
 
 function heroUrlForWidth() {
-  if (innerWidth < 700) return ['video/hero-480.mp4', null];
-  if (innerWidth < 1400) return ['video/hero-720.mp4', 'video/hero-480.mp4'];
-  return ['video/hero-1080.mp4', 'video/hero-720.mp4'];
+  // Phones get the light 480 file; everything tablet-and-up gets full 1080
+  // (falling back to 480 if 1080 is unavailable). Two tiers, so the visible
+  // desktop hero is always the sharpest rendition rather than a mid-size one.
+  if (innerWidth < 768) return ['video/hero-480.mp4', null];
+  return ['video/hero-1080.mp4', 'video/hero-480.mp4'];
 }
 
 function initHeroVideo() {
@@ -490,7 +492,7 @@ function initJourney() {
   }
 
   const rig = createScrubVideo(video, { onFrame: drawCurrent });
-  const [primaryUrl, fallbackUrl] = innerWidth < 900
+  const [primaryUrl, fallbackUrl] = innerWidth < 768
     ? ['video/journey-720.mp4', null]
     : ['video/journey-1080.mp4', 'video/journey-720.mp4'];
   rig.load(primaryUrl, fallbackUrl);
