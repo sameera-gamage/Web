@@ -46,7 +46,7 @@
 
   /* ---- preloader ---- */
   var pre = $('.preloader');
-  function boot() { reveals(); heroIn(); kinetic(); heroParallax(); videoScrub(); cfilm(); lines(); navOverHero(); carousels(); parallax(); voyage(); routeDraw(); petals(); if (window.ScrollTrigger) ScrollTrigger.refresh(); }
+  function boot() { reveals(); kinetic(); vfilm(); lines(); navOverHero(); carousels(); parallax(); petals(); if (window.ScrollTrigger) ScrollTrigger.refresh(); }
   if (pre && motion) {
     gsap.timeline({ onComplete: function () { pre.style.display = 'none'; ScrollTrigger.refresh(); } })
       .to('.pl-bar', { width: '100%', duration: .8, ease: 'power1.inOut' })
@@ -118,7 +118,7 @@
 
   /* ---- nav + badge colour over the hero ---- */
   function navOverHero() {
-    var hero = $('.hero') || $('.vhero'); if (!hero) return;
+    var hero = $('.hero') || $('.vhero') || $('.vfilm'); if (!hero) return;
     document.body.classList.add('over-hero');
     if (!window.ScrollTrigger) return;
     ScrollTrigger.create({ trigger: hero, start: 'bottom top+=90',
@@ -183,6 +183,49 @@
       }
       requestAnimationFrame(loop);
     })();
+  }
+
+  /* ---- the mist video film: fog covers one clip, reveals the next ---- */
+  function vfilm() {
+    var film = $('#vfilm'); if (!film) return;
+    var scenes = $$('.vscene', film);
+    var vids = scenes.map(function (s) { return $('video', s); });
+    var caps = scenes.map(function (s) { return $('.vcap', s); });
+    var mist = $('#mist', film), nowEl = $('#vfilmNow');
+    var n = scenes.length;
+    if (!motion) return;                         // static CSS shows a poster stack
+    gsap.set(scenes, { opacity: 0 }); gsap.set(scenes[0], { opacity: 1 });
+    gsap.set(caps, { opacity: 0, y: 36 }); gsap.set(caps[0], { opacity: 1, y: 0 });
+    gsap.set(mist, { opacity: 0 });
+
+    var curIdx = -1;
+    function ensurePlaying(idx) {
+      vids.forEach(function (v, i) {
+        if (!v) return;
+        if (i === idx || i === idx + 1) { if (v.paused) { var p = v.play(); if (p && p.catch) p.catch(function () {}); } }
+        else if (!v.paused) v.pause();
+      });
+    }
+    function setScene(idx) { if (idx === curIdx) return; curIdx = idx; ensurePlaying(idx); if (nowEl) nowEl.textContent = String(idx + 1).padStart(2, '0'); }
+    setScene(0);
+
+    // opening flourish
+    if (caps[0]) gsap.from(caps[0].children, { y: 44, opacity: 0, duration: 1.1, stagger: .14, ease: 'power3.out', delay: pre ? 1.1 : .2 });
+    var cue = $('.vfilm-cue', film); if (cue) gsap.to(cue, { autoAlpha: 0, ease: 'none', scrollTrigger: { trigger: film, start: '4% top', end: '12% top', scrub: true } });
+
+    var tl = gsap.timeline({ scrollTrigger: { trigger: film, start: 'top top', end: 'bottom bottom', scrub: 1,
+      onUpdate: function (self) { setScene(Math.min(n - 1, Math.round(self.progress * (n - 1)))); } } });
+
+    for (var k = 0; k < n - 1; k++) {
+      // fog rolls in, drifts, and clears
+      tl.fromTo(mist, { opacity: 0, xPercent: -10, scale: 1.05 }, { opacity: 1, xPercent: 0, scale: 1.16, duration: .5, ease: 'power1.inOut' }, k);
+      tl.to(mist, { opacity: 0, xPercent: 10, scale: 1.22, duration: .5, ease: 'power1.inOut' }, k + 0.5);
+      // swap scene + caption under the fog
+      tl.to(caps[k], { opacity: 0, y: -26, duration: .3, ease: 'power2.in' }, k + 0.2);
+      tl.to(scenes[k], { opacity: 0, duration: .22, ease: 'none' }, k + 0.42);
+      tl.fromTo(scenes[k + 1], { opacity: 0 }, { opacity: 1, duration: .22, ease: 'none' }, k + 0.42);
+      tl.fromTo(caps[k + 1], { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: .38, ease: 'power2.out' }, k + 0.62);
+    }
   }
 
   /* ---- the cinematic film: crossfade scenes + slow zoom on scroll ---- */

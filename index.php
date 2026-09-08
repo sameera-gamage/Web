@@ -5,56 +5,45 @@ require_once __DIR__ . '/inc/helpers.php';
 $work = db()->query("SELECT * FROM projects ORDER BY featured DESC, sort_order ASC LIMIT 6")->fetchAll();
 
 $page_title = 'From the ground to the keys';
-$page_desc  = 'A cinematic journey through an Excello home — land, design, materials, construction, and the keys.';
+$page_desc  = 'A cinematic film of an Excello home — the building, the balconies, the light, the rooms.';
 $navlight = true;
 require __DIR__ . '/inc/head.php';
+
+/* the video film, in story order */
+$film = [
+  ['Excello — Mount Lavinia, Sri Lanka', 'From the ground<br><span class="script">to the keys.</span>'],
+  ['The building',   'Rising from<br>the coast.'],
+  ['The craft',      'Crafted,<br>floor by floor.'],
+  ['The balconies',  'Room to<br><span class="script">breathe.</span>'],
+  ['The rooms',      'A home that\'s<br>ready for you.'],
+];
+$fn = count($film);
 ?>
 <div class="preloader" aria-hidden="true"><div class="pl-word">EXCELLO</div><div class="pl-bar"></div></div>
 <?php require __DIR__ . '/inc/nav.php'; ?>
 
 <main>
 
-<!-- ========= ACT I — scroll-scrubbed video (the arrival) ========= -->
-<section class="vhero" id="vhero">
-  <div class="vhero-stage">
-    <video class="vhero-vid" muted playsinline preload="auto" poster="<?= asset('video/hero-poster.jpg') ?>"><source src="<?= asset('video/hero.mp4') ?>" type="video/mp4"></video>
-    <img class="vhero-poster" src="<?= asset('video/hero-poster.jpg') ?>" alt="An Excello residence">
-    <div class="vhero-loader"></div>
-    <div class="vhero-copy hero-copy"><p class="eyebrow">Excello — Mount Lavinia, Sri Lanka</p></div>
-    <div class="vhero-cap cap-1 hero-copy"><h1 class="hero-title"><span class="mask"><span>From the ground</span></span><span class="mask"><span class="script">to the keys.</span></span></h1></div>
-    <div class="vhero-cap cap-2 hero-copy"><h2 class="hero-title" style="font-size:clamp(2.4rem,7vw,6rem)">A home, carried<br><span class="script">the whole way.</span></h2></div>
-    <div class="hero-cue"><span class="l"></span>Scroll to play</div>
-  </div>
-</section>
-
-<!-- ========= ACT II — the cinematic film ========= -->
-<?php
-$scenes = [
-  ['Chapter 01 — The land',   'rimg', 'site.jpg',            'It starts with<br>the land.'],
-  ['Chapter 02 — The design', 'cover','chapter-02.jpg',      'We draw it before<br>we build it.'],
-  ['Chapter 03 — The making', 'rimg', 'hero-exterior.jpg',   'Then we raise it,<br><span class="script">brick by brick.</span>'],
-  ['Chapter 04 — The light',  'rimg', 'living-3.jpg',        'Light finds<br>its rooms.'],
-  ['Chapter 05 — The calm',   'rimg', 'bedroom-1.jpg',       'Calm, in<br>every corner.'],
-  ['Chapter 06 — Together',   'rimg', 'dining-1.jpg',        'A place<br>to gather.'],
-  ['Chapter 07 — The rooftop','rimg', 'rooftop-garden.jpg',  'A rooftop<br>to share.'],
-  ['Chapter 08 — The keys',   'rimg', 'view-living.jpg',     'Then we hand<br>you the <span class="script">keys.</span>'],
-];
-$n = count($scenes);
-?>
-<section class="cfilm" id="cfilm" style="height:<?= $n * 90 ?>vh">
-  <div class="cfilm-stage">
-    <div class="cfilm-bars"></div>
-    <?php foreach ($scenes as $i => $s): $src = $s[1] === 'rimg' ? rimg($s[2]) : cover_src($s[2]); ?>
-      <div class="cscene" data-scene="<?= $i ?>">
-        <img src="<?= $src ?>" alt="<?= strip_tags($s[3]) ?>" <?= $i === 0 ? '' : 'loading="lazy"' ?>>
-        <div class="cscene-cap"><p class="ceyebrow"><?= e($s[0]) ?></p><h2 class="ctitle"><?= $s[3] ?></h2></div>
+<!-- ========= THE MIST VIDEO FILM ========= -->
+<section class="vfilm" id="vfilm" style="height:<?= $fn * 100 ?>vh">
+  <div class="vfilm-stage">
+    <?php foreach ($film as $i => $s): $n = $i + 1; ?>
+      <div class="vscene" data-scene="<?= $i ?>">
+        <video muted playsinline loop preload="<?= $i === 0 ? 'auto' : 'none' ?>" poster="<?= asset('video/scene-'.$n.'.jpg') ?>">
+          <source src="<?= asset('video/scene-'.$n.'.mp4') ?>" type="video/mp4">
+        </video>
+        <img class="vscene-poster" src="<?= asset('video/scene-'.$n.'.jpg') ?>" alt="">
+        <div class="vcap"><?php if ($i === 0): ?><p class="veyebrow"><?= e($s[0]) ?></p><h1 class="vtitle"><?= $s[1] ?></h1><?php else: ?><p class="veyebrow"><?= e($s[0]) ?></p><h2 class="vtitle"><?= $s[1] ?></h2><?php endif; ?></div>
       </div>
     <?php endforeach; ?>
-    <div class="cfilm-index"><b id="cfilmNow">01</b> / <?= str_pad((string)$n, 2, '0', STR_PAD_LEFT) ?></div>
+    <div class="mist" id="mist"></div>
+    <div class="vfilm-bars"></div>
+    <div class="vfilm-index"><b id="vfilmNow">01</b> / <?= str_pad((string)$fn, 2, '0', STR_PAD_LEFT) ?></div>
+    <div class="vfilm-cue"><span class="l"></span>Scroll</div>
   </div>
 </section>
 
-<!-- ========= ACT III — the outro (a real page beneath the film) ========= -->
+<!-- ========= OUTRO — a real page beneath the film ========= -->
 <section class="section panel-cream center">
   <div class="wrap">
     <p class="tinylabel rv rv-up">The studio</p>
@@ -68,7 +57,6 @@ $n = count($scenes);
   </div>
 </section>
 
-<!-- selected work — quiet strip -->
 <section class="section panel-sky">
   <div class="wrap"><div class="shead rv rv-up"><p class="eyebrow">Selected work</p><h2>The proof, land to keys.</h2></div></div>
   <div class="carousel rv rv-up" id="workCar" style="padding-inline:var(--edge)">
@@ -84,7 +72,6 @@ $n = count($scenes);
   </div>
 </section>
 
-<!-- promise + surprise -->
 <section class="section panel-ink center" id="promise" style="overflow:hidden;position:relative">
   <?= flower('tl') ?><?= flower('br') ?>
   <div class="petals" id="petals" aria-hidden="true"></div>
