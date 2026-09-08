@@ -3,6 +3,10 @@
 
 const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const isDesktop = () => matchMedia('(min-width: 981px)').matches && matchMedia('(pointer: fine)').matches;
+const smoothstep = (p, e0, e1) => {
+  const t = Math.min(1, Math.max(0, (p - e0) / (e1 - e0)));
+  return t * t * (3 - 2 * t);
+};
 
 /* ---------------------------------------------------------------------
    1. Lenis + GSAP ticker wiring
@@ -42,35 +46,152 @@ document.querySelectorAll('a[href^="#"]').forEach((a) => {
 });
 
 /* ---------------------------------------------------------------------
-   2. Frame preloader — 90-frame architectural transformation sequence
---------------------------------------------------------------------- */
-const FRAME_COUNT = 90;
-const FRAME_PATH = (i) => `images/frames/f-${String(i).padStart(3, '0')}.jpg`;
-const frameImages = [];
-const frameFailed = new Array(FRAME_COUNT + 1).fill(false);
+   2. Scroll-scrubbed video engine, shared by the hero and the journey
+   canvas. Both are all-intra (GOP 1) footage: every frame is its own
+   keyframe, so a scroll seek always decodes exactly one frame, no matter
+   how far or fast the scrub jumps.
 
+   Loading tries the plain, native route first — `src` + `load()` — which
+   lets the browser stream the file progressively over HTTP Range requests
+   instead of blocking on the whole download; that's what makes scrubbing
+   feel immediate rather than waiting on a multi-megabyte fetch to finish.
+   Only when that native route actually fails (a host that answers a Range
+   request with a plain 200, which Chrome then aborts) does it fall back to
+   fetching the whole file as a Blob, which works against any host at the
+   cost of that upfront wait. `fetch` itself throws under file://, so that
+   case never attempts the Blob path — native loading already works there
+   since there's no HTTP Range involved in reading a local file. */
+function createScrubVideo(video, opts) {
+  const onFrame = (opts && opts.onFrame) || null;
+  let duration = 0, target = 0, shown = 0, seekBusy = false, pendingTime = null;
+  let rafId = null, lastTick = 0, latestP = 0, primed = false;
+  const readyCbs = [];
+
+  function requestSeek(t) {
+    if (!duration) return;
+    if (seekBusy) { pendingTime = t; return; }
+    seekBusy = true;
+    try { video.currentTime = t; } catch { seekBusy = false; }
+  }
+  video.addEventListener('seeked', () => {
+    seekBusy = false;
+    if (onFrame) onFrame();
+    if (pendingTime !== null) { const t = pendingTime; pendingTime = null; requestSeek(t); }
+  });
+
+  function tick(now) {
+    const dt = Math.min(100, now - (lastTick || now));
+    lastTick = now;
+    const k = 0.18;
+    shown += (target - shown) * (1 - Math.pow(1 - k, dt / 16.667));
+    if (Math.abs(target - shown) < 0.01) { shown = target; rafId = null; lastTick = 0; }
+    else rafId = requestAnimationFrame(tick);
+    requestSeek(Math.min(duration - 0.03, Math.max(0, shown)));
+  }
+
+  function prime() {
+    if (primed) return;
+    primed = true;
+    const p = video.play();
+    if (p && typeof p.then === 'function') p.then(() => video.pause()).catch(() => {});
+  }
+
+  function onReady() {
+    duration = video.duration || 0;
+    prime();
+    requestSeek(Math.min(duration - 0.03, Math.max(0, latestP * duration)));
+    readyCbs.splice(0).forEach((cb) => cb());
+  }
+
+  function load(primaryUrl, fallbackUrl) {
+    let settled = false;
+    function toBlob() {
+      if (settled) return;
+      settled = true;
+      fetch(primaryUrl)
+        .then((res) => { if (!res.ok) throw new Error(String(res.status)); return res.blob(); })
+        .then((blob) => {
+          video.addEventListener('loadedmetadata', onReady, { once: true });
+          video.preload = 'auto';
+          video.src = URL.createObjectURL(blob);
+          video.load();
+        })
+        .catch(() => {
+          if (fallbackUrl && fallbackUrl !== primaryUrl) load(fallbackUrl, null);
+          else video.style.display = 'none';
+        });
+    }
+    function nativeReady() {
+      if (settled) return;
+      /* Metadata alone isn't proof the host actually supports Range
+         requests: a host that ignores Range and just answers 200 can still
+         parse a valid duration while leaving `seekable` empty, with no
+         `error` event to catch it by. That combination means scrubbing
+         would silently never move, so it's treated the same as a load
+         failure and falls back to the Blob route. */
+      const sk = video.seekable;
+      if (sk.length === 0 || sk.end(sk.length - 1) < video.duration - 0.5) { toBlob(); return; }
+      settled = true;
+      onReady();
+    }
+    video.addEventListener('loadedmetadata', nativeReady, { once: true });
+    video.addEventListener('error', () => {
+      if (location.protocol === 'file:') video.style.display = 'none';
+      else toBlob();
+    }, { once: true });
+    video.preload = 'auto';
+    video.src = primaryUrl;
+    video.load();
+  }
+
+  return {
+    load,
+    prime,
+    seekProgress(p) { latestP = p; target = p * (duration || 0); if (rafId === null) rafId = requestAnimationFrame(tick); },
+    onReady(cb) { if (duration) cb(); else readyCbs.push(cb); },
+    get duration() { return duration; },
+  };
+}
+
+/* ---------------------------------------------------------------------
+   Boot loader — tracks real readiness (fonts + both scrub videos), eased
+   toward the true figure so the number never stalls dead or jumps, capped
+   short of 100 until everything actually clears. A hard ceiling means a
+   stalled network can never lock a visitor out.
+--------------------------------------------------------------------- */
 const loaderEl = document.getElementById('loader');
 const loaderPct = document.getElementById('loader-pct');
 const loaderBarFill = document.getElementById('loader-bar-fill');
+const bootSignals = { fonts: false, hero: false, journey: false };
 
-function preloadFrames() {
-  let settled = 0;
+function bootProgress() {
+  const w = { fonts: 0.15, hero: 0.45, journey: 0.4 };
+  return (bootSignals.fonts ? w.fonts : 0) + (bootSignals.hero ? w.hero : 0) + (bootSignals.journey ? w.journey : 0);
+}
+function runLoader() {
   return new Promise((resolve) => {
-    for (let i = 1; i <= FRAME_COUNT; i++) {
-      const img = new Image();
-      img.decoding = 'async';
-      const onSettle = () => {
-        settled++;
-        const pct = Math.round((settled / FRAME_COUNT) * 100);
-        loaderPct.textContent = pct;
-        loaderBarFill.style.width = pct + '%';
-        if (settled === FRAME_COUNT) resolve();
-      };
-      img.onload = onSettle;
-      img.onerror = () => { frameFailed[i] = true; onSettle(); };
-      img.src = FRAME_PATH(i);
-      frameImages[i] = img;
-    }
+    let shown = 0, done = false, raf;
+    const allReady = () => bootSignals.fonts && bootSignals.hero && bootSignals.journey;
+    const finish = () => {
+      if (done) return;
+      done = true;
+      cancelAnimationFrame(raf);
+      loaderPct.textContent = '100';
+      loaderBarFill.style.width = '100%';
+      resolve();
+    };
+    const tick = () => {
+      shown += (bootProgress() - shown) * 0.09;
+      const n = Math.min(99, Math.round(shown * 100));
+      loaderPct.textContent = String(n);
+      loaderBarFill.style.width = n + '%';
+      if (!done) raf = requestAnimationFrame(tick);
+      if (allReady() && shown > 0.97) finish();
+    };
+    raf = requestAnimationFrame(tick);
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { bootSignals.fonts = true; });
+    else bootSignals.fonts = true;
+    setTimeout(finish, 8000);
   });
 }
 
@@ -157,6 +278,12 @@ const CLOUDS = [
   { start: 0.66, end: 1.00 },
 ];
 
+function heroUrlForWidth() {
+  if (innerWidth < 700) return ['video/hero-480.mp4', null];
+  if (innerWidth < 1400) return ['video/hero-720.mp4', 'video/hero-480.mp4'];
+  return ['video/hero-1080.mp4', 'video/hero-720.mp4'];
+}
+
 function initHeroVideo() {
   const video = document.getElementById('hero-video');
   const clouds = [...document.querySelectorAll('.cloud')];
@@ -165,98 +292,13 @@ function initHeroVideo() {
   const scrollCue = document.getElementById('hero-scroll-cue');
   const compass = document.getElementById('hero-compass');
 
-  const smoothstep = (p, e0, e1) => {
-    const t = Math.min(1, Math.max(0, (p - e0) / (e1 - e0)));
-    return t * t * (3 - 2 * t);
-  };
-
-  /* ---- queued, eased seek: GOP-1 (all-intra) footage means every seek
-     decodes exactly one frame, so this stays smooth even scrubbed fast ---- */
-  let duration = 0, target = 0, shown = 0, seekBusy = false, pendingTime = null;
-  let rafId = null, lastTick = 0;
-
-  function requestSeek(t) {
-    if (!duration) return;
-    if (seekBusy) { pendingTime = t; return; }
-    seekBusy = true;
-    try { video.currentTime = t; } catch { seekBusy = false; }
-  }
-  video.addEventListener('seeked', () => {
-    seekBusy = false;
-    if (pendingTime !== null) { const t = pendingTime; pendingTime = null; requestSeek(t); }
-  });
-  video.addEventListener('error', () => { seekBusy = false; pendingTime = null; video.style.display = 'none'; });
-
-  function tick(now) {
-    const dt = Math.min(100, now - (lastTick || now));
-    lastTick = now;
-    const k = 0.18;
-    shown += (target - shown) * (1 - Math.pow(1 - k, dt / 16.667));
-    if (Math.abs(target - shown) < 0.01) { shown = target; rafId = null; lastTick = 0; }
-    else rafId = requestAnimationFrame(tick);
-    requestSeek(Math.min(duration - 0.03, Math.max(0, shown)));
-  }
-
-  function seek(t) {
-    target = t;
-    if (rafId === null) rafId = requestAnimationFrame(tick);
-  }
-
-  let primed = false;
-  function prime() {
-    if (primed) return;
-    primed = true;
-    const p = video.play();
-    if (p && typeof p.then === 'function') p.then(() => video.pause()).catch(() => {});
-  }
-
-  function onVideoReady() {
-    duration = video.duration || 0;
-    prime();
-    requestSeek(Math.min(duration - 0.03, Math.max(0, latestP * duration)));
-  }
-
-  /* Fetched as a Blob rather than left to the browser's native Range
-     requests: some hosts (Python's dev server among them) answer a Range
-     request with a plain 200 instead of 206, and Chrome aborts the video
-     load outright rather than falling back. A Blob works against any host.
-     The poster is already on screen, so this loads quietly behind it and
-     the video fades in the moment it's ready.
-
-     `fetch` itself throws on file:// (opening index.html straight off disk),
-     so that case skips the Blob step entirely and assigns the URL directly —
-     there's no HTTP Range involved when the browser is just reading a local
-     file, so plain `src` seeking already works there. */
-  function startVideo() {
-    const primaryUrl = innerWidth < 700 ? 'video/hero-480.mp4' : 'video/hero-720.mp4';
-    const fallbackUrl = 'video/hero-480.mp4';
-
-    if (location.protocol === 'file:') {
-      video.addEventListener('loadedmetadata', onVideoReady, { once: true });
-      video.addEventListener('error', () => { video.style.display = 'none'; }, { once: true });
-      video.preload = 'auto';
-      video.src = primaryUrl;
-      video.load();
-    } else {
-      const load = (url, isFallback) => fetch(url)
-        .then((res) => { if (!res.ok) throw new Error('hero video ' + res.status); return res.blob(); })
-        .then((blob) => {
-          video.addEventListener('loadedmetadata', onVideoReady, { once: true });
-          video.preload = 'auto';
-          video.src = URL.createObjectURL(blob);
-          video.load();
-        })
-        .catch((err) => {
-          if (!isFallback && url !== fallbackUrl) return load(fallbackUrl, true);
-          video.style.display = 'none';
-        });
-      load(primaryUrl, false);
-    }
-    addEventListener('pointerdown', prime, { once: true, passive: true });
-    addEventListener('touchstart', prime, { once: true, passive: true });
-  }
-  let latestP = 0;
-  startVideo();
+  const rig = createScrubVideo(video);
+  const [primaryUrl, fallbackUrl] = heroUrlForWidth();
+  rig.load(primaryUrl, fallbackUrl);
+  rig.onReady(() => { bootSignals.hero = true; });
+  video.addEventListener('error', () => { bootSignals.hero = true; }, { once: true });
+  addEventListener('pointerdown', rig.prime, { once: true, passive: true });
+  addEventListener('touchstart', rig.prime, { once: true, passive: true });
 
   /* idle breath while parked at the very top: a slow scale about the frame
      centre only, never a pixel translation, so a near-static plate never reads
@@ -274,11 +316,10 @@ function initHeroVideo() {
 
   let lastProgress = -1;
   function paint(p) {
-    latestP = p;
     if (Math.abs(p - lastProgress) < 0.0015) return;
     lastProgress = p;
 
-    seek(p * (duration || 0));
+    rig.seekProgress(p);
     setBreath(!reduceMotion && p < 0.04);
 
     const contentOp = 1 - smoothstep(p, 0.02, 0.4);
@@ -339,9 +380,12 @@ const STAGES = [
   { title: 'Turnkey Handover', copy: 'Keys, landscape completion and lifelong structural care — we do not build and leave.', from: 0.83, to: 1.001 },
 ];
 
+const JOURNEY_FRAMES = 240;
+
 function initJourney() {
   const canvas = document.getElementById('journey-canvas');
   const ctx = canvas.getContext('2d');
+  const video = document.getElementById('journey-video');
   const frameLabel = document.getElementById('journey-frame-label');
   const stageCount = document.getElementById('stage-count');
   const stageNum = document.getElementById('stage-num');
@@ -351,14 +395,9 @@ function initJourney() {
   const progressFill = document.getElementById('journey-progress-fill');
 
   let dpr = Math.min(devicePixelRatio || 1, 2);
-  function resizeCanvas() {
-    dpr = Math.min(devicePixelRatio || 1, 2);
-    canvas.width = Math.round(canvas.clientWidth * dpr);
-    canvas.height = Math.round(canvas.clientHeight * dpr);
-    drawFrame(currentFrame, true);
-  }
+  let lastP = 0;
 
-  function drawProceduralFallback(idx) {
+  function drawProceduralFallback(p) {
     const w = canvas.width, h = canvas.height;
     ctx.fillStyle = '#0D0E11';
     ctx.fillRect(0, 0, w, h);
@@ -367,10 +406,10 @@ function initJourney() {
     const step = 48 * dpr;
     for (let x = 0; x < w; x += step) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke(); }
     for (let y = 0; y < h; y += step) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke(); }
-    const cx = w / 2, cy = h / 2, k = idx / FRAME_COUNT;
+    const cx = w / 2, cy = h / 2;
     ctx.strokeStyle = '#B39872';
     ctx.lineWidth = 1.4 * dpr;
-    const bw = w * 0.34, bh = h * 0.34 * k + h * 0.06;
+    const bw = w * 0.34, bh = h * 0.34 * p + h * 0.06;
     ctx.strokeRect(cx - bw / 2, cy - bh / 2, bw, bh);
     ctx.beginPath();
     ctx.moveTo(cx - bw / 2, cy - bh / 2); ctx.lineTo(cx - bw / 2 - bw * 0.22, cy - bh / 2 + bh * 0.28);
@@ -378,22 +417,27 @@ function initJourney() {
     ctx.stroke();
     ctx.fillStyle = 'rgba(247,245,240,0.5)';
     ctx.font = `${20 * dpr}px Plus Jakarta Sans`;
-    ctx.fillText(`STAGE ${String(idx).padStart(3, '0')}`, cx - bw / 2, cy + bh / 2 + 32 * dpr);
+    ctx.fillText(`STAGE ${String(Math.round(p * JOURNEY_FRAMES)).padStart(3, '0')}`, cx - bw / 2, cy + bh / 2 + 32 * dpr);
   }
 
-  let currentFrame = -1;
-  function drawFrame(idx, force) {
-    idx = Math.min(FRAME_COUNT, Math.max(1, idx));
-    if (idx === currentFrame && !force) return;
-    currentFrame = idx;
-    const img = frameImages[idx];
+  /* Drawn straight from the live <video> frame — native source resolution,
+     no pre-downscaled JPEGs — onto the canvas every time a seek settles. */
+  function drawCurrent() {
     const w = canvas.width, h = canvas.height;
-    if (!img || frameFailed[idx] || !img.naturalWidth) { drawProceduralFallback(idx); return; }
-    const scale = Math.max(w / img.naturalWidth, h / img.naturalHeight);
-    const dw = img.naturalWidth * scale, dh = img.naturalHeight * scale;
+    if (!w || !h) return;
+    if (video.style.display === 'none' || !video.videoWidth) { drawProceduralFallback(lastP); return; }
+    const scale = Math.max(w / video.videoWidth, h / video.videoHeight);
+    const dw = video.videoWidth * scale, dh = video.videoHeight * scale;
     ctx.clearRect(0, 0, w, h);
-    ctx.drawImage(img, (w - dw) / 2, (h - dh) / 2, dw, dh);
-    frameLabel.textContent = `FRAME ${String(idx).padStart(3, '0')} / ${FRAME_COUNT}`;
+    ctx.drawImage(video, (w - dw) / 2, (h - dh) / 2, dw, dh);
+    frameLabel.textContent = `FRAME ${String(Math.round(lastP * (JOURNEY_FRAMES - 1)) + 1).padStart(3, '0')} / ${JOURNEY_FRAMES}`;
+  }
+
+  function resizeCanvas() {
+    dpr = Math.min(devicePixelRatio || 1, 2);
+    canvas.width = Math.round(canvas.clientWidth * dpr);
+    canvas.height = Math.round(canvas.clientHeight * dpr);
+    drawCurrent();
   }
 
   let lastStageIndex = -1;
@@ -411,8 +455,18 @@ function initJourney() {
     progressFill.style.width = `${Math.round(p * 100)}%`;
   }
 
+  const rig = createScrubVideo(video, { onFrame: drawCurrent });
+  const [primaryUrl, fallbackUrl] = innerWidth < 900
+    ? ['video/journey-720.mp4', null]
+    : ['video/journey-1080.mp4', 'video/journey-720.mp4'];
+  rig.load(primaryUrl, fallbackUrl);
+  rig.onReady(() => { bootSignals.journey = true; resizeCanvas(); });
+  video.addEventListener('error', () => { bootSignals.journey = true; drawProceduralFallback(0); }, { once: true });
+  addEventListener('pointerdown', rig.prime, { once: true, passive: true });
+  addEventListener('touchstart', rig.prime, { once: true, passive: true });
+
   resizeCanvas();
-  drawFrame(1, true);
+  drawProceduralFallback(0);
   updateHud(0);
 
   addEventListener('resize', () => { clearTimeout(window.__jResize); window.__jResize = setTimeout(resizeCanvas, 150); });
@@ -420,9 +474,9 @@ function initJourney() {
   ScrollTrigger.create({
     trigger: '#journey-pin', start: 'top top', end: 'bottom bottom', scrub: true,
     onUpdate(self) {
-      const p = self.progress;
-      drawFrame(Math.round(1 + p * (FRAME_COUNT - 1)));
-      updateHud(p);
+      lastP = self.progress;
+      rig.seekProgress(lastP);
+      updateHud(lastP);
     },
   });
 }
@@ -488,6 +542,42 @@ function initConsultForm() {
 }
 
 /* ---------------------------------------------------------------------
+   11a. Layered parallax + soft 3D tilt (philosophy, developments,
+   materials, consult) — each [data-parallax] layer drifts against scroll
+   at its own speed so sections read as depth, not a single flat plane.
+--------------------------------------------------------------------- */
+function initParallaxLayers() {
+  if (reduceMotion) return;
+  document.querySelectorAll('[data-parallax]').forEach((el) => {
+    const speed = parseFloat(el.dataset.parallax) || 0.2;
+    const section = el.closest('.section') || el.parentElement;
+    gsap.to(el, {
+      yPercent: speed * 100,
+      ease: 'none',
+      scrollTrigger: { trigger: section, start: 'top bottom', end: 'bottom top', scrub: 0.6 },
+    });
+  });
+}
+
+function initSoftTilt() {
+  if (!isDesktop() || reduceMotion) return;
+  document.querySelectorAll('[data-tilt-soft]').forEach((el) => {
+    let raf = null;
+    el.addEventListener('mousemove', (e) => {
+      const r = el.getBoundingClientRect();
+      const mx = ((e.clientX - r.left) / r.width - 0.5) * 2;
+      const my = ((e.clientY - r.top) / r.height - 0.5) * 2;
+      if (raf) return;
+      raf = requestAnimationFrame(() => {
+        el.style.transform = `perspective(1400px) rotateY(${(mx * 3).toFixed(2)}deg) rotateX(${(-my * 3).toFixed(2)}deg)`;
+        raf = null;
+      });
+    });
+    el.addEventListener('mouseleave', () => { el.style.transform = ''; });
+  });
+}
+
+/* ---------------------------------------------------------------------
    11. Generic reveal-on-scroll + blueprint draw-in
 --------------------------------------------------------------------- */
 function initReveals() {
@@ -537,20 +627,17 @@ initPhilosophy();
 initJourney();
 initDevelopments();
 initMaterials();
+initParallaxLayers();
+initSoftTilt();
 initConsultForm();
 initReveals();
 initAmbient();
 
-let revealed = false;
-function revealSite() {
-  if (revealed) return;
-  revealed = true;
+runLoader().then(() => {
   loaderEl.setAttribute('data-done', 'true');
   loaderEl.setAttribute('aria-hidden', 'true');
   playHeroEntrance();
   ScrollTrigger.refresh();
-}
-preloadFrames().then(revealSite);
-setTimeout(revealSite, 15000);
+});
 
 addEventListener('error', () => {}, true);
