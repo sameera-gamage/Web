@@ -368,6 +368,32 @@ function initPhilosophy() {
   });
 }
 
+/* Fog-wipe reveal over the elevation drawing: the cursor clears a soft
+   circular hole in the fog mask, off-screen (so fully opaque) whenever the
+   pointer isn't over the stage — desktop/fine-pointer only, matching every
+   other hover-driven nicety on the page. */
+function initPhilosophyFog() {
+  if (!isDesktop() || reduceMotion) return;
+  const stage = document.getElementById('philosophy-stage');
+  const fog = document.getElementById('philosophy-fog');
+  let raf = null, tx = -9999, ty = -9999;
+  stage.addEventListener('pointermove', (e) => {
+    const r = stage.getBoundingClientRect();
+    tx = e.clientX - r.left;
+    ty = e.clientY - r.top;
+    if (raf) return;
+    raf = requestAnimationFrame(() => {
+      fog.style.setProperty('--fx', tx + 'px');
+      fog.style.setProperty('--fy', ty + 'px');
+      raf = null;
+    });
+  }, { passive: true });
+  stage.addEventListener('pointerleave', () => {
+    fog.style.setProperty('--fx', '-9999px');
+    fog.style.setProperty('--fy', '-9999px');
+  });
+}
+
 /* ---------------------------------------------------------------------
    7. Journey — pinned canvas scrubber, the six-stage turnkey process
 --------------------------------------------------------------------- */
@@ -624,6 +650,7 @@ initNavChrome();
 initCursor();
 initHeroVideo();
 initPhilosophy();
+initPhilosophyFog();
 initJourney();
 initDevelopments();
 initMaterials();

@@ -391,7 +391,21 @@ html.has-cursor a, html.has-cursor button, html.has-cursor input, html.has-curso
   padding: 0 clamp(1.25rem, 6vw, 6rem);
   overflow: hidden;
 }
-.philosophy-layers{ position: absolute; inset: 0; z-index: 0; pointer-events: none; color: var(--cement); }
+/* The elevation drawing sits at the base, covered by a fully-opaque fog
+   layer by default; a soft circular hole in the fog's mask follows the
+   cursor on hover, so the drawing only shows through where the visitor's
+   pointer actually is — like clearing a breath-fogged window. */
+.philosophy-elevation{
+  position: absolute; inset: 0; z-index: 0; width: 100%; height: 100%;
+  opacity: .5; color: var(--ink);
+}
+.philosophy-fog{
+  position: absolute; inset: 0; z-index: 1; background: var(--bone);
+  --fx: -50%; --fy: -50%;
+  -webkit-mask-image: radial-gradient(circle at var(--fx) var(--fy), rgba(0,0,0,0) 0, rgba(0,0,0,0) 110px, rgba(0,0,0,1) 260px);
+  mask-image: radial-gradient(circle at var(--fx) var(--fy), rgba(0,0,0,0) 0, rgba(0,0,0,0) 110px, rgba(0,0,0,1) 260px);
+}
+.philosophy-layers{ position: absolute; inset: 0; z-index: 2; pointer-events: none; color: var(--cement); }
 .philosophy-mark{
   position: absolute; top: 50%; left: 50%; width: min(70vw, 640px); height: min(70vw, 640px);
   margin: -320px 0 0 -320px; opacity: .1; will-change: transform;
@@ -401,7 +415,11 @@ html.has-cursor a, html.has-cursor button, html.has-cursor input, html.has-curso
   font-family: 'Plus Jakarta Sans', sans-serif; font-size: clamp(11px, 1.6vw, 16px);
   letter-spacing: .3em; text-transform: uppercase; opacity: .35; will-change: transform;
 }
-.philosophy-text{ position: relative; z-index: 1; }
+.philosophy-text{ position: relative; z-index: 3; }
+@media (max-width: 980px), (pointer: coarse){
+  .philosophy-fog{ display: none; }
+  .philosophy-elevation{ opacity: .12; }
+}
 .philosophy-text{
   max-width: 1180px; margin: 0 auto; text-align: center;
   font-family: 'Cormorant Garamond', serif;
