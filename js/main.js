@@ -17,8 +17,16 @@ gsap.set('.hero-headline .reveal', { yPercent: 112 });
 
 let lenis = null;
 if (!reduceMotion) {
-  lenis = new Lenis({ lerp: 0.1, smoothWheel: true, wheelMultiplier: 1 });
+  lenis = new Lenis({
+    lerp: 0.09,            // slightly crisper than the 0.1 default — buttery, not floaty
+    smoothWheel: true,
+    wheelMultiplier: 1.05,
+    touchMultiplier: 1.6,
+    syncTouch: false,     // native momentum on touch; Lenis only smooths wheel/keys
+  });
   lenis.on('scroll', ScrollTrigger.update);
+  // One rail, one ticker: Lenis is driven by the GSAP ticker so both engines
+  // advance on the exact same paint. Never add a second requestAnimationFrame.
   gsap.ticker.add((time) => lenis.raf(time * 1000));
   window.__lenis = lenis;
 } else {

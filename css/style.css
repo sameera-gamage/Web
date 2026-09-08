@@ -46,6 +46,16 @@ body{
 
 body.no-scroll{ overflow: hidden; height: 100%; }
 
+/* Official Lenis stylesheet — required for reliable smooth scrolling.
+   Without `html.lenis body { height: auto }` some browsers keep the native
+   scroll height fighting Lenis's virtual scroll, which reads as stutter or
+   "no smoothing". These rules make Lenis authoritative over the scroll. */
+html.lenis, html.lenis body{ height: auto; }
+.lenis.lenis-smooth{ scroll-behavior: auto !important; }
+.lenis.lenis-smooth [data-lenis-prevent]{ overscroll-behavior: contain; }
+.lenis.lenis-stopped{ overflow: hidden; }
+.lenis.lenis-smooth iframe{ pointer-events: none; }
+
 .font-serif{ font-family: 'Cormorant Garamond', 'Times New Roman', serif; }
 
 a{ color: inherit; text-decoration: none; }
