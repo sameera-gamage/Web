@@ -46,7 +46,7 @@
 
   /* ---- preloader ---- */
   var pre = $('.preloader');
-  function boot() { reveals(); heroIn(); kinetic(); heroParallax(); videoScrub(); lines(); navOverHero(); carousels(); parallax(); voyage(); routeDraw(); petals(); if (window.ScrollTrigger) ScrollTrigger.refresh(); }
+  function boot() { reveals(); heroIn(); kinetic(); heroParallax(); videoScrub(); cfilm(); lines(); navOverHero(); carousels(); parallax(); voyage(); routeDraw(); petals(); if (window.ScrollTrigger) ScrollTrigger.refresh(); }
   if (pre && motion) {
     gsap.timeline({ onComplete: function () { pre.style.display = 'none'; ScrollTrigger.refresh(); } })
       .to('.pl-bar', { width: '100%', duration: .8, ease: 'power1.inOut' })
@@ -183,6 +183,31 @@
       }
       requestAnimationFrame(loop);
     })();
+  }
+
+  /* ---- the cinematic film: crossfade scenes + slow zoom on scroll ---- */
+  function cfilm() {
+    var film = $('#cfilm'); if (!film) return;
+    var scenes = $$('.cscene', film);
+    var caps = scenes.map(function (s) { return $('.cscene-cap', s); });
+    var imgs = scenes.map(function (s) { return $('img', s); });
+    var nowEl = $('#cfilmNow');
+    if (!motion) return;               // static CSS shows a clean vertical stack
+    var n = scenes.length;
+    gsap.set(scenes, { opacity: 0 }); gsap.set(scenes[0], { opacity: 1 });
+    gsap.set(imgs, { scale: 1.12 });
+    gsap.set(caps, { opacity: 0, y: 42 }); gsap.set(caps[0], { opacity: 1, y: 0 });
+    var tl = gsap.timeline({ scrollTrigger: { trigger: film, start: 'top top', end: 'bottom bottom', scrub: 1,
+      onUpdate: function (self) { if (nowEl) nowEl.textContent = String(Math.min(n, Math.floor(self.progress * n) + 1)).padStart(2, '0'); } } });
+    for (var i = 0; i < n; i++) {
+      tl.to(imgs[i], { scale: 1.26, ease: 'none', duration: 1 }, i);
+      if (i > 0) tl.fromTo(caps[i], { opacity: 0, y: 42 }, { opacity: 1, y: 0, duration: .3, ease: 'power2.out' }, i + 0.06);
+      if (i < n - 1) {
+        tl.to(caps[i], { opacity: 0, y: -30, duration: .22, ease: 'power2.in' }, i + 0.72);
+        tl.to(scenes[i], { opacity: 0, ease: 'none', duration: .42 }, i + 0.68);
+        tl.fromTo(scenes[i + 1], { opacity: 0 }, { opacity: 1, ease: 'none', duration: .42 }, i + 0.68);
+      }
+    }
   }
 
   /* ---- the materials voyage: ship + truck sail across on scroll ---- */

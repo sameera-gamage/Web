@@ -437,3 +437,38 @@ html:not(.has-js) .preloader { display: none; }
 .is-static .vhero-vid { display: none; }
 .is-static .vhero-poster { display: block; }
 .is-static .vhero-cap.cap-2 { display: none; }
+
+/* ===================================================================
+   CINEMATIC FILM — full-screen scenes crossfade + slow zoom on scroll
+   =================================================================== */
+.cfilm { position: relative; background: #0b0c0e; }
+.cfilm-stage { position: sticky; top: 0; height: 100vh; overflow: hidden; background: #0b0c0e; }
+.cscene { position: absolute; inset: 0; opacity: 0; will-change: opacity; }
+.cscene:first-child { opacity: 1; }
+.cscene img { width: 100%; height: 100%; object-fit: cover; will-change: transform; transform: scale(1.12); }
+.cscene::after { content: ""; position: absolute; inset: 0;
+  background: linear-gradient(180deg, rgba(8,9,11,.5) 0%, rgba(8,9,11,.08) 26%, rgba(8,9,11,.12) 60%, rgba(8,9,11,.82) 100%); }
+/* letterbox + grain for a film feel */
+.cfilm-bars { position: absolute; inset: 0; z-index: 4; pointer-events: none; }
+.cfilm-bars::before, .cfilm-bars::after { content: ""; position: absolute; left: 0; right: 0; height: 6vh; background: #0b0c0e; }
+.cfilm-bars::before { top: 0; } .cfilm-bars::after { bottom: 0; }
+.ccaps { position: absolute; inset: 0; z-index: 3; }
+.ccap { position: absolute; left: 0; right: 0; bottom: 16vh; padding-inline: var(--edge); text-align: center; opacity: 0; will-change: transform, opacity; }
+.ccap .ceyebrow { font-family: var(--f-body); font-size: .72rem; letter-spacing: .34em; text-transform: uppercase; color: var(--gold-hi); margin-bottom: 1rem; }
+.ccap .ctitle { font-family: var(--f-disp); font-weight: 500; color: #fff; font-size: clamp(2.4rem, 6.5vw, 6rem); line-height: 1.02; text-shadow: 0 2px 50px rgba(0,0,0,.5); }
+.ccap .ctitle .script { color: var(--gold-hi); }
+.cfilm-index { position: absolute; z-index: 4; right: var(--edge); bottom: 8vh; font-family: var(--f-serif); color: rgba(255,255,255,.85); font-size: 1.1rem; letter-spacing: .1em; }
+.cfilm-index b { color: #fff; }
+
+/* static / mobile fallback: a stack of full-screen scenes */
+.is-static .cfilm-stage { position: relative; height: auto; }
+.is-static .cscene { position: relative; opacity: 1 !important; height: 92vh; }
+.is-static .cscene img { transform: none; }
+.is-static .ccaps { display: none; }
+.is-static .cscene .cscene-cap { position: absolute; left: 0; right: 0; bottom: 12vh; z-index: 3; text-align: center; padding-inline: var(--edge); }
+
+/* scene caption (lives inside each scene) */
+.cscene-cap { position: absolute; left: 0; right: 0; bottom: 16vh; z-index: 3; text-align: center; padding-inline: var(--edge); }
+.cscene-cap .ceyebrow { font-family: var(--f-body); font-size: .72rem; letter-spacing: .34em; text-transform: uppercase; color: var(--gold-hi); margin-bottom: 1rem; }
+.cscene-cap .ctitle { font-family: var(--f-disp); font-weight: 500; color: #fff; font-size: clamp(2.4rem, 6.5vw, 6rem); line-height: 1.03; text-shadow: 0 2px 50px rgba(0,0,0,.55); }
+.cscene-cap .ctitle .script { color: var(--gold-hi); }
