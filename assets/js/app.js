@@ -46,7 +46,7 @@
 
   /* ---- preloader ---- */
   var pre = $('.preloader');
-  function boot() { reveals(); heroIn(); kinetic(); heroParallax(); lines(); navOverHero(); carousels(); parallax(); voyage(); routeDraw(); petals(); if (window.ScrollTrigger) ScrollTrigger.refresh(); }
+  function boot() { reveals(); heroIn(); kinetic(); heroParallax(); videoScrub(); lines(); navOverHero(); carousels(); parallax(); voyage(); routeDraw(); petals(); if (window.ScrollTrigger) ScrollTrigger.refresh(); }
   if (pre && motion) {
     gsap.timeline({ onComplete: function () { pre.style.display = 'none'; ScrollTrigger.refresh(); } })
       .to('.pl-bar', { width: '100%', duration: .8, ease: 'power1.inOut' })
@@ -118,7 +118,7 @@
 
   /* ---- nav + badge colour over the hero ---- */
   function navOverHero() {
-    var hero = $('.hero'); if (!hero) return;
+    var hero = $('.hero') || $('.vhero'); if (!hero) return;
     document.body.classList.add('over-hero');
     if (!window.ScrollTrigger) return;
     ScrollTrigger.create({ trigger: hero, start: 'bottom top+=90',
@@ -151,6 +151,38 @@
       gsap.fromTo(el, { yPercent: -sp * 60 }, { yPercent: sp * 60, ease: 'none',
         scrollTrigger: { trigger: host, start: 'top bottom', end: 'bottom top', scrub: true } });
     });
+  }
+
+  /* ---- scroll-scrubbed video hero (video-as-Lenis) ---- */
+  function videoScrub() {
+    var sec = $('#vhero'); if (!sec) return;
+    var vid = $('.vhero-vid', sec);
+    if (motion) {
+      gsap.to('.cap-1', { autoAlpha: 0, ease: 'none', scrollTrigger: { trigger: sec, start: '30% top', end: '48% top', scrub: true } });
+      gsap.fromTo('.cap-2', { autoAlpha: 0 }, { autoAlpha: 1, ease: 'none', scrollTrigger: { trigger: sec, start: '50% top', end: '68% top', scrub: true } });
+      gsap.to('.vhero .hero-cue', { autoAlpha: 0, ease: 'none', scrollTrigger: { trigger: sec, start: '5% top', end: '15% top', scrub: true } });
+    }
+    if (!motion || !vid) return;
+    var dur = 0, target = 0, cur = 0, seeking = false;
+    sec.classList.add('loading');
+    function ready() { dur = vid.duration || 12; sec.classList.remove('loading'); }
+    if (vid.readyState >= 2) ready();
+    vid.addEventListener('loadedmetadata', function () { dur = vid.duration || 12; });
+    vid.addEventListener('loadeddata', ready);
+    vid.addEventListener('canplaythrough', ready);
+    setTimeout(function () { sec.classList.remove('loading'); }, 6000);
+    vid.addEventListener('seeked', function () { seeking = false; });
+    // prime the decoder so seeking is instant (muted lets this pass autoplay policy)
+    var p = vid.play(); if (p && p.then) p.then(function () { vid.pause(); }).catch(function () {});
+    ScrollTrigger.create({ trigger: sec, start: 'top top', end: 'bottom bottom', onUpdate: function (self) { target = self.progress; } });
+    (function loop() {
+      cur += (target - cur) * 0.12;
+      if (dur && vid.readyState >= 2 && !seeking) {
+        var t = Math.max(0, Math.min(dur - 0.05, cur * dur));
+        if (Math.abs((vid.currentTime || 0) - t) > 0.015) { seeking = true; try { vid.currentTime = t; } catch (e) { seeking = false; } }
+      }
+      requestAnimationFrame(loop);
+    })();
   }
 
   /* ---- the materials voyage: ship + truck sail across on scroll ---- */

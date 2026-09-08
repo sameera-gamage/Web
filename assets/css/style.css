@@ -414,3 +414,26 @@ html:not(.has-js) .preloader { display: none; }
 .amen-cap .tinylabel { color: var(--gold-hi); }
 .amen-cap h3 { color: var(--cream); margin-top: .3rem; }
 @media (max-width: 760px){ .amen { grid-template-columns: 1fr; } }
+
+/* ===================================================================
+   SCROLL-SCRUB VIDEO HERO (the video is driven by scroll / Lenis)
+   =================================================================== */
+.vhero { position: relative; height: 320vh; }
+.vhero-stage { position: sticky; top: 0; height: 100vh; overflow: hidden; }
+.vhero-vid, .vhero-poster { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.vhero-poster { display: none; }
+.vhero-stage::after { content: ""; position: absolute; inset: 0; z-index: 1; pointer-events: none;
+  background: linear-gradient(180deg, rgba(23,38,46,.36), rgba(23,38,46,.05) 32%, rgba(23,38,46,.55)); }
+.vhero-copy { position: absolute; z-index: 2; inset: auto 0 clamp(4rem,10vh,8rem) 0; padding-inline: var(--edge); color: var(--cream); }
+.vhero-copy .eyebrow { color: var(--cream); opacity: .92; }
+.vhero-cap { position: absolute; inset: auto 0 clamp(4rem,10vh,8rem) 0; padding-inline: var(--edge); }
+.vhero-cap.cap-2 { opacity: 0; }
+.vhero-loader { position: absolute; z-index: 3; left: 50%; top: 50%; transform: translate(-50%,-50%);
+  width: 40px; height: 40px; border-radius: 50%; border: 2px solid rgba(255,255,255,.25); border-top-color: #fff;
+  animation: spin 1s linear infinite; opacity: 0; transition: opacity .4s var(--ease); }
+.vhero.loading .vhero-loader { opacity: 1; }
+.is-static .vhero { height: 100vh; }
+.is-static .vhero-stage { position: relative; }
+.is-static .vhero-vid { display: none; }
+.is-static .vhero-poster { display: block; }
+.is-static .vhero-cap.cap-2 { display: none; }

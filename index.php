@@ -14,18 +14,29 @@ require __DIR__ . '/inc/head.php';
 
 <main>
 
-<!-- ============ HERO ============ -->
-<section class="hero">
-  <div class="hero-media"><img src="<?= rimg('hero-exterior.jpg') ?>" alt="An Excello residence at golden hour" fetchpriority="high"></div>
-  <div class="hero-copy">
-    <p class="eyebrow">Excello — Mount Lavinia, Sri Lanka</p>
-    <h1 class="hero-title">
-      <span class="mask"><span>From the ground</span></span>
-      <span class="mask"><span class="script">to the keys.</span></span>
-    </h1>
-    <p class="hero-sub">A design-build studio that carries a home the whole way — the land you buy, the plan we draw, the materials we bring, the door you open.</p>
+<!-- ============ HERO — scroll-scrubbed video (driven by Lenis) ============ -->
+<section class="vhero" id="vhero">
+  <div class="vhero-stage">
+    <video class="vhero-vid" muted playsinline preload="auto" poster="<?= asset('video/hero-poster.jpg') ?>">
+      <source src="<?= asset('video/hero.mp4') ?>" type="video/mp4">
+    </video>
+    <img class="vhero-poster" src="<?= asset('video/hero-poster.jpg') ?>" alt="An Excello residence">
+    <div class="vhero-loader"></div>
+
+    <div class="vhero-copy hero-copy">
+      <p class="eyebrow">Excello — Mount Lavinia, Sri Lanka</p>
+    </div>
+    <div class="vhero-cap cap-1 hero-copy">
+      <h1 class="hero-title">
+        <span class="mask"><span>From the ground</span></span>
+        <span class="mask"><span class="script">to the keys.</span></span>
+      </h1>
+    </div>
+    <div class="vhero-cap cap-2 hero-copy">
+      <h2 class="hero-title" style="font-size:clamp(2.4rem,7vw,6rem)">Carried the whole way.<br><span class="script">By one team.</span></h2>
+    </div>
+    <div class="hero-cue"><span class="l"></span>Scroll to play</div>
   </div>
-  <div class="hero-cue"><span class="l"></span>Scroll</div>
 </section>
 
 <!-- ============ THE CONCEPT ============ -->
