@@ -14,13 +14,17 @@
   if (window.gsap) gsap.config({ nullTargetWarn: false });
   if (reduced || !desktop) document.documentElement.classList.add('is-static');
 
-  /* ---- Lenis + GSAP ticker (tuned for a smooth, weighted feel) ---- */
+  /* ---- Lenis smooth scroll ----
+     Runs on every desktop, even when the OS has "reduce motion" on — smooth
+     scrolling is the one motion the user explicitly wants. Driven by the GSAP
+     ticker when present, with a plain rAF fallback so it can never freeze. ---- */
   var lenis = null;
-  if (!reduced && window.Lenis) {
-    lenis = new Lenis({ lerp: 0.075, wheelMultiplier: 0.95, smoothWheel: true, touchMultiplier: 1.5 });
+  if (desktop && window.Lenis) {
+    lenis = new Lenis({ lerp: 0.08, wheelMultiplier: 1, smoothWheel: true, touchMultiplier: 1.6, autoRaf: false });
     if (window.ScrollTrigger) lenis.on('scroll', ScrollTrigger.update);
-    gsap.ticker.add(function (t) { lenis.raf(t * 1000); });
-    gsap.ticker.lagSmoothing(0);
+    if (window.gsap) { gsap.ticker.add(function (t) { lenis.raf(t * 1000); }); gsap.ticker.lagSmoothing(0); }
+    else { (function raf(t) { lenis.raf(t); requestAnimationFrame(raf); })(0); }
+    document.documentElement.classList.add('has-lenis');
   }
 
   /* ---- nav ---- */
@@ -46,7 +50,36 @@
 
   /* ---- preloader ---- */
   var pre = $('.preloader');
-  function boot() { reveals(); heroIn(); heroParallax(); kinetic(); playInView(); vbands(); lines(); navOverHero(); carousels(); parallax(); petals(); if (window.ScrollTrigger) ScrollTrigger.refresh(); }
+  function boot() { reveals(); heroIn(); heroParallax(); kinetic(); playInView(); vbands(); tilt(); depth(); lines(); navOverHero(); carousels(); parallax(); petals(); if (window.ScrollTrigger) ScrollTrigger.refresh(); }
+
+  /* 3D tilt on cards + inner-image depth, following the cursor */
+  function tilt() {
+    if (!motion || !window.gsap) return;
+    $$('.car-slide, .amen-card, .edit-media').forEach(function (el) {
+      var img = $('img', el);
+      var rx = gsap.quickTo(el, 'rotationX', { duration: .6, ease: 'power3' });
+      var ry = gsap.quickTo(el, 'rotationY', { duration: .6, ease: 'power3' });
+      var ix = img ? gsap.quickTo(img, 'xPercent', { duration: .6, ease: 'power3' }) : null;
+      var iy = img ? gsap.quickTo(img, 'yPercent', { duration: .6, ease: 'power3' }) : null;
+      el.addEventListener('pointermove', function (e) {
+        var r = el.getBoundingClientRect();
+        var px = (e.clientX - r.left) / r.width - .5, py = (e.clientY - r.top) / r.height - .5;
+        ry(px * 9); rx(-py * 9); if (ix) { ix(px * -4); iy(py * -4); }
+      });
+      el.addEventListener('pointerleave', function () { ry(0); rx(0); if (ix) { ix(0); iy(0); } });
+    });
+  }
+
+  /* extra depth: hero copy and the big numbers drift at their own speed */
+  function depth() {
+    if (!motion) return;
+    var hc = $('.hero-copy');
+    if (hc) gsap.to(hc, { yPercent: 42, ease: 'none', scrollTrigger: { trigger: '.hero', start: 'top top', end: 'bottom top', scrub: true } });
+    $$('.edit-num').forEach(function (el) {
+      var host = el.closest('.edit'); if (!host) return;
+      gsap.fromTo(el, { yPercent: 40 }, { yPercent: -40, ease: 'none', scrollTrigger: { trigger: host, start: 'top bottom', end: 'bottom top', scrub: true } });
+    });
+  }
 
   /* play videos only while on screen — keeps the smooth scroll buttery */
   function playInView() {

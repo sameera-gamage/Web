@@ -532,3 +532,8 @@ html:not(.has-js) .preloader { display: none; }
 .vband-num { position: absolute; z-index: 2; right: var(--edge); bottom: 7vh; font-family: var(--f-serif); color: rgba(255,255,255,.85); font-size: 1.05rem; letter-spacing: .12em; }
 .is-static .vband video { display: none; }
 .is-static .vband .vband-poster { display: block; }
+
+/* ---------- 3D tilt depth ---------- */
+.edit, .amen, .car-track { perspective: 1400px; }
+.edit-media, .amen-card, .car-slide { transform-style: preserve-3d; will-change: transform; }
+.amen-card, .car-slide { box-shadow: 0 30px 60px -40px rgba(0,0,0,.5); }
