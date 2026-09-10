@@ -700,3 +700,71 @@ em, .it { font-style: italic; font-weight: 300; }
   .js .media--clip { clip-path: none; }
   .preloader { display: none; }
 }
+
+/* ==========================================================================
+   ADDENDUM — frame-sequence scrub, symmetry pass, fixed motif
+   ========================================================================== */
+
+/* --- Scroll-scrubbed frame sequence (converted from source video) --------- */
+.seq { overflow: hidden; }
+.seq__canvas { display: block; width: 100%; height: 100%; }
+.seq__loader {
+  position: absolute; left: var(--gutter); bottom: var(--gutter); z-index: 4;
+  font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase;
+  color: var(--cream); mix-blend-mode: difference;
+  transition: opacity 0.6s var(--ease);
+}
+.seq__loader b { font-variant-numeric: tabular-nums; }
+.seq__loader.is-done { opacity: 0; }
+
+/* Hero rendered as a pinned frame sequence */
+.hero--seq .hero__bg { position: absolute; inset: 0; background: var(--ink); }
+.hero--seq .hero__bg .seq__canvas { position: absolute; inset: 0; object-fit: cover; }
+.hero--seq .hero__bg::after { z-index: 2; }
+.hero--seq .hero__content { z-index: 3; }
+
+/* Full-bleed cinematic band (second sequence) */
+.seq-band { position: relative; height: 100vh; height: 100svh; overflow: hidden; background: var(--ink); }
+.seq-band .seq { position: absolute; inset: 0; }
+.seq-band .seq__canvas { position: absolute; inset: 0; object-fit: cover; }
+.seq-band__overlay {
+  position: absolute; inset: 0; z-index: 3;
+  display: flex; flex-direction: column; justify-content: flex-end;
+  padding: clamp(28px, 6vw, 90px) var(--gutter);
+  color: var(--cream);
+}
+.seq-band__overlay::before {
+  content: ""; position: absolute; inset: 0; z-index: -1;
+  background: linear-gradient(to top, rgba(21,22,19,0.78) 0%, rgba(21,22,19,0.15) 55%, rgba(21,22,19,0.28) 100%);
+}
+.seq-band__overlay .h-1 { margin-top: 16px; max-width: 16ch; }
+.seq-band__row { display: flex; justify-content: space-between; align-items: flex-end; gap: 24px; flex-wrap: wrap; }
+.seq-band__row .body { color: rgba(248,244,236,0.82); max-width: 32ch; }
+
+/* --- Symmetry pass -------------------------------------------------------- */
+/* Diptych: two equal columns, tops aligned */
+.duo { grid-template-columns: 1fr 1fr; align-items: start; gap: clamp(16px, 3vw, 48px); }
+.duo .media { aspect-ratio: 3 / 4; max-width: none !important; }
+.duo__lead { grid-column: 1 / -1; display: flex; justify-content: space-between; align-items: flex-end; gap: 24px; flex-wrap: wrap; margin-bottom: clamp(24px, 4vw, 56px); }
+.duo__lead .lede { max-width: 30ch; }
+
+/* Equal, aligned project panels (removes the jagged tall/wide rhythm) */
+.hscroll__track { align-items: flex-start; }
+.panel, .panel--tall, .panel--wide { width: clamp(300px, 36vw, 560px); }
+.panel .media, .panel--wide .media { aspect-ratio: 4 / 5; }
+.panel__meta { min-height: 2.4em; align-items: flex-start; }
+.panel__end { width: clamp(300px, 30vw, 480px); }
+
+/* --- Fixed motif behind the horizontal slide ------------------------------ */
+.hscroll__pin { position: relative; z-index: 1; }
+.hscroll__motif {
+  position: absolute; inset: 0; z-index: 0; pointer-events: none;
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0.55;
+}
+.hscroll__motif svg { width: min(86vw, 940px); height: auto; }
+.hscroll__motif .motif-rot { transform-box: fill-box; transform-origin: center; }
+@media (max-width: 900px) {
+  .hscroll__motif { display: none; }
+  .duo { grid-template-columns: 1fr; }
+}

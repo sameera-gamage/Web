@@ -66,3 +66,65 @@ All motion is disabled automatically for `prefers-reduced-motion`.
   a PHP mailer, etc.) by giving the `<form>` an `action` and removing the demo handler at the
   bottom of `js/main.js`.
 * The email `info@excello.lk` is a placeholder. Confirm the real address before launch.
+
+---
+
+## Update: scroll-scrubbed video frames, symmetry pass, fixed motif
+
+Two supplied videos were converted to still-frame sequences and are now scrubbed by scroll
+(the frame advances as you scroll, forward and back), the way a cinematic site plays a video
+on the scrollbar.
+
+### The frame sequences
+
+| Sequence | Source | Frames | Resolution | Folder |
+| --- | --- | --- | --- | --- |
+| Hero (architectural transformation) | 10s / 24fps clip | 72 | 1920×1080 (original) | `img/hero-seq/` |
+| Cinematic band (from foundation to finish) | 12.1s / 30fps clip | 60 | 1920×1080 (original) | `img/clip-seq/` |
+
+Frames were extracted at original resolution with ffmpeg:
+
+```
+ffmpeg -i hero.mp4 -vf "fps=72/10" -q:v 6 -frames:v 72 img/hero-seq/f_%03d.jpg
+ffmpeg -i clip.mp4 -vf "fps=60/12.1" -q:v 6 -frames:v 60 img/clip-seq/f_%03d.jpg
+```
+
+The two sequences are about 33 MB together, so the whole page preloads that before the scrub is
+fully smooth. **To make it lighter** for a live site, re-run the commands above with either a lower
+frame count (e.g. `fps=48/10`) or a smaller width (add `-vf "scale=1280:-2,fps=..."`). The player
+reads the frame count from the HTML, so also update `data-frames` on the section.
+
+### How the player works (`js/main.js`)
+
+Any element with `data-seq="<folder>" data-frames="<n>"` and a child `<canvas>` becomes a pinned,
+scroll-scrubbed scene:
+
+- Frames load progressively; a small `Loading NN%` counter shows until they are all in.
+- The current frame is drawn to a canvas with cover-fit math, redrawn on resize and on GSAP refresh.
+- A pinned `ScrollTrigger` maps scroll progress to the frame index. `data-seq-end` sets how much
+  scroll the scene takes (e.g. `+=150%`).
+- `data-seq-mode="hero"` also fades the hero text out toward the end of the pin.
+- Under `prefers-reduced-motion` the scene is not pinned; it just shows the first frame.
+
+To swap in different footage, replace the JPEGs in the folder (named `f_001.jpg`, `f_002.jpg`, …)
+and set `data-frames` to the new count.
+
+### Symmetry pass
+
+- The horizontal project gallery panels are now all the same width with the same 4:5 image ratio,
+  so their tops and bottoms line up instead of stepping up and down.
+- The feature block below the manifesto is now a balanced two-up diptych (equal columns, aligned
+  tops) with a single lead line above it.
+
+### The fixed motif
+
+The horizontal-slide section has a fixed line-drawn sun/arc motif (an inline SVG in `index.html`,
+`.hscroll__motif`) that stays put while the panels slide across it — a nod to Aathavan's
+solar theme. It is drawn with the bronze accent and is easy to replace: swap the inline `<svg>`
+for your own artwork. (The white image supplied for this was effectively blank, so this motif was
+drawn in its place; drop your SVG in if you have final art.)
+
+### Parallax images
+
+The parallax blocks still use cloud-hosted (Unsplash) images; a couple were refreshed to larger
+crops. Replace those `src` URLs with your own photography when ready.

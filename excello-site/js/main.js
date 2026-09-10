@@ -338,10 +338,80 @@
       tl.from(hero.querySelectorAll("[data-hero-fade]"), { opacity: 0, y: 24, duration: 1.2, stagger: 0.12 }, 0.7);
       tl.from(header, { yPercent: -100, opacity: 0, duration: 1, ease: "power3.out" }, 0.5);
 
-      /* Hero parallax on scroll */
-      if (bg) gsap.to(bg, { yPercent: 18, ease: "none", scrollTrigger: { trigger: hero, start: "top top", end: "bottom top", scrub: true } });
-      gsap.to(hero.querySelector(".hero__content"), { yPercent: -20, opacity: 0.2, ease: "none", scrollTrigger: { trigger: hero, start: "top top", end: "bottom top", scrub: true } });
+      /* Hero parallax on scroll (image hero only; the sequence hero scrubs frames instead) */
+      if (!hero.classList.contains("hero--seq")) {
+        if (bg) gsap.to(bg, { yPercent: 18, ease: "none", scrollTrigger: { trigger: hero, start: "top top", end: "bottom top", scrub: true } });
+        gsap.to(hero.querySelector(".hero__content"), { yPercent: -20, opacity: 0.2, ease: "none", scrollTrigger: { trigger: hero, start: "top top", end: "bottom top", scrub: true } });
+      }
     };
+
+    /* ------------------------------------------------------------------
+       Frame-sequence scrub — plays converted video frames on scroll.
+       Any [data-seq] host with a <canvas> becomes a pinned, scrubbed scene.
+       ------------------------------------------------------------------ */
+    document.querySelectorAll("[data-seq]").forEach(function (host) {
+      var dir = host.dataset.seq;
+      var count = parseInt(host.dataset.frames, 10);
+      var pad = parseInt(host.dataset.pad || "3", 10);
+      var ext = host.dataset.ext || "jpg";
+      var mode = host.dataset.seqMode || "band";
+      var canvas = host.querySelector("canvas");
+      if (!canvas || !count) return;
+      var ctx = canvas.getContext("2d", { alpha: false });
+      var scene = host.closest("[data-seq-scene]") || host;
+      var loaderWrap = (mode === "hero" ? scene : host).querySelector("[data-seq-loader]");
+      var loaderNum = loaderWrap && loaderWrap.querySelector("b");
+      var frames = new Array(count);
+      var loaded = 0, cur = -1, ready = false, progress = 0;
+
+      function url(i) { var n = String(i + 1); while (n.length < pad) n = "0" + n; return dir + "/f_" + n + "." + ext; }
+      function sizeCanvas() {
+        var r = host.getBoundingClientRect();
+        var dpr = Math.min(window.devicePixelRatio || 1, 2);
+        var w = Math.max(1, Math.round(r.width * dpr)), h = Math.max(1, Math.round(r.height * dpr));
+        if (canvas.width !== w || canvas.height !== h) { canvas.width = w; canvas.height = h; }
+      }
+      function paint(i) {
+        i = i < 0 ? 0 : (i > count - 1 ? count - 1 : i);
+        var img = frames[i];
+        if (!img || !img.complete || !img.naturalWidth) return;
+        cur = i;
+        var cw = canvas.width, ch = canvas.height, iw = img.naturalWidth, ih = img.naturalHeight;
+        var sc = Math.max(cw / iw, ch / ih), w = iw * sc, h = ih * sc, x = (cw - w) / 2, y = (ch - h) / 2;
+        ctx.fillStyle = "#151613"; ctx.fillRect(0, 0, cw, ch);
+        ctx.drawImage(img, x, y, w, h);
+      }
+      function redraw() { paint(Math.round(progress * (count - 1))); }
+      function onFrame(i) {
+        loaded++;
+        if (loaderNum) loaderNum.textContent = Math.round(loaded / count * 100);
+        if (i === 0 && !ready) { ready = true; sizeCanvas(); redraw(); }
+        if (loaded >= count && loaderWrap) loaderWrap.classList.add("is-done");
+        if (i === cur || cur === -1) redraw();
+      }
+      for (var i = 0; i < count; i++) (function (i) {
+        var img = new Image(); frames[i] = img;
+        img.onload = function () { onFrame(i); };
+        img.onerror = function () { onFrame(i); };
+        img.src = url(i);
+      })(i);
+      window.addEventListener("resize", function () { sizeCanvas(); redraw(); });
+
+      if (reduce) { sizeCanvas(); if (frames[0].complete) redraw(); else frames[0].addEventListener("load", function () { ready = true; sizeCanvas(); redraw(); }); return; }
+
+      ScrollTrigger.create({
+        trigger: scene, start: "top top", end: host.dataset.seqEnd || "+=120%",
+        pin: true, scrub: true, invalidateOnRefresh: true, anticipatePin: 1,
+        onRefresh: function () { sizeCanvas(); redraw(); },
+        onUpdate: function (self) {
+          progress = self.progress; if (ready) redraw();
+          if (mode === "hero") {
+            var c = scene.querySelector(".hero__content");
+            if (c) { var p = self.progress; var o = p < 0.6 ? 1 : 1 - (p - 0.6) / 0.4; gsap.set(c, { autoAlpha: Math.max(0, o), y: -50 * Math.max(0, p - 0.45) }); }
+          }
+        }
+      });
+    });
 
     /* Pinned sections must be refreshed before anything below them, so order
        every trigger by its position on the page before measuring. */

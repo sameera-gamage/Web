@@ -15,12 +15,13 @@
 
   <main>
     <!-- HERO -->
-    <section class="hero container">
-      <div class="hero__bg">
-        <img src="https://images.unsplash.com/photo-1613490493576-7fde63acd811?auto=format&fit=crop&w=2200&q=80" alt="Contemporary villa at dusk">
+    <section class="hero hero--seq container" data-seq-scene>
+      <div class="hero__bg seq" data-seq="img/hero-seq" data-frames="72" data-seq-mode="hero" data-seq-end="+=150%">
+        <canvas class="seq__canvas"></canvas>
       </div>
       <div class="hero__content">
         <p class="label hero__label" data-hero-fade>Design &amp; Build · Colombo, Sri Lanka</p>
+        <div class="seq__loader" data-seq-loader aria-hidden="true">Loading <b>0</b>%</div>
         <h1 class="h-display hero__title" data-split>Elevating the art of <em>living</em></h1>
         <div class="hero__bottom">
           <div>
@@ -53,15 +54,16 @@
     <!-- FEATURE IMAGE -->
     <section class="container">
       <div class="duo">
-        <div class="duo__meta">
-          <div class="media media--parallax media--clip media--ratio-portrait" data-parallax="8" style="max-width: 420px;">
-            <img src="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1400&q=80" alt="Living room with natural light">
-            <span class="media__caption">Interior · Private residence</span>
-          </div>
-          <p class="body body--muted" data-reveal>From bespoke homes on the coast to solar-powered residences in the city, our work is defined by functionality, fine aesthetics and craftsmanship that endures.</p>
+        <div class="duo__lead">
+          <p class="lede" data-reveal>From bespoke homes on the coast to solar-powered residences in the city, our work is defined by functionality, fine aesthetics and craftsmanship that endures.</p>
+          <a class="link" href="projects.html" data-reveal>Selected work</a>
         </div>
-        <div class="media media--parallax media--clip media--ratio-landscape" data-parallax="12">
-          <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=2200&q=80" alt="Modern house exterior with pool">
+        <div class="media media--parallax media--clip" data-parallax="8">
+          <img src="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1600&q=80" alt="Interior with natural light">
+          <span class="media__caption">Interior · Private residence</span>
+        </div>
+        <div class="media media--parallax media--clip" data-parallax="12">
+          <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1600&q=80" alt="Modern house exterior with pool">
           <span class="media__caption">Architecture · Design &amp; Build</span>
         </div>
       </div>
@@ -121,6 +123,26 @@
 
     <!-- PROJECTS: HORIZONTAL SCROLL -->
     <section class="hscroll">
+      <div class="hscroll__motif" aria-hidden="true">
+        <svg viewBox="0 0 600 600" fill="none" stroke="var(--bronze)" stroke-width="0.9">
+          <g class="motif-rot">
+            <circle cx="300" cy="300" r="70"/>
+            <circle cx="300" cy="300" r="120" stroke-opacity="0.7"/>
+            <circle cx="300" cy="300" r="175" stroke-opacity="0.5"/>
+            <circle cx="300" cy="300" r="235" stroke-opacity="0.32"/>
+            <g stroke-opacity="0.6">
+              <line x1="300" y1="20" x2="300" y2="90"/>
+              <line x1="300" y1="510" x2="300" y2="580"/>
+              <line x1="20" y1="300" x2="90" y2="300"/>
+              <line x1="510" y1="300" x2="580" y2="300"/>
+              <line x1="103" y1="103" x2="152" y2="152"/>
+              <line x1="448" y1="448" x2="497" y2="497"/>
+              <line x1="497" y1="103" x2="448" y2="152"/>
+              <line x1="152" y1="448" x2="103" y2="497"/>
+            </g>
+          </g>
+        </svg>
+      </div>
       <div class="hscroll__pin">
         <div class="hscroll__head">
           <div>
@@ -134,15 +156,15 @@
             <div class="media"><img src="https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=1400&q=80" alt="Aathavan by Excello apartment building"></div>
             <div class="panel__meta"><span class="panel__title">Aathavan by Excello</span><span class="panel__loc">Dehiwala · 44 residences</span></div>
           </a>
-          <a class="panel panel--tall" href="projects.html" data-cursor="view">
+          <a class="panel" href="projects.html" data-cursor="view">
             <div class="media"><img src="https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=1400&q=80" alt="Sea Esta villa with pool"></div>
             <div class="panel__meta"><span class="panel__title">Sea Esta</span><span class="panel__loc">Mount Lavinia · 16 villas</span></div>
           </a>
-          <a class="panel panel--wide" href="projects.html" data-cursor="view">
+          <a class="panel" href="projects.html" data-cursor="view">
             <div class="media"><img src="https://images.unsplash.com/photo-1540541338287-41700207dee6?auto=format&fit=crop&w=1600&q=80" alt="Rudra Wellness Retreat"></div>
             <div class="panel__meta"><span class="panel__title">Rudra Wellness Retreat</span><span class="panel__loc">Hospitality</span></div>
           </a>
-          <a class="panel panel--tall" href="projects.html" data-cursor="view">
+          <a class="panel" href="projects.html" data-cursor="view">
             <div class="media"><img src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1400&q=80" alt="Glen Aber Office Building"></div>
             <div class="panel__meta"><span class="panel__title">Glen Aber Office Building</span><span class="panel__loc">Commercial</span></div>
           </a>
@@ -157,6 +179,22 @@
         </div>
       </div>
       <div class="hscroll__progress"><i></i></div>
+    </section>
+
+    <!-- CINEMATIC BAND (second sequence) -->
+    <section class="seq-band" data-seq-scene>
+      <div class="seq" data-seq="img/clip-seq" data-frames="60" data-seq-mode="band" data-seq-end="+=130%">
+        <canvas class="seq__canvas"></canvas>
+        <div class="seq__loader" data-seq-loader aria-hidden="true">Loading <b>0</b>%</div>
+      </div>
+      <div class="seq-band__overlay">
+        <p class="label" style="color: rgba(248,244,236,0.82);" data-reveal><span class="num">(—)</span>In motion</p>
+        <h2 class="h-1" data-split>From foundation <em>to finish</em></h2>
+        <div class="seq-band__row" style="margin-top: 26px;">
+          <p class="body" data-reveal>Every Excello project is designed, engineered and built by one team, so the vision holds from the first line to the final handover.</p>
+          <a class="btn" href="projects.html" data-magnetic data-reveal style="color: var(--cream); border-color: rgba(248,244,236,0.5);">See the portfolio <svg class="arrow" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M1 13 13 1M4 1h9v9"/></svg></a>
+        </div>
+      </div>
     </section>
 
     <!-- STATS -->
