@@ -300,12 +300,46 @@ html.has-cursor a, html.has-cursor button, html.has-cursor input, html.has-curso
 }
 .hero-compass svg{ width:100%; height:100%; }
 
+/* The bone panel that rises over the hero at the end of the pin. Its top edge
+   is softly feathered so the white washes up over the footage rather than
+   cutting it with a hard line. Sits below the viewport at rest. */
+.hero-riser{
+  position: absolute; left: 0; right: 0; bottom: 0; height: 118%;
+  z-index: 10; pointer-events: none; overflow: hidden;
+  transform: translate3d(0, 100%, 0); will-change: transform;
+  background: linear-gradient(180deg,
+     rgba(247,245,240,0) 0%,
+     rgba(247,245,240,.55) 6%,
+     rgba(247,245,240,.92) 12%,
+     var(--bone) 18%, var(--bone) 100%);
+}
+/* inner parallax layers of the riser — a bright mist that runs ahead of the
+   panel, hairlines that lag behind it, and a small section tag */
+.riser-mist{
+  position: absolute; left: -10%; right: -10%; top: 6%; height: 56%;
+  background: radial-gradient(ellipse 58% 52% at 50% 42%, #fff 0%, rgba(255,255,255,.75) 34%, rgba(255,255,255,0) 72%);
+  will-change: transform;
+}
+.riser-rules{
+  position: absolute; left: clamp(1.25rem,4vw,3rem); right: clamp(1.25rem,4vw,3rem); top: 24%;
+  color: var(--cement); will-change: transform;
+}
+.riser-rules i{ display: block; height: 1px; background: currentColor; opacity: .16; margin-bottom: 16vh; }
+.riser-tag{
+  position: absolute; left: clamp(1.25rem,4vw,3rem); top: 22%;
+  display: flex; align-items: center; gap: .8rem;
+  font-family: 'Plus Jakarta Sans', sans-serif; font-size: 10.5px; letter-spacing: .3em;
+  text-transform: uppercase; color: var(--bronze); will-change: transform, opacity;
+}
+.riser-tag i{ width: 34px; height: 1px; background: currentColor; }
+
 .hero-inner{
-  position: relative; z-index: 5;
+  position: relative; z-index: 5; will-change: opacity;
   width: 100%; max-width: 1600px; margin: 0 auto;
   padding: 0 clamp(1.25rem, 4vw, 3rem) clamp(3rem, 7vw, 5.5rem);
   will-change: transform, opacity;
 }
+.hero-chips, .hero-headline, .hero-row{ will-change: transform; }
 .hero-chips{
   display:flex; flex-wrap: wrap; gap: .6rem 1rem; margin-bottom: clamp(1.6rem,3vw,2.6rem);
 }

@@ -13,6 +13,9 @@ const smoothstep = (p, e0, e1) => {
 --------------------------------------------------------------------- */
 gsap.registerPlugin(ScrollTrigger);
 gsap.ticker.lagSmoothing(0);
+// ignore the address-bar resize on mobile (no refresh storm while scrolling)
+// and throttle callbacks to the paint rate
+ScrollTrigger.config({ ignoreMobileResize: true, limitCallbacks: true });
 gsap.set('.hero-headline .reveal', { yPercent: 112 });
 
 let lenis = null;
@@ -273,7 +276,7 @@ function playHeroEntrance() {
     .add(() => document.querySelectorAll('#hero .reveal-up').forEach((el, i) => {
       setTimeout(() => el.classList.add('in'), i * 90);
     }), '-=0.7');
-  // compass rotation is now driven by the scroll parallax in the hero paint()
+  // compass rotation is now driven by the scroll parallax in the hero GSAP timeline
 }
 
 function heroUrlForWidth() {
@@ -313,42 +316,68 @@ function initHeroVideo() {
     else if (!on && breathing) { breathing = false; video.style.transform = 'scale(1.03)'; }
   }
 
-  // Hero foreground layers, parallaxed at different depths as the pin scrubs.
+  // Hero foreground layers + the white riser, all driven by ONE scrubbed GSAP
+  // timeline (timeline time == pin progress, 0..1). Only the video seek stays
+  // imperative, in onUpdate, because a frame index is not a tweenable style.
   const chips = document.getElementById('hero-chips');
   const headline = document.querySelector('.hero-headline');
   const heroRow = document.querySelector('.hero-row');
+  const riser = document.getElementById('hero-riser');
+  const riserMist = riser && riser.querySelector('.riser-mist');
+  const riserRules = riser && riser.querySelector('.riser-rules');
+  const riserTag = riser && riser.querySelector('.riser-tag');
+  const RISE_AT = 0.6;                      // the white starts washing up here
+
+  const tl = gsap.timeline({ defaults: { ease: 'none' }, paused: true });
+  // differential parallax — nearer layers travel further than farther ones,
+  // so the first scene reads with real depth as you scroll into it
+  tl.to(chips,    { y: -150 }, 0)
+    .to(headline, { y: -90 }, 0)
+    .to(heroRow,  { y: -40 }, 0)
+    .to(compass,  { y: 60, rotation: 18 }, 0)            // slow far-depth layer
+    .to(heroInner, { opacity: 0, duration: 0.38, ease: 'power1.inOut' }, 0.02)
+    .to([scrollCue, compass], { opacity: 0, duration: 0.14 }, 0);
+
+  // the next section's white washes up over the pinned hero — an overlap with
+  // its own inner parallax (mist ahead of the panel, hairlines lagging behind)
+  // instead of a hard cut at the section boundary
+  if (riser) {
+    // baseline inline state is set OUTSIDE the timeline so ScrollTrigger's
+    // refresh/revert cycle always lands on the rest pose, never on CSS+tween
+    gsap.set(riser, { y: 0, yPercent: 100 });
+    tl.to(riser, { yPercent: 0, duration: 1 - RISE_AT, ease: 'power2.inOut' }, RISE_AT);
+    if (riserMist)  { gsap.set(riserMist,  { yPercent: 60 });  tl.to(riserMist,  { yPercent: -14, duration: 1 - RISE_AT, ease: 'power2.out' }, RISE_AT); }
+    if (riserRules) { gsap.set(riserRules, { yPercent: 160 }); tl.to(riserRules, { yPercent: 0, duration: 1 - RISE_AT - 0.04, ease: 'power1.inOut' }, RISE_AT + 0.04); }
+    if (riserTag)   { gsap.set(riserTag,   { y: 60, opacity: 0 }); tl.to(riserTag, { y: 0, opacity: 1, duration: 0.3, ease: 'power2.out' }, RISE_AT + 0.1); }
+  }
+  tl.set({}, {}, 1);   // pin the timeline length to exactly 1 (= pin progress)
 
   let lastProgress = -1;
-  function paint(p) {
-    if (Math.abs(p - lastProgress) < 0.0015) return;
-    lastProgress = p;
-
-    rig.seekProgress(p);
-    setBreath(!reduceMotion && p < 0.04);
-
-    const contentOp = 1 - smoothstep(p, 0.02, 0.4);
-    heroInner.style.opacity = String(contentOp);
-
-    // differential parallax — nearer layers travel faster than farther ones,
-    // so the first scene reads with real depth as you scroll into it. At the
-    // very top (p≈0) transforms are cleared so the CSS entrance plays cleanly.
-    const par = p > 0.003;
-    if (chips)    chips.style.transform    = par ? `translate3d(0, ${(-p * 150).toFixed(1)}px, 0)` : '';
-    if (headline) headline.style.transform = par ? `translate3d(0, ${(-p * 90).toFixed(1)}px, 0)`  : '';
-    if (heroRow)  heroRow.style.transform  = par ? `translate3d(0, ${(-p * 40).toFixed(1)}px, 0)`  : '';
-
-    const chromeOp = 1 - smoothstep(p, 0, 0.14);
-    scrollCue.style.opacity = String(chromeOp);
-    compass.style.opacity = String(chromeOp * 0.7);
-    // the compass drifts down and rotates a touch — a slow far-depth layer
-    compass.style.transform = par ? `translate3d(0, ${(p * 60).toFixed(1)}px, 0) rotate(${(p * 18).toFixed(1)}deg)` : '';
-  }
-
-  paint(0);
   ScrollTrigger.create({
-    trigger: '#hero-pin', start: 'top top', end: 'bottom bottom', scrub: true,
-    onUpdate: (self) => paint(self.progress),
+    trigger: '#hero-pin', start: 'top top', end: 'bottom bottom',
+    scrub: true, animation: tl, invalidateOnRefresh: true,
+    onUpdate(self) {
+      const p = self.progress;
+      if (Math.abs(p - lastProgress) < 0.0015) return;
+      lastProgress = p;
+      rig.seekProgress(p);
+      setBreath(!reduceMotion && p < 0.04);
+      // once the white has washed up over the footage, the nav sits on light
+      nav.classList.toggle('on-light', p > 0.8);
+    },
   });
+  rig.seekProgress(0);
+  setBreath(!reduceMotion);
+
+  // the statement rides in a touch slower than the page — continuity with the
+  // riser that just carried its white up over the hero
+  const capWrap = document.querySelector('.caption-wrap');
+  if (capWrap && !reduceMotion) {
+    gsap.fromTo(capWrap, { yPercent: 14 }, {
+      yPercent: 0, ease: 'none',
+      scrollTrigger: { trigger: '#caption', start: 'top bottom', end: 'top 25%', scrub: true },
+    });
+  }
 }
 
 /* ---------------------------------------------------------------------
@@ -464,33 +493,32 @@ function initJourney() {
 
   addEventListener('resize', () => { clearTimeout(window.__jResize); window.__jResize = setTimeout(resizeCanvas, 150); });
 
-  // Cloud reveal + journey parallax entrance, then the remapped 6-stage scrub.
-  function paintReveal(p) {
-    const rp = smoothstep(p, 0, REVEAL);            // 0..1 across the reveal
-    // while the white cloud still covers the stage, the nav sits on a light
-    // ground, so use its dark treatment; flip back once the dark video shows
-    nav.classList.toggle('on-light', p < REVEAL * 0.7);
-    if (cloud) {
-      // the cloud panel lifts up (parallax) and fades as it clears
-      cloud.style.transform = `translate3d(0, ${(-rp * 118).toFixed(2)}%, 0) scale(${(1 + rp * 0.06).toFixed(3)})`;
-      cloud.style.opacity = String(1 - smoothstep(p, REVEAL * 0.55, REVEAL));
-    }
-    // journey content eases up into place beneath the lifting cloud
-    const enter = smoothstep(p, REVEAL * 0.35, REVEAL + 0.06);
-    if (hud) {
-      hud.style.opacity = String(enter);
-      hud.style.transform = `translate3d(0, ${((1 - enter) * 46).toFixed(1)}px, 0)`;
-    }
-    if (veil) veil.style.opacity = String(0.35 + 0.65 * enter);
-    // the video itself drifts up slightly as it's revealed — depth cue
-    canvas.style.transform = `translate3d(0, ${((1 - enter) * 4).toFixed(2)}vh, 0) scale(${(1.06 - enter * 0.06).toFixed(3)})`;
+  // Cloud reveal + journey parallax entrance as one scrubbed GSAP timeline
+  // (time == pin progress), then the remapped 6-stage video scrub.
+  const rtl = gsap.timeline({ defaults: { ease: 'none' }, paused: true });
+  const ENTER_AT = REVEAL * 0.35, ENTER_DUR = REVEAL * 0.65 + 0.06;
+  if (cloud) {
+    // the cloud panel lifts up (parallax) and dissolves as it clears
+    gsap.set(cloud, { yPercent: 0, scale: 1, opacity: 1 });
+    rtl.to(cloud, { yPercent: -118, scale: 1.06, duration: REVEAL, ease: 'power1.inOut' }, 0)
+       .to(cloud, { opacity: 0, duration: REVEAL * 0.45 }, REVEAL * 0.55);
   }
+  // journey content eases up into place beneath the lifting cloud; the video
+  // itself settles down from a slight zoom — a depth cue
+  if (hud)  { gsap.set(hud,  { opacity: 0, y: 46 }); rtl.to(hud,  { opacity: 1, y: 0, duration: ENTER_DUR, ease: 'power2.out' }, ENTER_AT); }
+  if (veil) { gsap.set(veil, { opacity: 0.35 });     rtl.to(veil, { opacity: 1, duration: ENTER_DUR }, ENTER_AT); }
+  gsap.set(canvas, { yPercent: 4, scale: 1.06 });
+  rtl.to(canvas, { yPercent: 0, scale: 1, duration: ENTER_DUR, ease: 'power2.out' }, ENTER_AT);
+  rtl.set({}, {}, 1);
 
   ScrollTrigger.create({
-    trigger: '#journey-pin', start: 'top top', end: 'bottom bottom', scrub: true,
+    trigger: '#journey-pin', start: 'top top', end: 'bottom bottom',
+    scrub: true, animation: rtl, invalidateOnRefresh: true,
     onUpdate(self) {
       const p = self.progress;
-      paintReveal(p);
+      // while the white cloud still covers the stage, the nav sits on a light
+      // ground, so use its dark treatment; flip back once the dark video shows
+      nav.classList.toggle('on-light', p < REVEAL * 0.7);
       // remap the video scrub onto the post-reveal portion of the pin
       lastP = Math.min(1, Math.max(0, (p - REVEAL) / (1 - REVEAL)));
       rig.seekProgress(lastP);
