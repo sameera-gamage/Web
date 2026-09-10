@@ -16,7 +16,7 @@
   <main>
     <!-- HERO -->
     <section class="hero hero--seq container" data-seq-scene>
-      <div class="hero__bg seq" data-seq="img/hero-seq" data-frames="72" data-seq-mode="hero" data-seq-end="+=150%">
+      <div class="hero__bg seq" data-seq="img/hero-seq" data-frames="240" data-seq-mode="hero" data-seq-end="+=150%">
         <canvas class="seq__canvas"></canvas>
       </div>
       <div class="hero__content">
@@ -199,31 +199,33 @@
       </div>
     </section>
 
-    <!-- CINEMATIC BAND (second sequence) -->
-    <section class="seq-band" data-seq-scene>
-      <div class="seq" data-seq="img/clip-seq" data-frames="60" data-seq-mode="band" data-seq-end="+=130%">
-        <canvas class="seq__canvas"></canvas>
-        <div class="seq__loader" data-seq-loader aria-hidden="true">Loading <b>0</b>%</div>
-      </div>
-      <div class="seq-band__overlay">
-        <p class="label" style="color: rgba(248,244,236,0.82);" data-reveal><span class="num">(—)</span>In motion</p>
-        <h2 class="h-1" data-split>From foundation <em>to finish</em></h2>
-        <div class="seq-band__row" style="margin-top: 26px;">
-          <p class="body" data-reveal>Every Excello project is designed, engineered and built by one team, so the vision holds from the first line to the final handover.</p>
-          <a class="btn" href="projects.html" data-magnetic data-reveal style="color: var(--cream); border-color: rgba(248,244,236,0.5);">See the portfolio <svg class="arrow" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M1 13 13 1M4 1h9v9"/></svg></a>
+    <!-- CINEMATIC BAND + overlap: the stats panel slides up over the band -->
+    <div class="stack">
+      <section class="seq-band is-sticky" data-seq-scene data-seq-sticky>
+        <div class="seq" data-seq="img/clip-seq" data-frames="363" data-seq-mode="band" data-seq-end="+=100%">
+          <canvas class="seq__canvas"></canvas>
+          <div class="seq__loader" data-seq-loader aria-hidden="true">Loading <b>0</b>%</div>
         </div>
-      </div>
-    </section>
+        <div class="seq-band__overlay">
+          <p class="label" style="color: rgba(248,244,236,0.82);" data-reveal><span class="num">(—)</span>In motion</p>
+          <h2 class="h-1" data-split>From foundation <em>to finish</em></h2>
+          <div class="seq-band__row" style="margin-top: 26px;">
+            <p class="body" data-reveal>Every Excello project is designed, engineered and built by one team, so the vision holds from the first line to the final handover.</p>
+            <a class="btn" href="projects.html" data-magnetic data-reveal style="color: var(--cream); border-color: rgba(248,244,236,0.5);">See the portfolio <svg class="arrow" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M1 13 13 1M4 1h9v9"/></svg></a>
+          </div>
+        </div>
+      </section>
 
-    <!-- STATS -->
-    <section class="section container">
-      <div class="stats">
+      <!-- STATS (rises up over the band) -->
+      <section class="section container stats-over" data-overlap>
+        <div class="stats">
         <div class="stat" data-reveal><div class="stat__num"><span data-count="17">0</span><sup>+</sup></div><p class="label stat__label">Years of expertise</p></div>
         <div class="stat" data-reveal><div class="stat__num"><span data-count="44">0</span></div><p class="label stat__label">Residences at Aathavan</p></div>
         <div class="stat" data-reveal><div class="stat__num"><span data-count="16">0</span></div><p class="label stat__label">Sea-view villas at Sea Esta</p></div>
         <div class="stat" data-reveal><div class="stat__num"><span data-count="100">0</span><sup>%</sup></div><p class="label stat__label">Solar-powered living</p></div>
       </div>
-    </section>
+      </section>
+    </div>
 
     <!-- MARQUEE -->
     <div class="marquee" aria-hidden="true">

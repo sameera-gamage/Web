@@ -33,7 +33,15 @@
      --------------------------------------------------------------------- */
   var lenis = null;
   if (!reduce) {
-    lenis = new Lenis({ lerp: 0.09, wheelMultiplier: 1, smoothWheel: true });
+    lenis = new Lenis({
+      lerp: 0.06,
+      duration: 1.25,
+      easing: function (t) { return Math.min(1, 1.001 - Math.pow(2, -10 * t)); },
+      smoothWheel: true,
+      syncTouch: true,
+      wheelMultiplier: 1,
+      touchMultiplier: 1.6
+    });
     lenis.on("scroll", ScrollTrigger.update);
     gsap.ticker.add(function (t) { lenis.raf(t * 1000); });
     gsap.ticker.lagSmoothing(0);
@@ -399,9 +407,10 @@
 
       if (reduce) { sizeCanvas(); if (frames[0].complete) redraw(); else frames[0].addEventListener("load", function () { ready = true; sizeCanvas(); redraw(); }); return; }
 
+      var sticky = scene.hasAttribute("data-seq-sticky");
       ScrollTrigger.create({
         trigger: scene, start: "top top", end: host.dataset.seqEnd || "+=120%",
-        pin: true, scrub: true, invalidateOnRefresh: true, anticipatePin: 1,
+        pin: !sticky, scrub: true, invalidateOnRefresh: true, anticipatePin: sticky ? 0 : 1,
         onRefresh: function () { sizeCanvas(); redraw(); },
         onUpdate: function (self) {
           progress = self.progress; if (ready) redraw();
@@ -439,6 +448,26 @@
             scrollTrigger: { trigger: el, start: "top bottom", end: "bottom top", scrub: true }
           });
         });
+      });
+    }
+
+    /* ------------------------------------------------------------------
+       Every image gets a GSAP reveal (fade + slow scale-out), and body
+       copy / labels animate in too. Split headings are already handled above.
+       ------------------------------------------------------------------ */
+    if (!reduce) {
+      document.querySelectorAll("main .media").forEach(function (m) {
+        if (m.classList.contains("media--clip")) return;                 // already clip-revealed
+        if (m.closest(".hero, [data-seq-scene], .sky, .hscroll, .service-float")) return;
+        var img = m.querySelector("img"); if (!img) return;
+        gsap.from(img, { scale: 1.18, duration: 1.6, ease: "power3.out", scrollTrigger: { trigger: m, start: "top 88%", once: true } });
+        gsap.from(m, { autoAlpha: 0, yPercent: 6, duration: 1.1, ease: "power3.out", scrollTrigger: { trigger: m, start: "top 90%", once: true } });
+      });
+
+      document.querySelectorAll("main .body, main .lede, main .label, main .service__desc, main .spec__k, main .panel__loc").forEach(function (el) {
+        if (el.hasAttribute("data-reveal")) return;
+        if (el.closest(".hero, [data-seq-scene], .sky, .footer, .menu, .preloader")) return;
+        gsap.from(el, { autoAlpha: 0, y: 18, duration: 0.9, ease: "power3.out", scrollTrigger: { trigger: el, start: "top 92%", once: true } });
       });
     }
 

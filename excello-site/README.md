@@ -145,3 +145,28 @@ crops. Replace those `src` URLs with your own photography when ready.
 
 Original-resolution frames (1920×1080) are kept in the repository. Download the full bundle from the
 branch rather than the chat attachment, which is size-limited.
+
+---
+
+## Update: full-frame scrub, section overlap, smoother Lenis, more motion
+
+- **Every frame, high fps.** Both videos are now extracted at their native frame rate and original
+  1920×1080 resolution: hero 240 frames (24 fps × 10s), band 363 frames (30 fps × 12.1s), about
+  150 MB of stills. The scrub is buttery because no frames are skipped. If that is too heavy for a
+  live host, re-extract with a lower `fps=` and update `data-frames` in `index.html`.
+- **Section overlap.** The cinematic band is now `position: sticky` inside a `.stack`, and the stats
+  panel (`[data-overlap]`, opaque background, soft top shadow) rises up and over it as you scroll,
+  so the lower section comes over the upper one.
+- **Smoother scrolling.** Lenis is tuned lower and softer (`lerp: 0.06`, exponential easing, touch
+  sync) for a more gliding feel that the frame scrub rides on.
+- **Less empty space.** Section padding and heading margins were trimmed site-wide.
+- **More GSAP.** Every image now has a GSAP reveal (fade plus slow scale-out) and body copy, leads
+  and labels animate in on scroll, on top of the split-line heading animations.
+
+### Downloading the full-resolution build
+
+Because the full-frame set is ~150 MB, the repository no longer carries a committed `.zip`
+(GitHub rejects single files over 100 MB). Download the whole branch as a ZIP instead:
+
+- **Download ZIP:** https://codeload.github.com/sameera-gamage/Web/zip/refs/heads/claude/website-clone-gsap-animations-zxupx1
+- Or on the branch page, use the green **Code → Download ZIP** button.
