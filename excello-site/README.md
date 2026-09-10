@@ -128,3 +128,20 @@ drawn in its place; drop your SVG in if you have final art.)
 
 The parallax blocks still use cloud-hosted (Unsplash) images; a couple were refreshed to larger
 crops. Replace those `src` URLs with your own photography when ready.
+
+---
+
+## Update: cloud environment + universal parallax
+
+- **Cloud environment** (`.sky` section, after the horizontal gallery). A warm sky gradient with a
+  soft bronze sun glow and six blurred cloud layers that drift at different speeds as you scroll
+  (parallax depth). Cloud colour is a single token, `--cloud` on `.sky`, and the sun/gradient use
+  the site's sand/bronze palette, so it already matches; change `--cloud` to retint.
+- **Universal parallax.** Every section now has parallax motion: decorative layers use
+  `data-py` / `data-px` (drift amount in percent, relative to their `[data-parallax-root]`), and a
+  gentle automatic parallax is applied to section headings, stats, values, specs, cards, quotes and
+  list blocks across all pages. Pinned scenes (hero, gallery, sequences) and the sky keep their own
+  motion and are skipped. All of it is disabled under `prefers-reduced-motion`.
+
+Original-resolution frames (1920×1080) are kept in the repository. Download the full bundle from the
+branch rather than the chat attachment, which is size-limited.

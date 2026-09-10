@@ -768,3 +768,39 @@ em, .it { font-style: italic; font-weight: 300; }
   .hscroll__motif { display: none; }
   .duo { grid-template-columns: 1fr; }
 }
+
+/* ==========================================================================
+   ADDENDUM 2 — cloud environment + universal section parallax
+   ========================================================================== */
+.sky {
+  --cloud: #fbf7ef;
+  position: relative; overflow: hidden;
+  min-height: 100vh; min-height: 100svh;
+  display: flex; align-items: center; justify-content: center; text-align: center;
+  background: linear-gradient(180deg, #f6f0e2 0%, var(--sand) 46%, #e6d4ba 100%);
+}
+.sky__sun {
+  position: absolute; left: 50%; top: 34%; width: min(54vw, 580px); aspect-ratio: 1;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(circle at center, rgba(199,166,122,0.5) 0%, rgba(199,166,122,0) 60%);
+  z-index: 0; will-change: transform;
+}
+.sky__clouds { position: absolute; inset: -14% -8%; z-index: 1; pointer-events: none; }
+.cloud {
+  position: absolute; display: block; will-change: transform;
+  background: radial-gradient(60% 62% at 50% 55%, var(--cloud) 0%, rgba(255,255,255,0) 72%);
+  filter: blur(10px);
+}
+.cloud--1 { width: 34vw; height: 16vw; left: 3%;  top: 18%; opacity: 0.95; }
+.cloud--2 { width: 46vw; height: 20vw; left: 52%; top: 10%; opacity: 0.9; }
+.cloud--3 { width: 28vw; height: 13vw; left: 20%; top: 52%; opacity: 0.85; }
+.cloud--4 { width: 42vw; height: 18vw; left: 58%; top: 58%; opacity: 0.92; }
+.cloud--5 { width: 24vw; height: 12vw; left: 1%;  top: 66%; opacity: 0.8; }
+.cloud--6 { width: 30vw; height: 14vw; left: 38%; top: 34%; opacity: 0.7; }
+.sky__inner { position: relative; z-index: 2; padding: 0 var(--gutter); }
+.sky .h-display { margin-top: 16px; }
+.sky .lede { margin: 24px auto 0; }
+/* darker themed pages keep the sky warm/light on purpose */
+body.is-dark .sky { color: var(--ink); }
+
+.js .sky [data-reveal] { opacity: 0; transform: translateY(30px); }

@@ -413,6 +413,35 @@
       });
     });
 
+    /* ------------------------------------------------------------------
+       Layered parallax (clouds and any decorative [data-py]/[data-px]).
+       Element drifts from -amount to +amount across its root's scroll.
+       ------------------------------------------------------------------ */
+    if (!reduce) {
+      document.querySelectorAll("[data-py], [data-px]").forEach(function (el) {
+        var py = parseFloat(el.dataset.py || 0), px = parseFloat(el.dataset.px || 0);
+        var root = el.closest("[data-parallax-root]") || el;
+        gsap.fromTo(el, { yPercent: -py, xPercent: -px }, {
+          yPercent: py, xPercent: px, ease: "none",
+          scrollTrigger: { trigger: root, start: "top bottom", end: "bottom top", scrub: true }
+        });
+      });
+
+      /* Universal, gentle parallax so every section has motion.
+         Skips pinned scenes (hero, gallery, sequences) and the sky (own layers). */
+      [[".section__head", 5], [".stat", 4], [".value", 4], [".spec", 3], [".person", 6],
+       [".quote", 5], [".manifesto__text", 4], [".svc__list", 5], [".contact__list", 5],
+       [".cta .h-display", 6], [".card__meta", 4]].forEach(function (g) {
+        document.querySelectorAll(g[0]).forEach(function (el) {
+          if (el.closest(".hero, .hscroll, [data-seq-scene], .sky")) return;
+          gsap.fromTo(el, { yPercent: g[1] }, {
+            yPercent: -g[1], ease: "none",
+            scrollTrigger: { trigger: el, start: "top bottom", end: "bottom top", scrub: true }
+          });
+        });
+      });
+    }
+
     /* Pinned sections must be refreshed before anything below them, so order
        every trigger by its position on the page before measuring. */
     ScrollTrigger.sort();
