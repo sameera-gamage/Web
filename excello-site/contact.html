@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Contact — Excello Developers</title>
+  <meta name="description" content="Contact Excello Developers at No 16, St Rita’s Road, Mount Lavinia, Sri Lanka. Call +94 77 022 2000 to start your project.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Manrope:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <script src="js/layout.js"></script>
+
+  <main>
+    <section class="hero hero--page container">
+      <div class="hero__bg">
+        <img src="https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=2200&q=80" alt="Bright studio interior">
+      </div>
+      <div class="hero__content">
+        <p class="label hero__label" data-hero-fade>Contact</p>
+        <h1 class="h-display hero__title" data-split>Let’s <em>talk</em></h1>
+        <div class="hero__bottom">
+          <p class="hero__sub" data-hero-fade>Tell us about your site, your brief and your timeline. We will come back to you within one business day.</p>
+          <div class="hero__scroll" data-hero-fade><i></i> Scroll</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section container">
+      <div class="contact">
+        <div>
+          <p class="label" data-reveal><span class="num">(01)</span>Reach us</p>
+          <h2 class="h-1" data-split style="margin-top: 18px;">We’re in <em>Mount Lavinia</em></h2>
+          <div class="contact__list">
+            <div class="contact__item" data-reveal><p class="label">Visit</p><p>No 16, St Rita’s Road,<br>Mount Lavinia, Sri Lanka</p></div>
+            <div class="contact__item" data-reveal><p class="label">Call</p><a href="tel:+94770222000">+94 77 022 2000</a></div>
+            <div class="contact__item" data-reveal><p class="label">Email</p><a href="mailto:info@excello.lk">info@excello.lk</a></div>
+            <div class="contact__item" data-reveal><p class="label">Hours</p><p>Monday to Saturday, 9:00 to 18:00</p></div>
+          </div>
+        </div>
+        <div>
+          <p class="label" data-reveal><span class="num">(02)</span>Start a project</p>
+          <form class="form" style="margin-top: 32px;" novalidate>
+            <div class="field" data-reveal><label for="name">Name</label><input id="name" name="name" type="text" required></div>
+            <div class="field" data-reveal><label for="email">Email</label><input id="email" name="email" type="email" required></div>
+            <div class="field" data-reveal><label for="phone">Phone</label><input id="phone" name="phone" type="tel"></div>
+            <div class="field" data-reveal>
+              <label for="service">I’m interested in</label>
+              <select id="service" name="service">
+                <option>Architecture</option>
+                <option>Construction</option>
+                <option>Interior Design</option>
+                <option>Real Estate &amp; Land</option>
+                <option>Business Branding</option>
+                <option>Aathavan by Excello</option>
+              </select>
+            </div>
+            <div class="field field--full" data-reveal><label for="message">Tell us about your project</label><textarea id="message" name="message" rows="4"></textarea></div>
+            <div class="form__submit" data-reveal>
+              <button class="btn btn--solid" type="submit" data-magnetic>Send enquiry <svg class="arrow" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M1 13 13 1M4 1h9v9"/></svg></button>
+              <span class="form__note">We respond within one business day.</span>
+            </div>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <section class="container" style="padding-bottom: clamp(80px, 12vw, 180px);">
+      <div class="map media media--parallax media--clip" data-parallax="6">
+        <img src="https://images.unsplash.com/photo-1524661135-423995f22d0b?auto=format&fit=crop&w=2200&q=70" alt="Map placeholder">
+        <span class="map__pin" aria-hidden="true"></span>
+        <span class="media__caption">Mount Lavinia · Replace with an embedded map</span>
+      </div>
+    </section>
+  </main>
+
+  <script src="js/vendor/gsap.min.js"></script>
+  <script src="js/vendor/ScrollTrigger.min.js"></script>
+  <script src="js/vendor/SplitText.min.js"></script>
+  <script src="js/vendor/lenis.min.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
