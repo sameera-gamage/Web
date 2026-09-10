@@ -189,9 +189,18 @@ html.has-cursor a, html.has-cursor button, html.has-cursor input, html.has-curso
   width: 100%; max-width: 1600px; margin: 0 auto;
   display: flex; align-items: center; justify-content: space-between; gap: 2rem;
 }
-.wordmark{ display:flex; align-items:center; gap:.65rem; font-family:'Cormorant Garamond',serif; font-size: 1.5rem; letter-spacing: .04em; }
-.wordmark svg{ width: 22px; height: 22px; flex: none; }
-.wordmark b{ font-style: italic; font-weight: 600; }
+.wordmark{ display:flex; align-items:center; gap:.7rem; }
+.wordmark .brand-mark{ width: 30px; height: 30px; flex: none; }
+.wordmark-text{
+  display:flex; flex-direction: column; line-height: 1;
+  font-family:'Cormorant Garamond',serif; font-size: 1.42rem; letter-spacing: .16em; font-weight: 500;
+}
+.wordmark-text i{
+  font-family:'Plus Jakarta Sans',sans-serif; font-style: normal;
+  font-size: 7.5px; letter-spacing: .34em; text-transform: uppercase;
+  opacity: .62; margin-top: .34em; padding-left: .12em;
+}
+@media (max-width: 480px){ .wordmark-text i{ display:none; } .wordmark-text{ font-size: 1.3rem; } }
 .nav-links{ display: flex; align-items: center; gap: clamp(1.4rem, 2.4vw, 2.4rem); }
 .nav-link{
   font-size: 11px; letter-spacing: .18em; text-transform: uppercase; font-weight: 500;
@@ -378,9 +387,10 @@ html.has-cursor a, html.has-cursor button, html.has-cursor input, html.has-curso
 #caption{
   position: relative;
   background: var(--bone);
-  min-height: 100svh;
   display: flex; align-items: center;
-  padding: clamp(6rem,14vh,12rem) clamp(1.25rem,4vw,3rem) clamp(8rem,18vh,14rem);
+  /* sized to its content — no tall empty plate below the wording, so the
+     cloud reveal follows the statement closely instead of a big white gap */
+  padding: clamp(7rem,16vh,12rem) clamp(1.25rem,4vw,3rem) clamp(3.5rem,7vh,6rem);
   overflow: hidden;
 }
 .caption-layers{ position: absolute; inset: 0; z-index: 0; pointer-events: none; color: var(--cement); }
@@ -434,32 +444,36 @@ html.has-cursor a, html.has-cursor button, html.has-cursor input, html.has-curso
    scrubbed upward (parallax) and fades, so the cloud lifts off the screen and
    the dark journey video is revealed beneath it. */
 .journey-cloud{
-  position: absolute; left: -6%; right: -6%; top: 0; height: 158%;
+  position: absolute; left: -6%; right: -6%; top: 0; height: 172%;
   z-index: 6; pointer-events: none; will-change: transform, opacity;
 }
-/* Solid bone at the top that feathers out toward the base; the cloud image
-   rides that fade zone so the lifting boundary is a soft cloud silhouette,
-   not a hard rectangle. The transparent tail sits below the fold at rest. */
+/* Solid bone at the top that dissolves over a LONG vertical span toward the
+   base — a gradual fade, never a hard cut, so the lifting boundary has no
+   visible line. The whole fade zone sits below the fold at rest (the panel
+   is far taller than the viewport), so at rest the screen is fully bone. */
 .journey-cloud-fill{
   position: absolute; inset: 0;
   background: linear-gradient(180deg,
-     var(--bone) 0%, var(--bone) 56%,
-     rgba(247,245,240,.85) 74%,
-     rgba(247,245,240,0) 92%);
+     var(--bone) 0%, var(--bone) 50%,
+     rgba(247,245,240,.92) 64%,
+     rgba(247,245,240,.60) 80%,
+     rgba(247,245,240,.25) 92%,
+     rgba(247,245,240,0) 100%);
 }
 .journey-cloud-img{
-  position: absolute; left: 0; right: 0; top: 30%; height: 72%;
-  background: url('../images/cloud.png') no-repeat center 44%;
-  background-size: 128% auto;
+  position: absolute; left: 0; right: 0; top: 34%; height: 80%;
+  background: url('../images/cloud.png') no-repeat center 46%;
+  background-size: 132% auto;
+  opacity: .96;
 }
 .journey-cloud-img.second{
-  top: 22%; height: 60%; opacity: .6;
-  background-position: center 60%; background-size: 158% auto;
+  top: 26%; height: 68%; opacity: .5;
+  background-position: center 62%; background-size: 168% auto;
   transform: scaleX(-1);
 }
 .journey-pin{
   position: relative;
-  height: 600vh;   /* first ~16% is the cloud reveal; the 6 stages fill the rest */
+  height: 560vh;   /* first ~11% is the cloud reveal; the 6 stages fill the rest */
 }
 .journey-stage{
   position: sticky; top: 0; height: 100svh; overflow: hidden;

@@ -273,9 +273,7 @@ function playHeroEntrance() {
     .add(() => document.querySelectorAll('#hero .reveal-up').forEach((el, i) => {
       setTimeout(() => el.classList.add('in'), i * 90);
     }), '-=0.7');
-  gsap.to('#hero-compass', {
-    rotate: 8, duration: 6, ease: 'sine.inOut', yoyo: true, repeat: -1,
-  });
+  // compass rotation is now driven by the scroll parallax in the hero paint()
 }
 
 function heroUrlForWidth() {
@@ -315,6 +313,11 @@ function initHeroVideo() {
     else if (!on && breathing) { breathing = false; video.style.transform = 'scale(1.03)'; }
   }
 
+  // Hero foreground layers, parallaxed at different depths as the pin scrubs.
+  const chips = document.getElementById('hero-chips');
+  const headline = document.querySelector('.hero-headline');
+  const heroRow = document.querySelector('.hero-row');
+
   let lastProgress = -1;
   function paint(p) {
     if (Math.abs(p - lastProgress) < 0.0015) return;
@@ -325,11 +328,20 @@ function initHeroVideo() {
 
     const contentOp = 1 - smoothstep(p, 0.02, 0.4);
     heroInner.style.opacity = String(contentOp);
-    heroInner.style.transform = `translateY(${(-40 * (1 - contentOp)).toFixed(1)}px)`;
+
+    // differential parallax — nearer layers travel faster than farther ones,
+    // so the first scene reads with real depth as you scroll into it. At the
+    // very top (p≈0) transforms are cleared so the CSS entrance plays cleanly.
+    const par = p > 0.003;
+    if (chips)    chips.style.transform    = par ? `translate3d(0, ${(-p * 150).toFixed(1)}px, 0)` : '';
+    if (headline) headline.style.transform = par ? `translate3d(0, ${(-p * 90).toFixed(1)}px, 0)`  : '';
+    if (heroRow)  heroRow.style.transform  = par ? `translate3d(0, ${(-p * 40).toFixed(1)}px, 0)`  : '';
 
     const chromeOp = 1 - smoothstep(p, 0, 0.14);
     scrollCue.style.opacity = String(chromeOp);
     compass.style.opacity = String(chromeOp * 0.7);
+    // the compass drifts down and rotates a touch — a slow far-depth layer
+    compass.style.transform = par ? `translate3d(0, ${(p * 60).toFixed(1)}px, 0) rotate(${(p * 18).toFixed(1)}deg)` : '';
   }
 
   paint(0);
@@ -373,7 +385,7 @@ function initJourney() {
   // The first slice of the pin plays the cloud reveal; the six-stage video
   // scrub is remapped onto the rest, so the journey "appears" from behind the
   // rising cloud with parallax before the process begins.
-  const REVEAL = 0.16;
+  const REVEAL = 0.11;
 
   let dpr = Math.min(devicePixelRatio || 1, 2);
   let lastP = 0;
