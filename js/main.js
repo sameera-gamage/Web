@@ -253,7 +253,7 @@ function initNavChrome() {
     start: 0, end: 'max',
     onUpdate: (self) => nav.classList.toggle('scrolled', self.scroll() > 40),
   });
-  document.querySelectorAll('#philosophy, #developments, #consult').forEach((sec) => {
+  document.querySelectorAll('#caption').forEach((sec) => {
     ScrollTrigger.create({
       trigger: sec, start: 'top 90px', end: 'bottom 90px',
       onEnter: () => nav.classList.add('on-light'),
@@ -278,14 +278,6 @@ function playHeroEntrance() {
   });
 }
 
-const CLOUDS = [
-  { start: 0.42, end: 0.76 },
-  { start: 0.48, end: 0.82 },
-  { start: 0.54, end: 0.88 },
-  { start: 0.60, end: 0.94 },
-  { start: 0.66, end: 1.00 },
-];
-
 function heroUrlForWidth() {
   // Phones get the light 480 file; everything tablet-and-up gets full 1080
   // (falling back to 480 if 1080 is unavailable). Two tiers, so the visible
@@ -296,11 +288,10 @@ function heroUrlForWidth() {
 
 function initHeroVideo() {
   const video = document.getElementById('hero-video');
-  const clouds = [...document.querySelectorAll('.cloud')];
-  const cloudWash = document.getElementById('hero-cloud-wash');
   const heroInner = document.getElementById('hero-inner');
   const scrollCue = document.getElementById('hero-scroll-cue');
   const compass = document.getElementById('hero-compass');
+  if (!video) return;
 
   const rig = createScrubVideo(video);
   const [primaryUrl, fallbackUrl] = heroUrlForWidth();
@@ -339,14 +330,6 @@ function initHeroVideo() {
     const chromeOp = 1 - smoothstep(p, 0, 0.14);
     scrollCue.style.opacity = String(chromeOp);
     compass.style.opacity = String(chromeOp * 0.7);
-
-    clouds.forEach((cloud, i) => {
-      const { start, end } = CLOUDS[i];
-      const k = smoothstep(p, start, end);
-      cloud.style.opacity = String(k);
-      cloud.style.transform = `translateY(${(10 - 10 * k).toFixed(2)}vh) scale(${(0.72 + 0.46 * k).toFixed(3)})`;
-    });
-    cloudWash.style.opacity = String(smoothstep(p, 0.56, 1));
   }
 
   paint(0);
@@ -357,55 +340,8 @@ function initHeroVideo() {
 }
 
 /* ---------------------------------------------------------------------
-   6. Philosophy — scrubbed word reveal
---------------------------------------------------------------------- */
-function initPhilosophy() {
-  const words = [...document.querySelectorAll('#philosophy-text .w')];
-  const n = words.length;
-  let lastProgress = -1;
-  ScrollTrigger.create({
-    trigger: '#philosophy', start: 'top top', end: 'bottom bottom', scrub: true,
-    onUpdate(self) {
-      const p = self.progress;
-      if (Math.abs(p - lastProgress) < 0.002) return;
-      lastProgress = p;
-      words.forEach((w, i) => {
-        const threshold = i / n;
-        const local = Math.min(1, Math.max(0, (p - threshold) * n * 1.5));
-        w.style.opacity = String(0.16 + 0.84 * local);
-      });
-    },
-  });
-}
-
-/* Fog-wipe reveal over the elevation drawing: the cursor clears a soft
-   circular hole in the fog mask, off-screen (so fully opaque) whenever the
-   pointer isn't over the stage — desktop/fine-pointer only, matching every
-   other hover-driven nicety on the page. */
-function initPhilosophyFog() {
-  if (!isDesktop() || reduceMotion) return;
-  const stage = document.getElementById('philosophy-stage');
-  const fog = document.getElementById('philosophy-fog');
-  let raf = null, tx = -9999, ty = -9999;
-  stage.addEventListener('pointermove', (e) => {
-    const r = stage.getBoundingClientRect();
-    tx = e.clientX - r.left;
-    ty = e.clientY - r.top;
-    if (raf) return;
-    raf = requestAnimationFrame(() => {
-      fog.style.setProperty('--fx', tx + 'px');
-      fog.style.setProperty('--fy', ty + 'px');
-      raf = null;
-    });
-  }, { passive: true });
-  stage.addEventListener('pointerleave', () => {
-    fog.style.setProperty('--fx', '-9999px');
-    fog.style.setProperty('--fy', '-9999px');
-  });
-}
-
-/* ---------------------------------------------------------------------
-   7. Journey — pinned canvas scrubber, the six-stage turnkey process
+   7. Journey — pinned canvas scrubber, the six-stage turnkey process,
+   preceded by the cloud reveal (cloud lifts up to expose the video).
 --------------------------------------------------------------------- */
 const STAGES = [
   { title: 'Land & Feasibility', copy: "Microclimate, topography and zoning clearances are surveyed along the riverfront site before a single line is drawn.", from: 0.00, to: 0.15 },
@@ -420,6 +356,7 @@ const JOURNEY_FRAMES = 240;
 
 function initJourney() {
   const canvas = document.getElementById('journey-canvas');
+  if (!canvas) return;
   const ctx = canvas.getContext('2d');
   const video = document.getElementById('journey-video');
   const frameLabel = document.getElementById('journey-frame-label');
@@ -429,6 +366,14 @@ function initJourney() {
   const stageCopy = document.getElementById('stage-copy');
   const dots = [...document.querySelectorAll('.stage-dot')];
   const progressFill = document.getElementById('journey-progress-fill');
+  const cloud = document.getElementById('journey-cloud');
+  const hud = document.querySelector('.journey-hud');
+  const veil = document.querySelector('.journey-veil');
+
+  // The first slice of the pin plays the cloud reveal; the six-stage video
+  // scrub is remapped onto the rest, so the journey "appears" from behind the
+  // rising cloud with parallax before the process begins.
+  const REVEAL = 0.16;
 
   let dpr = Math.min(devicePixelRatio || 1, 2);
   let lastP = 0;
@@ -507,10 +452,35 @@ function initJourney() {
 
   addEventListener('resize', () => { clearTimeout(window.__jResize); window.__jResize = setTimeout(resizeCanvas, 150); });
 
+  // Cloud reveal + journey parallax entrance, then the remapped 6-stage scrub.
+  function paintReveal(p) {
+    const rp = smoothstep(p, 0, REVEAL);            // 0..1 across the reveal
+    // while the white cloud still covers the stage, the nav sits on a light
+    // ground, so use its dark treatment; flip back once the dark video shows
+    nav.classList.toggle('on-light', p < REVEAL * 0.7);
+    if (cloud) {
+      // the cloud panel lifts up (parallax) and fades as it clears
+      cloud.style.transform = `translate3d(0, ${(-rp * 118).toFixed(2)}%, 0) scale(${(1 + rp * 0.06).toFixed(3)})`;
+      cloud.style.opacity = String(1 - smoothstep(p, REVEAL * 0.55, REVEAL));
+    }
+    // journey content eases up into place beneath the lifting cloud
+    const enter = smoothstep(p, REVEAL * 0.35, REVEAL + 0.06);
+    if (hud) {
+      hud.style.opacity = String(enter);
+      hud.style.transform = `translate3d(0, ${((1 - enter) * 46).toFixed(1)}px, 0)`;
+    }
+    if (veil) veil.style.opacity = String(0.35 + 0.65 * enter);
+    // the video itself drifts up slightly as it's revealed — depth cue
+    canvas.style.transform = `translate3d(0, ${((1 - enter) * 4).toFixed(2)}vh, 0) scale(${(1.06 - enter * 0.06).toFixed(3)})`;
+  }
+
   ScrollTrigger.create({
     trigger: '#journey-pin', start: 'top top', end: 'bottom bottom', scrub: true,
     onUpdate(self) {
-      lastP = self.progress;
+      const p = self.progress;
+      paintReveal(p);
+      // remap the video scrub onto the post-reveal portion of the pin
+      lastP = Math.min(1, Math.max(0, (p - REVEAL) / (1 - REVEAL)));
       rig.seekProgress(lastP);
       updateHud(lastP);
     },
@@ -518,69 +488,9 @@ function initJourney() {
 }
 
 /* ---------------------------------------------------------------------
-   8. Developments — parallax drift + 3D tilt
---------------------------------------------------------------------- */
-function initDevelopments() {
-  if (!reduceMotion) {
-    gsap.fromTo('#dev-track', { x: 40 }, {
-      x: -40, ease: 'none',
-      scrollTrigger: { trigger: '#developments', start: 'top bottom', end: 'bottom top', scrub: 0.6 },
-    });
-  }
-  if (!isDesktop() || reduceMotion) return;
-  document.querySelectorAll('[data-tilt]').forEach((card) => {
-    const inner = card.querySelector('.dev-card-inner');
-    let raf = null, mx = 0, my = 0;
-    card.addEventListener('mousemove', (e) => {
-      const r = card.getBoundingClientRect();
-      mx = ((e.clientX - r.left) / r.width - 0.5) * 2;
-      my = ((e.clientY - r.top) / r.height - 0.5) * 2;
-      if (raf) return;
-      raf = requestAnimationFrame(() => {
-        inner.style.transform = `perspective(1000px) rotateY(${mx * 6}deg) rotateX(${-my * 6}deg) scale(1.02)`;
-        raf = null;
-      });
-    });
-    card.addEventListener('mouseleave', () => { inner.style.transform = ''; });
-  });
-}
-
-/* ---------------------------------------------------------------------
-   9. Materials — tab / swatch toggle
---------------------------------------------------------------------- */
-function initMaterials() {
-  const tabs = [...document.querySelectorAll('#mat-tabs .tab')];
-  const panels = [...document.querySelectorAll('[data-mat-panel]')];
-  tabs.forEach((tab) => {
-    tab.addEventListener('click', () => {
-      const key = tab.dataset.mat;
-      tabs.forEach((t) => t.setAttribute('aria-selected', String(t === tab)));
-      panels.forEach((p) => p.classList.toggle('active', p.dataset.matPanel === key));
-    });
-  });
-}
-
-/* ---------------------------------------------------------------------
-   10. Consultation form
---------------------------------------------------------------------- */
-function initConsultForm() {
-  const form = document.getElementById('consult-form');
-  const success = document.getElementById('consult-success');
-  form.addEventListener('submit', (e) => {
-    e.preventDefault();
-    if (!form.checkValidity()) { form.reportValidity(); return; }
-    const name = form.querySelector('#f-name').value.trim();
-    document.getElementById('consult-success-copy').textContent =
-      `Thank you, ${name.split(' ')[0]}. Our studio will be in touch within one business day to schedule your Design Clarity Call.`;
-    form.style.display = 'none';
-    success.classList.add('show');
-  });
-}
-
-/* ---------------------------------------------------------------------
-   11a. Layered parallax + soft 3D tilt (philosophy, developments,
-   materials, consult) — each [data-parallax] layer drifts against scroll
-   at its own speed so sections read as depth, not a single flat plane.
+   8. Layered parallax + soft 3D tilt — each [data-parallax] layer drifts
+   against scroll at its own speed so sections read as depth, not a flat
+   plane. Applied to the caption section here.
 --------------------------------------------------------------------- */
 function initParallaxLayers() {
   if (reduceMotion) return;
@@ -659,14 +569,9 @@ document.getElementById('year').textContent = new Date().getFullYear();
 initNavChrome();
 initCursor();
 initHeroVideo();
-initPhilosophy();
-initPhilosophyFog();
 initJourney();
-initDevelopments();
-initMaterials();
 initParallaxLayers();
 initSoftTilt();
-initConsultForm();
 initReveals();
 initAmbient();
 
